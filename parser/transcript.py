@@ -2,7 +2,7 @@ import datetime
 import os
 from dataclasses import dataclass
 from typing import List, Tuple, Any
-from word_reader import open_doc_as_txt, filter_word_docs
+from common import open_doc_as_txt, filter_word_docs
 from tqdm import tqdm
 from datetime import datetime, timedelta
 import re
