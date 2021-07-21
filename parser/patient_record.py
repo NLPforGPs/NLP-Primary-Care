@@ -1,16 +1,19 @@
 import os
+import re
 from dataclasses import dataclass
 from typing import List, Any, Optional
 import docx
 from docx.table import Table
-from word_reader import filter_word_docs
+from common import filter_word_docs
 from tqdm import tqdm
 from datetime import datetime, timedelta
+import json
 
 PCC_PT_RECORD_RAW_DIR = r"Z:\Patient records"
 PCC_PT_RECORD_DIR = r"Z:\prepared\records"
-# PCC_PT_RECORD_RAW_DIR = r"Z:\test_records"
 
+
+@dataclass
 class PatientRecord:
     date: datetime = None
     gp: str = None
@@ -36,9 +39,10 @@ class PatientRecord:
     x_ray: str = None
 
 
+@dataclass
 class PatientRecords:
     id: str
-    records: List[PatientRecord]
+    records: List[PatientRecord] = None
 
 
 class PatientRecordParser:
@@ -106,15 +110,75 @@ class PatientRecordParser:
         if not os.path.exists(PCC_PT_RECORD_RAW_DIR):
             raise FileNotFoundError
         word_docs = filter_word_docs(os.listdir(PCC_PT_RECORD_RAW_DIR))
+
         for doc_name in tqdm(word_docs):
+
+            _id = re.search("(.+?)_pt_record_view", doc_name)
+            if _id:
+                _id = _id.group(1)
+
             word_doc = docx.Document(os.path.join(PCC_PT_RECORD_RAW_DIR, doc_name))
             if len(word_doc.tables) != 1:
                 raise ValueError("must contain only one table for GP record")
-            record = self._parse_table(word_doc.tables[0])
-            # parsed = self._parse_transcript_doc(text)
-            # self._save_txt(parsed)
+            _records = self._parse_table(word_doc.tables[0])
+
+            pt_records = PatientRecords(_id, _records)
+            self.save_as_json(pt_records)
+
+    @staticmethod
+    def save_as_json(pt_records: PatientRecords):
+        if not os.path.exists(PCC_PT_RECORD_DIR):
+            os.makedirs(PCC_PT_RECORD_DIR)
+        filename = os.path.join(PCC_PT_RECORD_DIR, f"{pt_records.id}_pt_record.txt")
+
+        def encode_records(obj):
+            if isinstance(obj, PatientRecords):
+                return {
+                    '__pt_record__': True,
+                    **vars(obj),
+                }
+            else:
+                return getattr(obj, '__dict__', str(obj))
+
+        jsn_str = json.dumps(pt_records, default=encode_records, indent=4, sort_keys=True)
+        with open(filename, 'w') as writer:
+            writer.write(jsn_str)
+
+    @staticmethod
+    def read_from_json(file: str) -> PatientRecords:
+        def decode_record(dct):
+            if "__pt_record__" in dct:
+                def decode_single(d: dict) -> PatientRecord:
+                    d['date'] = datetime.strptime(d['date'], "%Y-%m-%d")
+                    return PatientRecord(**d)
+
+                return PatientRecords(
+                    id=dct['id'],
+                    records=[decode_single(r) for r in dct['records']]
+                )
+            return dct
+
+        filename = os.path.join(PCC_PT_RECORD_DIR, file)
+        with open(filename, 'r') as reader:
+            data = reader.read()
+            pt_transcript = json.loads(data, object_hook=decode_record)
+            return pt_transcript
+
+    def read_prepared(self):
+        if not os.path.exists(PCC_PT_RECORD_DIR):
+            raise FileNotFoundError
+
+        files = os.listdir(PCC_PT_RECORD_DIR)
+        txt_docs = list(filter(lambda _file: _file.find('.txt') > 0, files))
+
+        pt_records = []
+        for file in txt_docs:
+            record = self.read_from_json(file)
+            pt_records.append(record)
+        return pt_records
 
 
 if __name__ == '__main__':
     pt_parser = PatientRecordParser()
     pt_parser.prepare_raw()
+    pt_parser.read_prepared()
