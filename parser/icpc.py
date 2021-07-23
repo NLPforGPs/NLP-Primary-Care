@@ -13,6 +13,7 @@ https://www.ehelse.no/kodeverk/icpc-2e--english-version
 PCC_ICPC_DIR = r"Z:\codes\ICPC"
 PCC_ICPC_FILE = "icpc-2e-v7.0.csv"
 
+
 @dataclass
 class IcpcCode:
     code: str
@@ -32,7 +33,7 @@ class IcpcCode:
 class IcpcParser:
     def __init__(self):
         self.df: pd.DataFrame
-        self.codes_list : List[IcpcCode] = []
+        self.codes_list: List[IcpcCode] = []
         self.parse_code()
 
     def parse_code(self):

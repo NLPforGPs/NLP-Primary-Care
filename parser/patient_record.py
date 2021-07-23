@@ -46,6 +46,15 @@ class PatientRecords:
 
 
 class PatientRecordParser:
+    pt_records = []
+    _lookup = {}
+
+    def __init__(self, from_raw=False):
+        if from_raw:
+            self._prepare_raw()
+
+        self._read_prepared()
+        self._create_index()
 
     @staticmethod
     def _parse_table(table: docx.table.Table):
@@ -106,7 +115,7 @@ class PatientRecordParser:
 
         return records
 
-    def prepare_raw(self):
+    def _prepare_raw(self):
         if not os.path.exists(PCC_PT_RECORD_RAW_DIR):
             raise FileNotFoundError
         word_docs = filter_word_docs(os.listdir(PCC_PT_RECORD_RAW_DIR))
@@ -123,10 +132,10 @@ class PatientRecordParser:
             _records = self._parse_table(word_doc.tables[0])
 
             pt_records = PatientRecords(_id, _records)
-            self.save_as_json(pt_records)
+            self._save_as_json(pt_records)
 
     @staticmethod
-    def save_as_json(pt_records: PatientRecords):
+    def _save_as_json(pt_records: PatientRecords):
         if not os.path.exists(PCC_PT_RECORD_DIR):
             os.makedirs(PCC_PT_RECORD_DIR)
         filename = os.path.join(PCC_PT_RECORD_DIR, f"{pt_records.id}_pt_record.txt")
@@ -145,7 +154,7 @@ class PatientRecordParser:
             writer.write(jsn_str)
 
     @staticmethod
-    def read_from_json(file: str) -> PatientRecords:
+    def _read_from_json(file: str) -> PatientRecords:
         def decode_record(dct):
             if "__pt_record__" in dct:
                 def decode_single(d: dict) -> PatientRecord:
@@ -164,21 +173,28 @@ class PatientRecordParser:
             pt_transcript = json.loads(data, object_hook=decode_record)
             return pt_transcript
 
-    def read_prepared(self):
+    def _read_prepared(self):
         if not os.path.exists(PCC_PT_RECORD_DIR):
             raise FileNotFoundError
 
         files = os.listdir(PCC_PT_RECORD_DIR)
         txt_docs = list(filter(lambda _file: _file.find('.txt') > 0, files))
 
-        pt_records = []
+        self.pt_records = []
         for file in txt_docs:
-            record = self.read_from_json(file)
-            pt_records.append(record)
-        return pt_records
+            record = self._read_from_json(file)
+            self.pt_records.append(record)
+        return self.pt_records
+
+    def _create_index(self):
+        self._lookup = {}
+        for i, record in enumerate(self.pt_records):
+            self._lookup[record.id] = i
+
+    def get(self, record_id):
+        if record_id in self._lookup:
+            return self.pt_records[self._lookup[record_id]]
 
 
 if __name__ == '__main__':
     pt_parser = PatientRecordParser()
-    pt_parser.prepare_raw()
-    pt_parser.read_prepared()

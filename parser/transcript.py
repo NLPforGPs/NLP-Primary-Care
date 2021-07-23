@@ -31,6 +31,15 @@ class Transcript:
 
 class TranscriptParser:
 
+    transcripts = []
+    _lookup = {}
+
+    def __init__(self, from_raw=False):
+        if from_raw:
+            self._prepare_raw()
+
+        self._read_prepared()
+
     @staticmethod
     def _parse_single_line(speaker: str, _line: str) -> List[Any]:
         leftover_content = _line.strip()
@@ -163,7 +172,7 @@ class TranscriptParser:
                 text_file.write(f"{dialogue[0]}\n")
                 text_file.write(f"{dialogue[1]}\n")
 
-    def _read_prepared_txt(self, filename) -> Transcript:
+    def _read_single_prepared_txt(self, filename) -> Transcript:
         target = os.path.join(PCC_TRANSCRIPT_DIR, filename)
 
         def sanitize(text: str):
@@ -194,20 +203,19 @@ class TranscriptParser:
                 line_is_speaker = not line_is_speaker
             return Transcript(id, start_datetime, duration, conversation)
 
-    def get(self):
+    def _read_prepared(self):
         if not PCC_TRANSCRIPT_DIR:
             raise FileNotFoundError
         if not os.path.exists(PCC_TRANSCRIPT_DIR):
             raise FileNotFoundError
         files = os.listdir(PCC_TRANSCRIPT_DIR)
         txt_docs = list(filter(lambda _file: _file.find('.txt') > 0, files))
-        _transcripts = []
+        self.transcripts = []
         for file in txt_docs:
-            transcript = self._read_prepared_txt(file)
-            _transcripts.append(transcript)
-        return _transcripts
+            transcript = self._read_single_prepared_txt(file)
+            self.transcripts.append(transcript)
 
-    def prepare_raw(self):
+    def _prepare_raw(self):
         if not os.path.exists(PCC_TRANSCRIPT_RAW_DIR):
             raise FileNotFoundError
         dirs = os.listdir(PCC_TRANSCRIPT_RAW_DIR)
@@ -220,8 +228,15 @@ class TranscriptParser:
                 parsed = self._parse_transcript_doc(text)
                 self._save_txt(parsed)
 
+    def _create_index(self):
+        self._lookup = {}
+        for i, transcript in enumerate(self.transcripts):
+            self._lookup[transcript.id] = i
+
+    def get(self, record_id):
+        if record_id in self._lookup:
+            return self.transcripts[self._lookup[record_id]]
 
 if __name__ == '__main__':
     transcript_parser = TranscriptParser()
-    transcript_parser.prepare_raw()
-    transcript_parser.get()
+    print("test")
