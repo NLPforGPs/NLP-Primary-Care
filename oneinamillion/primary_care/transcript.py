@@ -1,8 +1,12 @@
 import datetime
+import logging
 import os
 from dataclasses import dataclass
 from typing import List, Tuple, Any
-from common import open_doc_as_txt, filter_word_docs
+
+import numpy as np
+
+from ..common import open_doc_as_txt, filter_word_docs
 from tqdm import tqdm
 from datetime import datetime, timedelta
 import re
@@ -30,7 +34,6 @@ class Transcript:
 
 
 class TranscriptParser:
-
     transcripts = []
     _lookup = {}
 
@@ -39,6 +42,7 @@ class TranscriptParser:
             self._prepare_raw()
 
         self._read_prepared()
+        self._create_index()
 
     @staticmethod
     def _parse_single_line(speaker: str, _line: str) -> List[Any]:
@@ -50,7 +54,8 @@ class TranscriptParser:
             bracket_start = bracket_start_idx != -1
             bracket_end = bracket_end_idx != -1
             # contain ] matching from non-terminating [ from previous line
-            if (bracket_start and bracket_end and bracket_end_idx < bracket_start_idx) or (bracket_end and not bracket_start):
+            if (bracket_start and bracket_end and bracket_end_idx < bracket_start_idx) or (
+                    bracket_end and not bracket_start):
                 conv.append([INFO, leftover_content[:bracket_end_idx]])
                 leftover_content = leftover_content[bracket_end_idx + 1:]
             # contain [ ] in sequence
@@ -97,7 +102,7 @@ class TranscriptParser:
         if len(time) != 6 and ':' in time:
             time = f"{int(time.replace(':', '')):06d}"  # mm:ss
         elif len(time) == 5:
-            time = f"{time[:4]}0{time[4:5]}" #hhmms
+            time = f"{time[:4]}0{time[4:5]}"  # hhmms
         if len(time) != 6:
             time = None
 
@@ -119,9 +124,9 @@ class TranscriptParser:
             raise NotImplementedError
 
         if lines[3].find("ID") >= 0:
-            id = lines[3].replace("ID:", "").strip()
+            record_id = lines[3].replace("ID:", "").strip()
         elif lines[3].find("Date") >= 0:  # to accommodate some document may have ID labelled as Date
-            id = lines[3].replace("Date:", "").strip()
+            record_id = lines[3].replace("Date:", "").strip()
         else:
             raise ValueError("id not found")
 
@@ -132,7 +137,6 @@ class TranscriptParser:
                 return segments[0].strip(), segments[1].strip()
             else:
                 return None, _line.strip()
-
 
         line: str
         speaker = None
@@ -157,9 +161,10 @@ class TranscriptParser:
 
             conversation.extend(line_content)
 
-        return Transcript(id, start_datetime, duration, conversation)
+        return Transcript(record_id, start_datetime, duration, conversation)
 
-    def _save_txt(self, transcript: Transcript):
+    @staticmethod
+    def _save_txt(transcript: Transcript):
         if not os.path.exists(PCC_TRANSCRIPT_DIR):
             os.makedirs(PCC_TRANSCRIPT_DIR)
         filename = f"{transcript.id}_transcript.txt"
@@ -172,14 +177,15 @@ class TranscriptParser:
                 text_file.write(f"{dialogue[0]}\n")
                 text_file.write(f"{dialogue[1]}\n")
 
-    def _read_single_prepared_txt(self, filename) -> Transcript:
+    @staticmethod
+    def _read_single_prepared_txt(filename) -> Transcript:
         target = os.path.join(PCC_TRANSCRIPT_DIR, filename)
 
         def sanitize(text: str):
             return ''.join(text.rsplit('\n', 1))
 
         with open(target) as text_file:
-            id = sanitize(text_file.readline())
+            record_id = sanitize(text_file.readline())
             dt_txt = sanitize(text_file.readline())
             if ':' in dt_txt:
                 start_datetime = datetime.strptime(dt_txt, "%Y-%m-%d %H:%M:%S")
@@ -201,7 +207,7 @@ class TranscriptParser:
                 else:
                     conversation.append((sanitize(speaker), line))
                 line_is_speaker = not line_is_speaker
-            return Transcript(id, start_datetime, duration, conversation)
+            return Transcript(record_id, start_datetime, duration, conversation)
 
     def _read_prepared(self):
         if not PCC_TRANSCRIPT_DIR:
@@ -219,8 +225,8 @@ class TranscriptParser:
         if not os.path.exists(PCC_TRANSCRIPT_RAW_DIR):
             raise FileNotFoundError
         dirs = os.listdir(PCC_TRANSCRIPT_RAW_DIR)
-        for dir in tqdm(dirs):
-            sub_path = os.path.join(PCC_TRANSCRIPT_RAW_DIR, dir)
+        for current_dir in tqdm(dirs):
+            sub_path = os.path.join(PCC_TRANSCRIPT_RAW_DIR, current_dir)
             # only process valid word document
             word_docs = filter_word_docs(os.listdir(sub_path))
             for word_doc in tqdm(word_docs):
@@ -236,7 +242,12 @@ class TranscriptParser:
     def get(self, record_id):
         if record_id in self._lookup:
             return self.transcripts[self._lookup[record_id]]
+        else:
+            logging.warning(f"{record_id} does not have transcript")
+
+    def get_doc_ids(self):
+        return np.sort(list(self._lookup.keys())).tolist()
+
 
 if __name__ == '__main__':
     transcript_parser = TranscriptParser()
-    print("test")

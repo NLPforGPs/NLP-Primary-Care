@@ -1,9 +1,7 @@
-import json
 import os
 from typing import List
 
 import docx
-from docx import Document
 import textract
 
 
@@ -17,14 +15,15 @@ def open_doc_as_txt(filename: str):
     elif filename.endswith('.docx'):
         doc = docx.Document(filename)
         p_list = [p.text for p in doc.paragraphs]
-        text = '\n'.join(p_list)
-        return text
+        doc_text = '\n'.join(p_list)
+        return doc_text
     else:
         raise NotImplementedError(f"cannot read {filename.rsplit('.', 1)[1]} formatted document")
 
 
 def filter_word_docs(files: List[str]) -> List[str]:
     return list(filter(lambda _file: not _file.startswith('~$') and _file.find('.doc') > 0, files))
+
 
 # # turns an object into dictionary recursively
 # # https://stackoverflow.com/questions/1036409/recursively-convert-python-object-graph-to-dictionary

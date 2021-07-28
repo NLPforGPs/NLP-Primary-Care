@@ -1,13 +1,17 @@
+import json
+import logging
 import os
 import re
 from dataclasses import dataclass
-from typing import List, Any, Optional
+from datetime import datetime
+from typing import List, Optional
+
 import docx
+import numpy as np
 from docx.table import Table
-from common import filter_word_docs
 from tqdm import tqdm
-from datetime import datetime, timedelta
-import json
+
+from oneinamillion.common import filter_word_docs
 
 PCC_PT_RECORD_RAW_DIR = r"Z:\Patient records"
 PCC_PT_RECORD_DIR = r"Z:\prepared\records"
@@ -45,6 +49,7 @@ class PatientRecords:
     records: List[PatientRecord] = None
 
 
+# noinspection PyTypeChecker
 class PatientRecordParser:
     pt_records = []
     _lookup = {}
@@ -56,6 +61,7 @@ class PatientRecordParser:
         self._read_prepared()
         self._create_index()
 
+    # noinspection PyTypeChecker
     @staticmethod
     def _parse_table(table: docx.table.Table):
         if len(table.columns) < 3 or len(table.columns) > 4:
@@ -194,6 +200,11 @@ class PatientRecordParser:
     def get(self, record_id):
         if record_id in self._lookup:
             return self.pt_records[self._lookup[record_id]]
+        else:
+            logging.warning(f"{record_id} does not have patient records")
+
+    def get_doc_ids(self):
+        return np.sort(list(self._lookup.keys())).tolist()
 
 
 if __name__ == '__main__':
