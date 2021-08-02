@@ -2,11 +2,12 @@ import datetime
 import logging
 import os
 from dataclasses import dataclass
-from typing import List, Tuple, Any
+from functools import lru_cache
+from typing import List, Any
 
 import numpy as np
 
-from ..common import open_doc_as_txt, filter_word_docs
+from oneinamillion.common import open_doc_as_txt, filter_word_docs
 from tqdm import tqdm
 from datetime import datetime, timedelta
 import re
@@ -17,12 +18,12 @@ PCC_TRANSCRIPT_DIR = r"Z:\prepared\transcripts"
 INFO = 'info'
 
 
-class Transcript:
-    id: str = None
-    date_time: datetime = None
-    duration: timedelta
-    # contain speaker and spoken text
-    conversations: List[Tuple[str, Any]]
+# class Transcript:
+#     id: str = None
+#     date_time: datetime = None
+#     duration: timedelta
+#     # contain speaker and spoken text
+#     conversations: List[Tuple[str, Any]]
 
 
 @dataclass
@@ -30,52 +31,51 @@ class Transcript:
     id: str
     start_datetime: datetime
     duration: timedelta
-    conversation: List[Any]
+    conversations: List[Any]
 
 
 class TranscriptParser:
-    transcripts = []
-    _lookup = {}
+    doc_ids = []
 
     def __init__(self, from_raw=False):
         if from_raw:
             self._prepare_raw()
 
-        self._read_prepared()
-        self._create_index()
+        self._get_doc_ids()
 
-    @staticmethod
-    def _parse_single_line(speaker: str, _line: str) -> List[Any]:
-        leftover_content = _line.strip()
-        conv = []
-        while len(leftover_content) > 0:
-            bracket_start_idx = leftover_content.find('[')
-            bracket_end_idx = leftover_content.find(']')
-            bracket_start = bracket_start_idx != -1
-            bracket_end = bracket_end_idx != -1
-            # contain ] matching from non-terminating [ from previous line
-            if (bracket_start and bracket_end and bracket_end_idx < bracket_start_idx) or (
-                    bracket_end and not bracket_start):
-                conv.append([INFO, leftover_content[:bracket_end_idx]])
-                leftover_content = leftover_content[bracket_end_idx + 1:]
-            # contain [ ] in sequence
-            elif bracket_start and bracket_end and bracket_start_idx < bracket_end_idx:
-                if bracket_start_idx > 0:
-                    conv.append([speaker, leftover_content[:bracket_start_idx]])
-                conv.append([INFO, leftover_content[bracket_start_idx + 1: bracket_end_idx]])
-                leftover_content = leftover_content[bracket_end_idx + 1:]
-            # contain only [ in sequence without matching ]
-            elif bracket_start and not bracket_end:
-                if bracket_start_idx > 0:
-                    conv.append([speaker, leftover_content[:bracket_start_idx]])
-                conv.append([INFO, leftover_content[bracket_start_idx + 1:]])
-                leftover_content = ''
-            # if contain no special [] symbols
-            elif not bracket_start and not bracket_end:
-                if len(leftover_content) > 1:  # prevents any redundant punctuations
-                    conv.append([speaker, leftover_content])
-                leftover_content = ''
-        return conv
+    def _get_doc_ids(self):
+        if not PCC_TRANSCRIPT_DIR or not os.path.exists(PCC_TRANSCRIPT_DIR):
+            raise FileNotFoundError
+        files = os.listdir(PCC_TRANSCRIPT_DIR)
+        txt_docs = list(filter(lambda _file: _file.find('.txt') > 0, files))
+
+        def _extract_id_from_name(filename):
+            return re.search(r"^(?P<_id>.+)_transcript\.txt", filename).group('_id')
+
+        self.doc_ids = [_extract_id_from_name(filename) for filename in txt_docs]
+        self.doc_ids.sort()
+
+    @lru_cache
+    def get(self, record_id):
+        if record_id in self.doc_ids:
+            target = f"{record_id}_transcript.txt"
+            return _read_single_prepared_txt(target)
+        else:
+            logging.warning(f"{record_id} does not have transcript document.")
+
+    # Convert Raw documents to txt format
+    def _prepare_raw(self):
+        if not os.path.exists(PCC_TRANSCRIPT_RAW_DIR):
+            raise FileNotFoundError
+        dirs = os.listdir(PCC_TRANSCRIPT_RAW_DIR)
+        for current_dir in tqdm(dirs):
+            sub_path = os.path.join(PCC_TRANSCRIPT_RAW_DIR, current_dir)
+            # only process valid word document
+            word_docs = filter_word_docs(os.listdir(sub_path))
+            for word_doc in tqdm(word_docs):
+                text = open_doc_as_txt(os.path.join(sub_path, word_doc))
+                parsed = self._parse_transcript_doc(text)
+                _save_txt(parsed)
 
     # Parse the raw doc input into a Transcript object
     def _parse_transcript_doc(self, raw):
@@ -146,7 +146,7 @@ class TranscriptParser:
             new_speaker, content = get_speaker_content(line)
             if new_speaker is not None:
                 speaker = new_speaker
-            line_content = self._parse_single_line(speaker, content)
+            line_content = _parse_single_line(speaker, content)
 
             # merge non-contiguous dialogue that came from the same speaker / INFO
             if len(line_content) > 0:
@@ -163,91 +163,86 @@ class TranscriptParser:
 
         return Transcript(record_id, start_datetime, duration, conversation)
 
-    @staticmethod
-    def _save_txt(transcript: Transcript):
-        if not os.path.exists(PCC_TRANSCRIPT_DIR):
-            os.makedirs(PCC_TRANSCRIPT_DIR)
-        filename = f"{transcript.id}_transcript.txt"
-        target = os.path.join(PCC_TRANSCRIPT_DIR, filename)
-        with open(target, "w") as text_file:
-            text_file.write(f"{transcript.id}\n")
-            text_file.write(f"{transcript.start_datetime}\n")
-            text_file.write(f"{transcript.duration}\n")
-            for dialogue in transcript.conversation:
-                text_file.write(f"{dialogue[0]}\n")
-                text_file.write(f"{dialogue[1]}\n")
 
-    @staticmethod
-    def _read_single_prepared_txt(filename) -> Transcript:
-        target = os.path.join(PCC_TRANSCRIPT_DIR, filename)
+def _parse_single_line(speaker: str, _line: str) -> List[Any]:
+    leftover_content = _line.strip()
+    conv = []
+    while len(leftover_content) > 0:
+        bracket_start_idx = leftover_content.find('[')
+        bracket_end_idx = leftover_content.find(']')
+        bracket_start = bracket_start_idx != -1
+        bracket_end = bracket_end_idx != -1
+        # contain ] matching from non-terminating [ from previous line
+        if (bracket_start and bracket_end and bracket_end_idx < bracket_start_idx) or (
+                bracket_end and not bracket_start):
+            conv.append([INFO, leftover_content[:bracket_end_idx]])
+            leftover_content = leftover_content[bracket_end_idx + 1:]
+        # contain [ ] in sequence
+        elif bracket_start and bracket_end and bracket_start_idx < bracket_end_idx:
+            if bracket_start_idx > 0:
+                conv.append([speaker, leftover_content[:bracket_start_idx]])
+            conv.append([INFO, leftover_content[bracket_start_idx + 1: bracket_end_idx]])
+            leftover_content = leftover_content[bracket_end_idx + 1:]
+        # contain only [ in sequence without matching ]
+        elif bracket_start and not bracket_end:
+            if bracket_start_idx > 0:
+                conv.append([speaker, leftover_content[:bracket_start_idx]])
+            conv.append([INFO, leftover_content[bracket_start_idx + 1:]])
+            leftover_content = ''
+        # if contain no special [] symbols
+        elif not bracket_start and not bracket_end:
+            if len(leftover_content) > 1:  # prevents any redundant punctuations
+                conv.append([speaker, leftover_content])
+            leftover_content = ''
+    return conv
 
-        def sanitize(text: str):
-            return ''.join(text.rsplit('\n', 1))
 
-        with open(target) as text_file:
-            record_id = sanitize(text_file.readline())
-            dt_txt = sanitize(text_file.readline())
-            if ':' in dt_txt:
-                start_datetime = datetime.strptime(dt_txt, "%Y-%m-%d %H:%M:%S")
-            else:
-                start_datetime = datetime.strptime(dt_txt, "%Y-%m-%d")
-            duration = sanitize(text_file.readline())
-            digits = [float(d) for d in duration.split(':')]
-            if len(digits) != 3:
-                raise ValueError(f"{duration} cannot be parsed.")
-            duration = timedelta(hours=digits[0], minutes=digits[1], seconds=digits[2])
-            conversation = []
-            line_is_speaker = True
-            speaker = None
+def _save_txt(transcript: Transcript):
+    if not os.path.exists(PCC_TRANSCRIPT_DIR):
+        os.makedirs(PCC_TRANSCRIPT_DIR)
+    filename = f"{transcript.id}_transcript.txt"
+    target = os.path.join(PCC_TRANSCRIPT_DIR, filename)
+    with open(target, "w") as text_file:
+        text_file.write(f"{transcript.id}\n")
+        text_file.write(f"{transcript.start_datetime}\n")
+        text_file.write(f"{transcript.duration}\n")
+        for dialogue in transcript.conversations:
+            text_file.write(f"{dialogue[0]}\n")
+            text_file.write(f"{dialogue[1]}\n")
 
-            for line in text_file:
-                line = sanitize(line)
-                if line_is_speaker:
-                    speaker = line
-                else:
-                    conversation.append((sanitize(speaker), line))
-                line_is_speaker = not line_is_speaker
-            return Transcript(record_id, start_datetime, duration, conversation)
 
-    def _read_prepared(self):
-        if not PCC_TRANSCRIPT_DIR:
-            raise FileNotFoundError
-        if not os.path.exists(PCC_TRANSCRIPT_DIR):
-            raise FileNotFoundError
-        files = os.listdir(PCC_TRANSCRIPT_DIR)
-        txt_docs = list(filter(lambda _file: _file.find('.txt') > 0, files))
-        self.transcripts = []
-        for file in txt_docs:
-            transcript = self._read_single_prepared_txt(file)
-            self.transcripts.append(transcript)
+def _read_single_prepared_txt(filename) -> Transcript:
+    target = os.path.join(PCC_TRANSCRIPT_DIR, filename)
 
-    def _prepare_raw(self):
-        if not os.path.exists(PCC_TRANSCRIPT_RAW_DIR):
-            raise FileNotFoundError
-        dirs = os.listdir(PCC_TRANSCRIPT_RAW_DIR)
-        for current_dir in tqdm(dirs):
-            sub_path = os.path.join(PCC_TRANSCRIPT_RAW_DIR, current_dir)
-            # only process valid word document
-            word_docs = filter_word_docs(os.listdir(sub_path))
-            for word_doc in tqdm(word_docs):
-                text = open_doc_as_txt(os.path.join(sub_path, word_doc))
-                parsed = self._parse_transcript_doc(text)
-                self._save_txt(parsed)
+    def sanitize(text: str):
+        return ''.join(text.rsplit('\n', 1))
 
-    def _create_index(self):
-        self._lookup = {}
-        for i, transcript in enumerate(self.transcripts):
-            self._lookup[transcript.id] = i
-
-    def get(self, record_id):
-        if record_id in self._lookup:
-            return self.transcripts[self._lookup[record_id]]
+    with open(target) as text_file:
+        record_id = sanitize(text_file.readline())
+        dt_txt = sanitize(text_file.readline())
+        if ':' in dt_txt:
+            start_datetime = datetime.strptime(dt_txt, "%Y-%m-%d %H:%M:%S")
         else:
-            logging.warning(f"{record_id} does not have transcript")
+            start_datetime = datetime.strptime(dt_txt, "%Y-%m-%d")
+        duration = sanitize(text_file.readline())
+        digits = [float(d) for d in duration.split(':')]
+        if len(digits) != 3:
+            raise ValueError(f"{duration} cannot be parsed.")
+        duration = timedelta(hours=digits[0], minutes=digits[1], seconds=digits[2])
+        conversation = []
+        line_is_speaker = True
+        speaker = None
 
-    def get_doc_ids(self):
-        return np.sort(list(self._lookup.keys())).tolist()
+        for line in text_file:
+            line = sanitize(line)
+            if line_is_speaker:
+                speaker = line
+            else:
+                conversation.append((sanitize(speaker), line))
+            line_is_speaker = not line_is_speaker
+        return Transcript(record_id, start_datetime, duration, conversation)
 
 
 if __name__ == '__main__':
     transcript_parser = TranscriptParser()
+

@@ -4,10 +4,10 @@ import os
 import re
 from dataclasses import dataclass
 from datetime import datetime
+from functools import lru_cache
 from typing import List, Optional
 
 import docx
-import numpy as np
 from docx.table import Table
 from tqdm import tqdm
 
@@ -51,15 +51,12 @@ class PatientRecords:
 
 # noinspection PyTypeChecker
 class PatientRecordParser:
-    pt_records = []
-    _lookup = {}
+    doc_ids = []
 
     def __init__(self, from_raw=False):
         if from_raw:
             self._prepare_raw()
-
-        self._read_prepared()
-        self._create_index()
+        self._get_doc_ids()
 
     # noinspection PyTypeChecker
     @staticmethod
@@ -179,33 +176,28 @@ class PatientRecordParser:
             pt_transcript = json.loads(data, object_hook=decode_record)
             return pt_transcript
 
-    def _read_prepared(self):
+    def _get_doc_ids(self):
         if not os.path.exists(PCC_PT_RECORD_DIR):
             raise FileNotFoundError
 
         files = os.listdir(PCC_PT_RECORD_DIR)
         txt_docs = list(filter(lambda _file: _file.find('.txt') > 0, files))
 
-        self.pt_records = []
-        for file in txt_docs:
-            record = self._read_from_json(file)
-            self.pt_records.append(record)
-        return self.pt_records
+        def _extract_id_from_name(filename):
+            return re.search(r"^(?P<_id>.+)_pt_record\.txt", filename).group('_id')
 
-    def _create_index(self):
-        self._lookup = {}
-        for i, record in enumerate(self.pt_records):
-            self._lookup[record.id] = i
+        self.doc_ids = [_extract_id_from_name(filename) for filename in txt_docs]
+        self.doc_ids.sort()
 
+    @lru_cache
     def get(self, record_id):
-        if record_id in self._lookup:
-            return self.pt_records[self._lookup[record_id]]
+        if record_id in self.doc_ids:
+            target = f"{record_id}_pt_record.txt"
+            return self._read_from_json(target)
         else:
-            logging.warning(f"{record_id} does not have patient records")
-
-    def get_doc_ids(self):
-        return np.sort(list(self._lookup.keys())).tolist()
+            logging.warning(f"{record_id} does not have PC record document.")
 
 
 if __name__ == '__main__':
     pt_parser = PatientRecordParser()
+
