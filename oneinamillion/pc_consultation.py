@@ -68,13 +68,14 @@ class PCConsultation:
         doc_ids, codes = zip(*flattened_pairs)
         n_samples = len(doc_ids)
         doc_ids = np.array(doc_ids).reshape((n_samples, -1))
+        doc_ids_flatten = doc_ids.flatten()
         classified_codes = [c[0] for c in codes]
         classified_codes = np.array(classified_codes).reshape((n_samples,))
         split = StratifiedShuffleSplit(n_splits=n_splits, test_size=test_size, random_state=self._seed)
         for train_index, test_index in split.split(doc_ids, classified_codes):
-            yield train_index, test_index
+            print("test")
+            yield doc_ids_flatten[train_index], doc_ids_flatten[test_index]
 
 
 if __name__ == '__main__':
     pc = PCConsultation()
-
