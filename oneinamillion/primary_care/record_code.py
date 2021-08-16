@@ -27,7 +27,7 @@ class RecordCodeParser:
                             self._id_code_dict[current_id] = [self._id_code_dict[current_id]]
                         self._id_code_dict[current_id].append(code)
                     else:
-                        self._id_code_dict[current_id] = code
+                        self._id_code_dict[current_id] = [code]
 
     # lookup the ICPC codes for the record
     def get(self, record_id):

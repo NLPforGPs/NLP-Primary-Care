@@ -32,7 +32,7 @@ class IcpcCode:
 
 class IcpcParser:
     def __init__(self):
-        self.df: pd.DataFrame = pd.DataFrame()
+        self._df: pd.DataFrame = pd.DataFrame()
         self._codes_list: List[IcpcCode] = []
         self._lookup: dict[str, IcpcCode] = {}
 
@@ -52,7 +52,7 @@ class IcpcParser:
         df['exclusion_codes'] = df['exclusion'].apply(get_codes_from_str)
         df['consider_codes'] = df['consider'].apply(get_codes_from_str)
 
-        self.df = df
+        self._df = df
         # df.to_csv(os.path.join(PCC_ICPC_DIR, "icpc-prepared.csv"))
         self._create_objs()
         self._create_lookup()
@@ -60,7 +60,7 @@ class IcpcParser:
 
     def _create_objs(self):
         self._codes_list = []
-        for row in self.df.itertuples(name='Code'):
+        for row in self._df.itertuples(name='Code'):
             # noinspection PyUnresolvedReferences,PyProtectedMember
             dct = row._asdict()
             dct['code'] = dct['Code']
@@ -89,6 +89,9 @@ class IcpcParser:
 
     def get_objs(self):
         return self._codes_list
+
+    def get_pd(self):
+        return self._df
 
 
 if __name__ == '__main__':

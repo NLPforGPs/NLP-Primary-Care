@@ -1,15 +1,21 @@
 import logging
+import os.path
 from dataclasses import dataclass
 from typing import List
 
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import StratifiedShuffleSplit
+from tqdm import tqdm
 
 from .primary_care.patient_record import PatientRecordParser, PatientRecords
 from .primary_care.record_code import RecordCodeParser
 from .primary_care.transcript import TranscriptParser, Transcript
 
-logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+PCC_PREPARED_PATH = 'Z:\prepared'
 
 
 @dataclass
@@ -29,6 +35,9 @@ class PCConsultation:
 
     def __init__(self, seed=None):
         self._get_doc_ids()
+
+        self._pd_path = os.path.join(PCC_PREPARED_PATH, 'consultation.csv')
+
         if seed:
             self._seed = seed
 
@@ -51,9 +60,9 @@ class PCConsultation:
         only_record = set(pt_record_list) - set(transcript_list)
         only_transcript = set(transcript_list) - set(pt_record_list)
 
-        logging.info(f"Total primary care data-pairs: {len(self.doc_ids)}")
-        logging.warning(f"The current IDs only have record documents.\n{np.sort(np.array(list(only_record)))}")
-        logging.warning(f"The current IDs only have transcript documents.\n{np.sort(np.array(list(only_transcript)))}")
+        logger.info(f"Total primary care data-pairs: {len(self.doc_ids)}")
+        logger.warning(f"The current IDs only have record documents.\n{np.sort(np.array(list(only_record)))}")
+        logger.warning(f"The current IDs only have transcript documents.\n{np.sort(np.array(list(only_transcript)))}")
 
     # return list of indexes for train and test sets
     def create_train_test_split(self, n_splits=1, test_size=0.2):
@@ -75,6 +84,31 @@ class PCConsultation:
         for train_index, test_index in split.split(doc_ids, classified_codes):
             yield doc_ids_flatten[train_index], doc_ids_flatten[test_index]
 
+    def get_pd(self, from_raw=False):
+        if os.path.exists(self._pd_path) and not from_raw:
+            df = pd.read_csv(self._pd_path, index_col=0)
+            df.reset_index(inplace=True)
+        else:
+            ids = self.doc_ids
+            columns = ['record_id', 'icpc_codes', 'pt_records',
+                       'transcript__start_date', 'transcript__duration', 'transcript__conversation']
+            df = pd.DataFrame(columns=columns)
+            for ii, record_id in enumerate(tqdm(ids)):
+                record = self.get_single(record_id)
+                data = {
+                    'record_id': record_id,
+                    'icpc_codes': record.codes,
+                    'pt_records': [vars(i) for i in record.pt_record.records],
+                    'transcript__start_date': str(record.transcript.start_datetime),
+                    'transcript__duration': str(record.transcript.duration),
+                    'transcript__conversation': record.transcript.conversations,
+                }
+                df = df.append(data, ignore_index=True)
+            df.to_csv(self._pd_path)
+        return df
+
 
 if __name__ == '__main__':
     pc = PCConsultation()
+    x = pc.get_pd()
+
