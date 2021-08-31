@@ -5,15 +5,12 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import List, Any
 
-import numpy as np
-
 from oneinamillion.common import open_doc_as_txt, filter_word_docs
 from tqdm import tqdm
 from datetime import datetime, timedelta
 import re
 
-PCC_TRANSCRIPT_RAW_DIR = r"Z:\Transcripts\transcripts"
-PCC_TRANSCRIPT_DIR = r"Z:\prepared\transcripts"
+from oneinamillion.resources import PCC_TRANSCRIPT_RAW_DIR, PCC_TRANSCRIPT_DIR
 
 INFO = 'info'
 
@@ -43,6 +40,10 @@ class TranscriptParser:
 
         self._get_doc_ids()
 
+    def clear_cache(self):
+        self._prepare_raw()
+        self._get_doc_ids()
+
     def _get_doc_ids(self):
         if not PCC_TRANSCRIPT_DIR or not os.path.exists(PCC_TRANSCRIPT_DIR):
             raise FileNotFoundError
@@ -65,6 +66,7 @@ class TranscriptParser:
 
     # Convert Raw documents to txt format
     def _prepare_raw(self):
+        logging.info("Parsing text from transcript documents")
         if not os.path.exists(PCC_TRANSCRIPT_RAW_DIR):
             raise FileNotFoundError
         dirs = os.listdir(PCC_TRANSCRIPT_RAW_DIR)

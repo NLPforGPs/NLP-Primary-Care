@@ -8,14 +8,13 @@ import pandas as pd
 from sklearn.model_selection import StratifiedShuffleSplit
 from tqdm import tqdm
 
+from oneinamillion.resources import PCC_PREPARED_PATH
 from .primary_care.patient_record import PatientRecordParser, PatientRecords
 from .primary_care.record_code import RecordCodeParser
 from .primary_care.transcript import TranscriptParser, Transcript
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-PCC_PREPARED_PATH = 'Z:\prepared'
 
 
 @dataclass
@@ -89,6 +88,9 @@ class PCConsultation:
             df = pd.read_csv(self._pd_path, index_col=0)
             df.reset_index(inplace=True)
         else:
+            # this will force a cache refresh from the two parsers
+            self.record_parser.clear_cache()
+            self.transcript_parser.clear_cache()
             ids = self.doc_ids
             columns = ['record_id', 'icpc_codes', 'pt_records',
                        'transcript__start_date', 'transcript__duration', 'transcript__conversation']

@@ -5,13 +5,12 @@ from typing import List
 
 import pandas as pd
 
+from oneinamillion.resources import PCC_ICPC_DIR, PCC_ICPC_FILE
+
 """
 The data source for ICPC-2 codes:
 https://www.ehelse.no/kodeverk/icpc-2e--english-version
 """
-
-PCC_ICPC_DIR = r"Z:\codes\ICPC"
-PCC_ICPC_FILE = "icpc-2e-v7.0.csv"
 
 
 @dataclass

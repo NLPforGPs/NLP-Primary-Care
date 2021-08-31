@@ -12,9 +12,7 @@ from docx.table import Table
 from tqdm import tqdm
 
 from oneinamillion.common import filter_word_docs
-
-PCC_PT_RECORD_RAW_DIR = r"Z:\Patient records"
-PCC_PT_RECORD_DIR = r"Z:\prepared\records"
+from oneinamillion.resources import PCC_PT_RECORD_RAW_DIR, PCC_PT_RECORD_DIR
 
 
 @dataclass
@@ -56,6 +54,10 @@ class PatientRecordParser:
     def __init__(self, from_raw=False):
         if from_raw:
             self._prepare_raw()
+        self._get_doc_ids()
+
+    def clear_cache(self):
+        self._prepare_raw()
         self._get_doc_ids()
 
     # noinspection PyTypeChecker
@@ -119,6 +121,7 @@ class PatientRecordParser:
         return records
 
     def _prepare_raw(self):
+        logging.info("Parsing text from patient record documents")
         if not os.path.exists(PCC_PT_RECORD_RAW_DIR):
             raise FileNotFoundError
         word_docs = filter_word_docs(os.listdir(PCC_PT_RECORD_RAW_DIR))

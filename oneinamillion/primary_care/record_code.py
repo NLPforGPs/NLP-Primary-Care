@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 
-PCC_CODES_FILE = r'Z:\codes\OiAM_ICPC-2.xlsx'
+from oneinamillion.resources import PCC_CODES_FILE
 
 
 class RecordCodeParser:
