@@ -50,22 +50,28 @@ NLP_GP
    - for available variable names, look at `resources.py`.
    
 
-3. create new conda environment for project
+3. create new 
+   [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) 
+   for project
 
-```
-conda env create --file nlp_gp.yml
-```
+   ```
+   # create environment using the requirements file
+   conda env create --file nlp_gp.yml
+   
+   #activate environment
+   conda activate NLP_GP
+   ```
 
 
 4. launch jupyter lab/ notebook and launch python notebook, 
    either from the command line, or from the GUI launcher.
    [Jupyter Lab guide](https://jupyterlab.readthedocs.io/en/stable/getting_started/starting.html).
 
-```
-jupyter lab
-# OR
-jupyter notebook
-```
+   ```
+   jupyter lab
+   # OR
+   jupyter notebook
+   ```
 
 ## Updating Source Datasets
 **Prerequisites**
