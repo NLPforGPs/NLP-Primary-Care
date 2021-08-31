@@ -33,6 +33,3 @@ def filter_word_docs(files: List[str]) -> List[str]:
 #     else:
 #         return json.dumps(obj, default=lambda o: getattr(o, '__dict__', str(o)), separators=(',', ':'))
 
-if __name__ == '__main__':
-    text = open_doc_as_txt(r"Z:\Transcripts\transcripts\01-11\20141208_125909-011110_Transcript.docx")
-    print("test")
