@@ -29,6 +29,8 @@ NLP_GP
 
 1. Mount the network drive for the
    [One In a Million archive](https://www.bristol.ac.uk/primaryhealthcare/researchthemes/one-in-a-million/)
+   - If you are not on the university network, connect to the VPN
+   
    - On a windows computer: From windows Explorer access, or Map a network drive, to:
      `\\rdsfcifs.acrc.bris.ac.uk\NLP_One_In_A_Million`
 
