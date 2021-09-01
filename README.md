@@ -25,29 +25,39 @@ NLP_GP
 | utils                |                | Commonly used methods                                                     |
 |                      | preprocessing  | methods for data preprocessing                                            |
 
+
 ## Development Setup
 
-1. Mount the network drive for the
-   [One In a Million archive](https://www.bristol.ac.uk/primaryhealthcare/researchthemes/one-in-a-million/)
-   - If you are not on the university network, connect to the VPN
-   
+1. Mount the network drive for the [One In a Million archive](https://www.bristol.ac.uk/primaryhealthcare/researchthemes/one-in-a-million/)
+
+   If you are not on the university network, connect to the VPN
+
    - On a windows computer: From windows Explorer access, or Map a network drive, to:
      `\\rdsfcifs.acrc.bris.ac.uk\NLP_One_In_A_Million`
 
    - On a Mac: In the Finder select 'Go->Connect To Server...' from the menu (or Command-K) and enter 
      `smb://rdsfcifs.acrc.bris.ac.uk/NLP_One_In_A_Million` into the dialogue box.
+   
+   - On Linux (Ubuntu):
+     ```
+     # before we can mount Windows shared drive, we need to install CIFS
+     sudo apt install cifs-utils
      
+     # create mount point and mount network drive
+     sudo mkdir /mnt/nlp_one_in_a_million
+     sudo mount -t cifs //rdsfcifs.acrc.bris.ac.uk/NLP_One_In_A_Million /mnt/nlp_one_in_a_million/ -o user=uz18855,domain=UOB
+     ```
 
-2. Point the program to use the mounted network drive
+3. Point the program to use the mounted network drive
    either:
    - Set environment variables on linux/ macos, e.g.
      ```
-     export PCC_BASE_DIR='~/mounted_location'
+     export PCC_BASE_DIR='/mnt/nlp_one_in_a_million'
      ```
    - or update `resources.py` in `oneinamillion` package, e.g.
       ```
       # Insert line to override variables
-      PCC_BASE_DIR = '~/mounted_location'
+      PCC_BASE_DIR = '/mnt/nlp_one_in_a_million'
       ```
    - for available variable names, look at `resources.py`.
    
@@ -57,6 +67,9 @@ NLP_GP
    for project
 
    ```
+   # navigate to project directory
+   cd NLP-GP/
+   
    # create environment using the requirements file
    conda env create --file nlp_gp.yml
    
