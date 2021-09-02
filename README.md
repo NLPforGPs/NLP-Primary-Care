@@ -39,13 +39,15 @@ NLP_GP
      `smb://rdsfcifs.acrc.bris.ac.uk/NLP_One_In_A_Million` into the dialogue box.
    
    - On Linux (Ubuntu):
+     
+     replace *\<USERNAME\>* with your own UOB login username
      ```
      # before we can mount Windows shared drive, we need to install CIFS
      sudo apt install cifs-utils
      
      # create mount point and mount network drive
      sudo mkdir /mnt/nlp_one_in_a_million
-     sudo mount -t cifs //rdsfcifs.acrc.bris.ac.uk/NLP_One_In_A_Million /mnt/nlp_one_in_a_million/ -o user=uz18855,domain=UOB
+     sudo mount -t cifs //rdsfcifs.acrc.bris.ac.uk/NLP_One_In_A_Million /mnt/nlp_one_in_a_million/ -o user=<USERNAME>,domain=UOB
      ```
 
 3. Point the program to use the mounted network drive
