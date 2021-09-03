@@ -66,7 +66,10 @@ NLP_GP
 
 3. create new 
    [conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) 
-   for project
+   for project.
+   
+   To install CUDA with PyTorch on **macOS**, please refer to
+   [guide](https://pytorch.org/get-started/locally/#mac-from-source).
 
    ```
    # navigate to project directory
