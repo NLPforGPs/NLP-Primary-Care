@@ -42,6 +42,8 @@ class CksParser:
             self._get_cks()
             self._get_link()
             self._build_icpc_keywords_from_cks()
+        else:
+            self._df = pd.read_csv(self._cache_file, index_col=0)
 
     def _get_cks(self):
         """
