@@ -24,14 +24,24 @@ class CksParser:
     _cks_description_dic = {}
     _icpc_descriptions = {}
     _df = pd.DataFrame()
+    _cache_file = path.join(PCC_CKS_DIR, 'icpc_cks_description.csv')
 
-    def __init__(self, headings_to_include=None):
-        self._get_cks()
-        self._get_link()
-        self._build_icpc_keywords_from_cks()
+    def __init__(self, headings_to_include=None, from_raw=False):
+        """
+        :param headings_to_include: sub-section headings to include from CKS description file
+        :param from_raw: refresh cached CKS descriptions
+        """
         self.headings_to_include = default_headings_to_include  # CKS sub-section headings to include
         if headings_to_include:
             self.headings_to_include = headings_to_include
+
+        if not path.exists(self._cache_file):
+            from_raw = True
+
+        if from_raw:
+            self._get_cks()
+            self._get_link()
+            self._build_icpc_keywords_from_cks()
 
     def _get_cks(self):
         """
@@ -108,6 +118,7 @@ class CksParser:
             logger.info(
                 f"Please ensure that the title headings for CKS symptoms matches in both the cks and the link document.")
         self._df = pd.DataFrame.from_dict(self._icpc_descriptions, orient='index', columns=['cks descriptions'])
+        self._df.to_csv(self._cache_file)
 
     def get_pd(self):
         """
