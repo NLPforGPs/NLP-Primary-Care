@@ -18,11 +18,13 @@ PCC_BASE_DIR = environ.get('PCC_BASE_DIR') or r"Z:/"
 # Clinical Codes
 PCC_CODES_DIR = environ.get('PCC_CODES_DIR') or os.path.join(PCC_BASE_DIR, 'codes')
 PCC_CODES_FILE = os.path.join(PCC_CODES_DIR, 'OiAM_ICPC-2.xlsx')
+PCC_CODES_LINK_FILE = "icpc2_to_cks.xlsx"
 # ICPC
 PCC_ICPC_DIR = os.path.join(PCC_CODES_DIR, 'ICPC')
 PCC_ICPC_FILE = "icpc-2e-v7.0.csv"
 # CKS
-# ...
+PCC_CKS_DIR = os.path.join(PCC_CODES_DIR, 'CKS')
+PCC_CKS_FILE = "cks_health_topics-29-07-2021.csv"
 
 # Raw source documents
 PCC_PT_RECORD_RAW_DIR = environ.get('PCC_PT_RECORD_RAW_DIR') or os.path.join(PCC_BASE_DIR, 'Patient records')

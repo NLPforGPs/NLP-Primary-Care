@@ -5,10 +5,19 @@ from typing import List
 import nltk
 
 
+def utils_remove_questions(text: str):
+    return re.sub(r'[\w|\s]*?\?', '', text)
+
+
+def utils_remove_bracket_sources(text: str):
+    return re.sub(r'\[.*?]', '', text)
+
+
 def utils_preprocess_text(text: str, stemming: bool = False, lemmatisation: bool = True,
                           stopwords_list: List[str] = None, remove_stopwords: bool = True,
                           remove_punctuation: bool = False):
     # clean (convert to lowercase and remove punctuations and characters and then strip)
+    text = text.lower()
 
     if remove_punctuation:
         # add whitespace to punctuations without trailing spaces,
