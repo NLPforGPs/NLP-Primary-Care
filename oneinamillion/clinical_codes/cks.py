@@ -15,10 +15,13 @@ default_headings_to_include = [
 #    'Prognosis',
 #    'Risk factors',
 #    'Differential diagnosis',
-    'Diagnosis'
-    'Clinical features'
-    'Presentation'
-    'Signs and symptoms'
+    'Causes',
+    'Definition',
+    'Diagnosis',
+    'Clinical features',
+    'History',
+    'Presentation',
+    'Signs and symptoms',
     'When to suspect'
 ]
 
