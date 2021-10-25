@@ -181,6 +181,7 @@ class PatientRecordParser:
 
     def _get_doc_ids(self):
         if not os.path.exists(PCC_PT_RECORD_DIR):
+            print(f'cannot find {PCC_PT_RECORD_DIR}')
             raise FileNotFoundError
 
         files = os.listdir(PCC_PT_RECORD_DIR)
@@ -203,4 +204,3 @@ class PatientRecordParser:
 
 if __name__ == '__main__':
     pt_parser = PatientRecordParser()
-

@@ -1,0 +1,6 @@
+openpyxl
+numpy
+scikit-learn
+nltk
+seaborn
+

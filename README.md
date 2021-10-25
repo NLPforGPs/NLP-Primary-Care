@@ -126,3 +126,4 @@ There might also be missing documents for that consultation.
 There are three documents required for every primary care consultation record.
 By default, the parser would only return samples only if the three documents are present.
 i) the transcript, ii) the gp record, iii) the clinical codes for the record.
+

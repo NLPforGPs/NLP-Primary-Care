@@ -1,0 +1,10 @@
+openpyxl
+numpy
+sklearn
+nltk
+seaborn
+python-docx
+textract
+utils
+scikit-multilearn
+wordcloud
