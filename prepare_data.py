@@ -4,13 +4,18 @@ from oneinamillion.pc_consultation import PCConsultation
 from oneinamillion.resources import PCC_BASE_DIR
 import os
 from sklearn.preprocessing import MultiLabelBinarizer
-
+from sklearn.model_selection import train_test_split
+from transformers import AutoTokenizer
 from oneinamillion.clinical_codes.icpc import IcpcParser
 from utils.preprocessing.text import utils_preprocess_text
 import pandas as pd
 import numpy as np
-
+from utils.preprocessing.data import write_path, segment_without_overlapping
+from nltk import tokenize
+from utils.preprocessing.text import cleaner
 from oneinamillion.clinical_codes.cks import CksParser
+
+
 
 
 def prepare_original_data():
@@ -45,7 +50,7 @@ def prepare_original_data():
     return orig_dataset, mult_lbl_enc, y_hot
 
 
-def load_icpc_descriptions(mult_lbl_enc):
+def load_icpc_descriptions():
     icpc_parser = IcpcParser()
     icpc_df = icpc_parser.get_pd()
 
@@ -80,13 +85,14 @@ def load_cks_descriptions():
     return cks_description_corpus
 
 
-def load_descriptions(selected_mode, mult_lbl_enc):
-    icpc_description_corpus = load_icpc_descriptions(mult_lbl_enc)
+def load_descriptions(selected_mode, class_name):
+    icpc_description_corpus = load_icpc_descriptions()
     cks_description_corpus = load_cks_descriptions()
-
+    if class_name is None:
+        class_name = icpc_description_corpus.index.tolist()
     # print(f"Description: {selected_mode}")
     icpc_description_dic = {}
-    for icpc_code in mult_lbl_enc.classes_:
+    for icpc_code in class_name:
         icpc_code = icpc_code.upper()
         if selected_mode == 'ICPC only':
             icpc_description_dic[icpc_code] = f"{icpc_description_corpus.loc[icpc_code]['keywords']}"
@@ -98,3 +104,33 @@ def load_descriptions(selected_mode, mult_lbl_enc):
     icpc_corpus_df = pd.DataFrame.from_dict(icpc_description_dic, orient='index', columns=['keyword'])
     icpc_corpus = icpc_corpus_df['keyword']
     return icpc_corpus
+
+def generate_datasets(tokenizer, chunk_size, test_size, selected_mode, save_path, class_name=None):
+    '''
+    split descriptions into smaller chunks.
+    '''
+    train_data, test_data = [], []
+    descriptions = load_descriptions(selected_mode, class_name)
+    for ii, _ in enumerate(descriptions):
+        description = cleaner(descriptions[ii])
+        sents = tokenize.sent_tokenize(description)
+        chunks = segment_without_overlapping(tokenizer, sents, chunk_size)
+        labels = [descriptions.index[ii]]*len(chunks)
+        train_examples, test_examples = train_test_split(list(zip(chunks, labels)), test_size=test_size,random_state=20211125)
+        train_data.extend(train_examples)
+        test_data.extend(test_examples)
+
+    write_path(os.path.join(save_path, str(chunk_size) + '_train_{}.json'.format(selected_mode.replace(' ', '_'))), train_data)
+    write_path(os.path.join(save_path, str(chunk_size) + '_test_{}.json'.format(selected_mode.replace(' ', '_'))), test_data)
+        # processed_data.extend(zip(chunks, labels))
+        # texts.extend(chunks)
+        # all_labels.extend(labels)
+
+
+if __name__ == '__main__':
+
+    tokenizer = AutoTokenizer.from_pretrained('microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract')
+    save_path = './data/cks_only'
+    # if not os.path.exists(save_path):
+    #     os.mkdir(save_path)
+    generate_datasets(tokenizer, 490, 0.2, 'CKS only', save_path)

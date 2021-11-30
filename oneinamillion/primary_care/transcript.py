@@ -56,7 +56,7 @@ class TranscriptParser:
         self.doc_ids = [_extract_id_from_name(filename) for filename in txt_docs]
         self.doc_ids.sort()
 
-    @lru_cache
+    @lru_cache(maxsize=128, typed=False)
     def get(self, record_id):
         if record_id in self.doc_ids:
             target = f"{record_id}_transcript.txt"
@@ -72,6 +72,7 @@ class TranscriptParser:
         dirs = os.listdir(PCC_TRANSCRIPT_RAW_DIR)
         for current_dir in tqdm(dirs):
             sub_path = os.path.join(PCC_TRANSCRIPT_RAW_DIR, current_dir)
+            if not os.path.isdir(sub_path): continue
             # only process valid word document
             word_docs = filter_word_docs(os.listdir(sub_path))
             for word_doc in tqdm(word_docs):
