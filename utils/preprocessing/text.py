@@ -12,7 +12,11 @@ def utils_remove_questions(text: str):
 def utils_remove_bracket_sources(text: str):
     return re.sub(r'\[.*?]', '', text)
 
-
+def cleaner(transcript):
+    transcript = re.sub('(?<=[a-zA-Z])(\.|(\s\.))(?=[a-zA-Z])', '. ', transcript)
+    transcript = re.sub('(?<=[a-zA-Z])(\?|(\s\?))(?=[a-zA-Z])', '? ', transcript)
+    return re.sub('(?<=[a-zA-Z])(\!|(\s\!))(?=[a-zA-Z])', '! ', transcript)
+    
 def utils_preprocess_text(text: str, stemming: bool = False, lemmatisation: bool = True,
                           stopwords_list: List[str] = None, remove_stopwords: bool = True,
                           remove_punctuation: bool = False):

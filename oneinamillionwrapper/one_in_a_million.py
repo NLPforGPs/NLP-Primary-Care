@@ -82,8 +82,10 @@ FEATURES = datasets.Features(
                     "speaker": datasets.Value("string"),
                     "dialogue": datasets.Value("string"),
                 }
-            )
-        },
+            ),
+            "ICPC_codes": datasets.Value("string"),
+        }
+        
     }
 )
 
@@ -92,6 +94,7 @@ FEATURES = datasets.Features(
 class OneInAMillionBuilderConfig(datasets.BuilderConfig):
     n_fold: int = 1
     ith_fold: int = 1
+    test_size: float = 0.2
 
 
 class OneInAMillion(datasets.GeneratorBasedBuilder):
@@ -110,17 +113,18 @@ class OneInAMillion(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         # These kwargs will be passed to _generate_examples
+
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "split": "train"
+                    "split": "train",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "split": "test"
+                    "split": "test",
                 },
             ),
             datasets.SplitGenerator(
@@ -132,7 +136,7 @@ class OneInAMillion(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(
-            self, split  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
+            self, split
     ):
         """ Yields examples as (key, example) tuples. """
         # This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
@@ -141,14 +145,16 @@ class OneInAMillion(datasets.GeneratorBasedBuilder):
         pc_reader = PCConsultation()
 
         train_split, test_split = [], []
-        for ii, (train_split, test_split) in enumerate(pc_reader.create_train_test_split(self.config.n_fold)):
+        for ii, (train_split, test_split, y_train, y_test) in enumerate(pc_reader.create_train_test_split(self.config.n_fold, test_size=self.config.test_size)):
             if ii + 1 == self.config.ith_fold:
                 break
 
         if split == 'train':
             selected_idx = train_split
+            labels = y_train
         else:
             selected_idx = test_split
+            labels = y_test
 
         for ii, data in enumerate(pc_reader.get_sequence(selected_idx)):
 
@@ -171,6 +177,14 @@ class OneInAMillion(datasets.GeneratorBasedBuilder):
                             "dialogue": c[1],
                         }
                         for c in data.transcript.conversations
-                    ]
+                    ],
+                    "ICPC_codes": labels[ii],
+
                 }
             }
+if __name__ == '__main__':
+
+    from datasets import load_dataset
+    dataset = load_dataset('/Users/hsfang/workspace/consolidation/NLP-Primary-Care/oneinamillionwrapper/one_in_a_million.py')
+
+    print(dataset['test']['transcript'][0])

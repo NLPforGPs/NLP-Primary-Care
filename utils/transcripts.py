@@ -54,6 +54,10 @@ def read_transcript(transcript, show_patient=True, show_gp=True, show_info=False
         valid_speakers.extend(['gp', 'doc'])  # doctor
     if show_info:
         valid_speakers.extend(['info'])
+
+    if type(transcript) == str:
+        transcript = literal_eval(transcript)
+        
     for s, utt in transcript:
         valid = any(w in s.lower() for w in valid_speakers)
         if valid:
@@ -61,5 +65,7 @@ def read_transcript(transcript, show_patient=True, show_gp=True, show_info=False
             new_t.append(utt)
     if return_format == 'concat':
         return ' '.join(new_t)
+    elif return_format == 'list':
+        return new_t
     else:
         return list(zip(new_s, new_t))

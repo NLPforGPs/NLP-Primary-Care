@@ -89,6 +89,7 @@ class PCConsultation:
         for train_index, test_index in split.split(doc_ids, classified_codes):
             yield doc_ids_flatten[train_index], doc_ids_flatten[test_index], classified_codes[train_index],classified_codes[test_index]
 
+
     def get_pd(self, from_raw=False):
         if os.path.exists(self._pd_path) and not from_raw:
             df = pd.read_csv(self._pd_path, index_col=0)

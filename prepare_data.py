@@ -105,7 +105,7 @@ def load_descriptions(selected_mode, class_name):
     icpc_corpus = icpc_corpus_df['keyword']
     return icpc_corpus
 
-def generate_datasets(tokenizer, chunk_size, test_size, selected_mode, save_path, class_name=None):
+def generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, save_path, class_name=None):
     '''
     split descriptions into smaller chunks.
     '''
@@ -120,17 +120,33 @@ def generate_datasets(tokenizer, chunk_size, test_size, selected_mode, save_path
         train_data.extend(train_examples)
         test_data.extend(test_examples)
 
-    write_path(os.path.join(save_path, str(chunk_size) + '_train_{}.json'.format(selected_mode.replace(' ', '_'))), train_data)
-    write_path(os.path.join(save_path, str(chunk_size) + '_test_{}.json'.format(selected_mode.replace(' ', '_'))), test_data)
+    write_path(os.path.join(save_path, 'train.json'), train_data)
+    write_path(os.path.join(save_path, 'test.json'), test_data)
         # processed_data.extend(zip(chunks, labels))
         # texts.extend(chunks)
         # all_labels.extend(labels)
+
+def prepare_transcripts_eval(tokenizer, save_path, max_length=490):
+    parser = PCConsultation()
+    orig_dataset = parser.get_pd()
+    orig_dataset = orig_dataset.drop(orig_dataset[orig_dataset['icpc_codes']=="[nan]"].index)
+
+    orig_dataset['codes'] = orig_dataset['icpc_codes'].apply(extract_icpc_categories)
+    orig_dataset['transcript__conversation_both'] = orig_dataset['transcript__conversation'].apply(
+        lambda t: read_transcript(t, return_format='list'))
+    orig_dataset['transcript__conversation_both'] = orig_dataset['transcript__conversation_both'].apply(
+        lambda t: segment_without_overlapping(tokenizer, t, max_length))
+    data = list(zip(orig_dataset['transcript__conversation_both'].tolist(), orig_dataset['codes'].tolist()))
+
+    write_path(os.path.join(save_path, 'transcript.json'), data)
+
 
 
 if __name__ == '__main__':
 
     tokenizer = AutoTokenizer.from_pretrained('microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract')
-    save_path = './data/cks_only'
+    save_path = './data/transcripts'
     # if not os.path.exists(save_path):
-    #     os.mkdir(save_path)
-    generate_datasets(tokenizer, 490, 0.2, 'CKS only', save_path)
+    # os.makedirs(save_path)
+    # generate_descriptions(tokenizer, 490, 0.2, 'CKS only', save_path)
+    prepare_transcripts_eval(tokenizer)
