@@ -27,3 +27,7 @@ def evaluate_classifications(targets,
         )
 
     return f1_score(targets, predictions, average='macro')
+
+def softmax(logits):
+    normalized = np.exp(logits - np.max(logits, axis = -1, keepdims=True))
+    return normalized / np.sum(normalized, axis=-1, keepdims=True)

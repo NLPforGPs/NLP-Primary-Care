@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import trange
 import os
 import logging
+from utils.preprocessing.data import softmax
 
 class DescClassifier(nn.Module):
     def __init__(self, model, epochs, learning_rate, weight_decay=1e-4):
@@ -150,7 +151,7 @@ class DescClassifier(nn.Module):
             else:
                 pred_ids = np.argmax(all_res, axis=-1)
                 labels = [[id2class[item]] for item in pred_ids]
-                class_probs = utils.softmax(np.array(all_res))
+                class_probs = softmax(np.array(all_res))
                 # print('labels', labels)
             return labels, class_probs
 
@@ -168,7 +169,7 @@ class DescClassifier(nn.Module):
         # print('logits', logits)
         # [batch_size,]
         # selected_ids = torch.argmax(logits, dim=-1)
-        probs = utils.softmax(logits)
+        probs = softmax(logits)
         pred_probs = np.max(probs, axis=-1)
         selected_ids = np.argmax(logits, axis=-1)
         labels = class_name[selected_ids]

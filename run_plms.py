@@ -14,7 +14,7 @@ import logging
 import datasets
 from datasets import load_dataset
 from prepare_data import generate_descriptions, prepare_transcripts_eval
-from utils.preprocessing.data import masking, labelmapping, prompt_encoding
+from utils.preprocessing.data import masking, labelmapping, prompt_encoding, merge_predictions
 from torch.utils.data import DataLoader
 
 if __name__ == '__main__':
@@ -162,9 +162,10 @@ if __name__ == '__main__':
         # plot_heatmap(class_logits, predict_data['splited_nums'], class_names)
 
         mult_lbl_enc = MultiLabelBinarizer()
-        y_hot = mult_lbl_enc.fit_transform(dataset['codes'])
+        labels = [[label2name[code] for code in codes] for codes in dataset['codes']]
+        y_hot = mult_lbl_enc.fit_transform(labels)
         predictions = mult_lbl_enc.transform(predictions)
 
-        final_predictions = merge_predictions(predict_data['splited_nums'], np.array(predictions))
+        final_predictions = merge_predictions(splited_nums, np.array(predictions))
         
-        print(evaluate_classifications(y_hot, final_predictions, list(label2name.values()), show_report=True))
+        print(evaluate_classifications(y_hot, final_predictions, list(mult_lbl_enc.classes_), show_report=True))
