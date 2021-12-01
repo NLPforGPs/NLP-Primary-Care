@@ -6,24 +6,49 @@ this question.
 
 ## Folder Structure
 ```
-NLP_GP
-├───oneinamillion
-│   ├───clinical_codes
-│   ├───primary_care
-├───oneinamillionwrapper
-└───utils
-    └───preprocessing
+├── README.md
+├── acknowledgements.md
+├── classification.ipynb
+├── nlp_gp.yml
+├── nn_model
+│   ├── __init__.py
+│   └── desc_classifier.py                    // deep learning classifiers
+├── oneinamillion                             // data extraction and preparation
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── clinical_codes
+│   ├── common.py
+│   ├── pc_consultation.py
+│   ├── primary_care
+│   └── resources.py
+├── oneinamillionwrapper                       // Dataset for deep learning model
+│   ├── __init__.py
+│   ├── description_dataset.py                 // Load description dataset using dataset API
+│   ├── one_in_a_million.py                     
+│   └── transcript_evaldataset.py              // Load transcript dataset using dataset API
+├── prepare_data.py                            // Prepare and split transcript data and descritpion data  
+├── requirements_conda.txt
+├── requirements_pip.txt
+├── run_plms.py                                 // entrypoint for run deep learning models
+└── utils                                       // Tools used in other components
+    ├── __init__.py
+    ├── metrics
+    ├── preprocessing
+    ├── stopwords
+    └── transcripts.py
 ```
 
 
 | package              | sub-package    | description                                                               |
 |----------------------|----------------|---------------------------------------------------------------------------|
-| oneinamillion        |                | class for getting clinical consultation datapairs                         |
+| oneinamillion        |                | package for getting clinical consultation datapairs                         |
 |                      | clinical_codes | class for getting ICPC or CKS codes                                       |
 |                      | primary_care   | contains sub-package classes to parse transcripts/ gp records             |
-| oneinamillionwrapper |                | Wrapper class for clinical datapairs to be used with HuggingFace datasets |
+| oneinamillionwrapper |                | Datasets(transcripts and descripts) used in deep learning models using HuggingFace datasets|
 | utils                |                | Commonly used methods                                                     |
 |                      | preprocessing  | methods for data preprocessing                                            |
+| nn_model             |                | package for different deep learning models                                |
+| metrics              |                | package for model evaluation                                              |
 
 
 ## Development Setup
@@ -112,6 +137,20 @@ orig_dataset = parser.get_pd(from_raw=True)
 
 Make sure to do this *once* only and *undo the changes* after a single execution, 
 as parsing and preparing raw consultation documents is a costly process.
+
+
+
+## Deep learning model tuning
+
+- Train a classifier using descriptions
+```python
+python3 ./run_plms.py 
+
+```
+- Evaluate performance transcripts
+```python
+```
+
 
 ### FAQ
 
