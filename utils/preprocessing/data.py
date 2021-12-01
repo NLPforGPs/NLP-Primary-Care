@@ -118,18 +118,3 @@ def prompt_encoding(examples, tokenizer, prompt, max_length=512):
 #         input_ids = encoded_input['input_ids']
 #         all_input_ids.append(input_ids)
 
-def softmax(logits):
-    normalized = np.exp(logits - np.max(logits, axis = -1, keepdims=True))
-    return normalized / np.sum(normalized, axis=-1, keepdims=True)
-
-def merge_predictions(record_cnt, predictions):
-        cum_sum = np.cumsum(record_cnt)
-        assert cum_sum[-1] == len(predictions)
-        final_predictions = np.zeros((len(record_cnt), predictions.shape[1]))
-        prev = 0
-        for i in range(len(cum_sum)):
-            entry = cum_sum[i]
-            final_predictions[i] = np.any(predictions[prev:entry], axis=0).astype(int)
-            prev = entry
-        return final_predictions
-

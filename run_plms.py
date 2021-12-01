@@ -14,8 +14,10 @@ import logging
 import datasets
 from datasets import load_dataset
 from prepare_data import generate_descriptions, prepare_transcripts_eval
-from utils.preprocessing.data import masking, labelmapping, prompt_encoding, merge_predictions
+from utils.preprocessing.data import masking, labelmapping, prompt_encoding
+from utils.utils import merge_predictions
 from torch.utils.data import DataLoader
+from oneinamillion.resources import PCC_BASE_DIR
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -27,13 +29,13 @@ if __name__ == '__main__':
     parser.add_argument('--weight_decay', type=float, default=1e-4)
 
     parser.add_argument('--train_datapath', type=str, default='./data/train.json')
-    parser.add_argument('--data_dir', type=str, default='./data')
+    parser.add_argument('--train_data_dir', type=str, default='./data')
     parser.add_argument('--label_path', type=str, default='label2id.json')
     parser.add_argument('--dev_datapath', type=str, default='./data/test.json')
-    parser.add_argument('--predict_dir', type=str, default='./data/splitted_transcripts.json')
+    parser.add_argument('--predict_data_dir', type=str, default='./data/splitted_transcripts.json')
     parser.add_argument('--test_datapath', type=str, default='./data/splitted_transcripts.json')
-    parser.add_argument('--save_dir', type=str, default='./model')
-    parser.add_argument('--save_name', type=str, default='test')
+    parser.add_argument('--model_dir', type=str, default='./model')
+    parser.add_argument('--model_name', type=str, default='test')
     parser.add_argument('--ckpt_name', type=str, default='test')
     parser.add_argument('--prompt', type=str, default='This is a problem of {}.')
     parser.add_argument('--selected_mode', type=str, default='CKS only')
@@ -50,6 +52,16 @@ if __name__ == '__main__':
 
     
     args = parser.parse_args()
+
+    # training data directory, descriptions
+    train_data_dir = os.path.join(PCC_BASE_DIR, args.train_data_dir)
+    # prediction data directory, transcripts
+    predict_data_dir = os.path.join(PCC_BASE_DIR, args.predict_data_dir)
+    # model save path
+    model_dir = os.path.join(PCC_BASE_DIR, args.model_dir)
+
+
+
     device = (torch.device('cuda') if torch.cuda.is_available()
                 else torch.device('cpu'))
 
@@ -71,17 +83,18 @@ if __name__ == '__main__':
     classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
     tokenizer = AutoTokenizer.from_pretrained(args.pretrained_model)
     # load data
-    if not os.path.exists(args.data_dir):
-        logging.info('data_dir not exists, generating data....')
-        os.makedirs(args.data_dir)
-        # this will generate a train and test datasets in args.data_dir
-        generate_descriptions(tokenizer=tokenizer, chunk_size = args.chunk_size, test_size = 0.2, selected_mode=args.selected_mode, save_path = args.data_dir)
-
-
+    
     if args.do_train:
         logging.info('training...')
+
+        if not os.path.exists(train_data_dir):
+            logging.info('data_dir not exists, generating data....')
+            os.makedirs(train_data_dir)
+            # this will generate a train and test datasets in data_dir
+            generate_descriptions(tokenizer=tokenizer, chunk_size = args.chunk_size, test_size = 0.2, selected_mode=args.selected_mode, save_path = train_data_dir)
+
         # using data loader script to load data
-        dataset = load_dataset('./oneinamillionwrapper/description_dataset.py', download_mode="force_redownload", data_dir= args.data_dir)
+        dataset = load_dataset('./oneinamillionwrapper/description_dataset.py', download_mode="force_redownload", data_dir= train_data_dir)
 
         if args.use_prompt:
             print('using prompt methods...')
@@ -99,7 +112,7 @@ if __name__ == '__main__':
             labels = list(set(dataset['train']['codes']))
             label2id = {key: ix for ix, key in enumerate(labels)}
             print('label2id',label2id)
-            with open(os.path.join(args.data_dir, args.label_path), 'w') as f:
+            with open(os.path.join(args.train_data_dir, args.label_path), 'w') as f:
                 json.dump(label2id, f)
             dataset = dataset.map(lambda e: labelmapping(e['codes'], label2id), batched=True)
             dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
@@ -107,33 +120,31 @@ if __name__ == '__main__':
             dev_dataloader = DataLoader(dataset['test'], batch_size=args.batch_size, shuffle=False)
 
         
-        classifier.train(train_loader=train_dataloader, dev_loader=dev_dataloader, save_dir=args.save_dir, save_name=args.save_name, stop_epochs=args.stop_epochs, device=device, prompt=args.prompt, load_checkpoint=args.load_checkpoint, ckpt_name=args.ckpt_name)
+        classifier.train(train_loader=train_dataloader, dev_loader=dev_dataloader, save_dir=model_dir, model_name=args.model_name, stop_epochs=args.stop_epochs, device=device, prompt=args.prompt, load_checkpoint=args.load_checkpoint, ckpt_name=args.ckpt_name)
 
     if args.do_predict:
         print('Predicting...')
-        if not os.path.exists(args.predict_dir):
+        if not os.path.exists(predict_data_dir):
             logging.info('data_dir not exists, generating data....')
-            os.makedirs(args.predict_dir)
+            os.makedirs(predict_data_dir)
         # this will generate a train and test datasets in args.data_dir
-            prepare_transcripts_eval(tokenizer=tokenizer, max_length= args.chunk_size, save_path = args.predict_dir)
+            prepare_transcripts_eval(tokenizer=tokenizer, max_length= args.chunk_size, save_path = predict_data_dir)
         
         # predict_data = load_data(args.predict_dir)
         if args.load_checkpoint:
-            print('path',os.path.join(
-                args.save_dir, args.save_name+'best-val-acc-model.pt'))
+
             if device == torch.device('cpu'):
                 checkpoint = torch.load(os.path.join(
-                    args.save_dir, args.save_name+'best-val-acc-model.pt'), map_location=device)
+                    model_dir, args.model_name+'best-val-acc-model.pt'), map_location=device)
             else:
                 checkpoint = torch.load(os.path.join(
-                    args.save_dir, args.save_name+'best-val-acc-model.pt'))
+                    model_dir, args.model_name+'best-val-acc-model.pt'))
             classifier.load_state_dict(checkpoint['state_dict'])
 
         # load data
-        dataset = load_dataset('./oneinamillionwrapper/transcript_evaldataset.py', download_mode="force_redownload", data_dir= args.predict_dir)
+        dataset = load_dataset('./oneinamillionwrapper/transcript_evaldataset.py', download_mode="force_redownload", data_dir= predict_data_dir)
         dataset = dataset['test']
         splited_nums = dataset['split_nums']
-        print('spliteed_nums', splited_nums)
 
         # predict_loader = DataLoader(BinaryDescLMDataset(data=predict_data['all_trans'], prompt=prompt, label2name=label2name, pretrained_model= args.pretrained_model, do_train=False, random_mask=False), batch_size=args.batch_size, shuffle=False)
         if args.use_prompt:

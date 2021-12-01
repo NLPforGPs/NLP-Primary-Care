@@ -55,3 +55,4 @@ def utils_preprocess_text(text: str, stemming: bool = False, lemmatisation: bool
 
 
 nltk.download('wordnet')
+

@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import trange
 import os
 import logging
-from utils.preprocessing.data import softmax
+from utils.utils import save_checkpoint, softmax
 
 class DescClassifier(nn.Module):
     def __init__(self, model, epochs, learning_rate, weight_decay=1e-4):

@@ -140,16 +140,51 @@ as parsing and preparing raw consultation documents is a costly process.
 
 
 
-## Deep learning model tuning
+## Fine-tuning Pretrained Models with Distant Supervision
+> This method is to fine-tune the pretrained models using descriptions and adapt to transcripts
 
 - Train a classifier using descriptions
-```python
-python3 ./run_plms.py 
+   -  Prompt
+      -  running on local machine
+   ```
+   python3 ./run_plms.py --batch_size 8 --do_train True --epoch 15 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --learning_rate 1e-4 --weight_decay 1e-4 --use_prompt True --model_dir models/prompt --model_name multiclass-abstract-optimal --multi_class True --train_data_dir "dl_data/desc/CKS only" --prompt "This is a problem of {}."
+   ```
+      - running on Bluepebble
+   ```
+   sbatch ./scripts/train/train-prompt.sh
+   ```
 
-```
-- Evaluate performance transcripts
-```python
-```
+   - Conventional(turn off `argument prompt`, change model to PubMedBERT(abstract-fulltext))
+      - running on local machine
+   ```
+   python3 ./run_plms.py --batch_size 32 --do_predict True  --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --use_prompt True --load_checkpoint True --multi_class True --model_dir models/coventional --model_name multiclass-abstract-conventional --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts'
+   ```
+      - running on Bluepebble
+   ```
+   sbatch ./scripts/train/train-conventional.sh
+   ```
+   
+
+- Evaluate performance using transcripts
+   -  Prompt
+      -  running on local machine
+
+   ```python3 ./run_plms.py --batch_size 32 --do_predict True  --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --use_prompt True --load_checkpoint True --multi_class True --model_dir models/prompt --model_name multiclass-abstract-modified --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts'
+   ```
+      - running on Bluepebble
+      ```
+      sbatch ./scripts/test/test-prompt.sh
+      ```
+   - Conventional
+      - running on local machine
+      ```
+      python3 ./run_plms.py --batch_size 32 --do_predict True  --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --load_checkpoint True --multi_class True --model_dir models/coventional --model_name multiclass-abstract-modified --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts'
+      ```
+      - running on Bluepebble
+      ```
+      sbatch ./scripts/test/test-conventional.sh
+      ```
+   More details could be found in `./scripts/``
 
 
 ### FAQ
