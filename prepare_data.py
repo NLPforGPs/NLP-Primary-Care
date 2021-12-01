@@ -11,6 +11,8 @@ from utils.preprocessing.text import utils_preprocess_text
 import pandas as pd
 import numpy as np
 from utils.preprocessing.data import write_path, segment_without_overlapping
+import nltk
+nltk.download('punkt')
 from nltk import tokenize
 from utils.preprocessing.text import cleaner
 from oneinamillion.clinical_codes.cks import CksParser

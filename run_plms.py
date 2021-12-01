@@ -89,7 +89,7 @@ if __name__ == '__main__':
             dataset = dataset.map(lambda e: masking(e['description'], e['codes'], label2name, tokenizer, args.prompt), batched=True)
             dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
             train_dataloader = DataLoader(dataset['train'], batch_size=args.batch_size, shuffle=True)
-            test_dataloader = DataLoader(dataset['test'], batch_size=args.batch_size, shuffle=False)
+            dev_dataloader = DataLoader(dataset['test'], batch_size=args.batch_size, shuffle=False)
 
             # test_dataset = dataset['test'].map(lambda e: masking(e['description'], tokenizer, args.prompt), batched=True)
             # test_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
@@ -104,10 +104,10 @@ if __name__ == '__main__':
             dataset = dataset.map(lambda e: labelmapping(e['codes'], label2id), batched=True)
             dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
             train_dataloader = DataLoader(dataset['train'], batch_size=args.batch_size, shuffle=True)
-            dev_dataloder = DataLoader(dataset['test'], batch_size=args.batch_size, shuffle=False)
+            dev_dataloader = DataLoader(dataset['test'], batch_size=args.batch_size, shuffle=False)
 
         
-        classifier.train(train_loader=train_dataloder, dev_loader=dev_dataloder, save_dir=args.save_dir, save_name=args.save_name, stop_epochs=args.stop_epochs, device=device, prompt=args.prompt, load_checkpoint=args.load_checkpoint, ckpt_name=args.ckpt_name)
+        classifier.train(train_loader=train_dataloader, dev_loader=dev_dataloader, save_dir=args.save_dir, save_name=args.save_name, stop_epochs=args.stop_epochs, device=device, prompt=args.prompt, load_checkpoint=args.load_checkpoint, ckpt_name=args.ckpt_name)
 
     if args.do_predict:
         print('Predicting...')
