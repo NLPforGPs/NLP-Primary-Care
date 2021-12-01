@@ -169,7 +169,8 @@ as parsing and preparing raw consultation documents is a costly process.
    -  Prompt
       -  running on local machine
 
-         ```python3 ./run_plms.py --batch_size 32 --do_predict True  --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --use_prompt True --load_checkpoint True --multi_class True --model_dir models/prompt --model_name multiclass-abstract-modified --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts'
+         ```
+         python3 ./run_plms.py --batch_size 32 --do_predict True  --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --use_prompt True --load_checkpoint True --multi_class True --model_dir models/prompt --model_name multiclass-abstract-modified --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts'
          ```
       - running on Bluepebble
          ```
