@@ -1,4 +1,10 @@
 ## Project Description
+- [Project Description](#project-description)
+- [Folder Structure](#folder-structure)
+- [Development Setup](#development-setup)
+- [Updating Source Datasets](#updating-source-datasets)
+- [Fine-tuning Pretrained Models with Distant Supervision](#fine-tuning-pretrained-models-with-distant-supervision)
+  - [FAQ](#faq)
 
 The project proposal asks the question: ‘Is it possible to build a proof-of-concept NLP tool to successfully “code” and
 summarise a clinical primary care consultation from an audio transcription of that consultation?’. This work answers
