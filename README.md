@@ -193,7 +193,7 @@ as parsing and preparing raw consultation documents is a costly process.
          ```
          sbatch ./scripts/test/test-conventional.sh
          ```
-   More details could be found in `./scripts/``
+   More details could be found in `./scripts/`
 
 
 ### FAQ
