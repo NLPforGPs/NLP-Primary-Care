@@ -102,7 +102,7 @@ class DescClassifier(nn.Module):
 
     def predict(self, predict_loader, device, tokenizer, class_names, use_prompt=True, load_checkpoint=False, id2class=None):
         
-        predictions, all_res, labels = [], [], []
+        predictions, all_logits, labels = [], [], []
         self.model.eval()
         with torch.no_grad():
             
@@ -113,58 +113,47 @@ class DescClassifier(nn.Module):
                 targets = batch['targets'].to(device)
 
                 input_ids = input_ids.view(-1, 512)
-                # print('text',batch['text'])
                 attention_mask = attention_mask.view(-1, 512)
                 token_type_ids = token_type_ids.view(-1, 512)
-                # print('input_ids', input_ids.size())
-                # print('attention mask', attention_mask.size())
-                # print('targets', targets.size())
-                if use_prompt:
+                
+                if use_prompt: # for prompt targets is natural languages ranther than labels
                     targets = targets.view(-1, 512)
-
-                # exit()
 
                 output = self.model(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids, labels = targets)
                 loss, logits = output[0], output[1]
+                # logits prompt: [Batch size, sequence_length, vocab_size], conventional: [Batch size, class_nums]
                 logits = logits.detach().cpu().numpy()
                 if use_prompt:
-                    # index of [MASK]
+                    # index of [MASK] [[1,20],[2,32],[3,20],..]
                     index = np.argwhere(targets.detach().cpu().numpy() != -100)
+                    # format it into [x_aixs,y_axis]
                     index = list(zip(*index))
 
                     # [batch_size, vocab_size]
                     logits = logits[index]
-                    # all_res.extend(logits.tolist())
 
-                # else:
-                    # [batch_size,]
-                    # all_pred = np.argmax(logits, axis=-1)
-                # print('pred', all_pred.shape)
-
-                all_res.extend(logits.tolist())
-                    # all_res.extend(all_pred.tolist())
+                all_logits.extend(logits.tolist())
 
                     
             if use_prompt:
-                labels, class_probs = self.obtain_max_class(tokenizer, class_names, all_res)
+                labels, class_probs = self.obtain_max_class(tokenizer, class_names, all_logits)
 
             else:
-                pred_ids = np.argmax(all_res, axis=-1)
+                pred_ids = np.argmax(all_logits, axis=-1)
                 labels = [[id2class[item]] for item in pred_ids]
-                class_probs = softmax(np.array(all_res))
+                class_probs = softmax(np.array(all_logits))
                 # print('labels', labels)
             return labels, class_probs
 
 
     def obtain_max_class(self, tokenizer, class_name, logits, threshold=0):
-        '''
+        ''' take out the max class and its probability
         logtis:[batch_size, vocab_size]
-        class_name: array
+        class_name: np.array, class names
         '''        
         class_ids = tokenizer.convert_tokens_to_ids(class_name)
         # [batch_size, vocab_size]
         logits = np.array(logits)
-        # logits = np.concatenate(logits,axis=0)
         logits = logits[:, class_ids]
         # print('logits', logits)
         # [batch_size,]
@@ -173,5 +162,4 @@ class DescClassifier(nn.Module):
         pred_probs = np.max(probs, axis=-1)
         selected_ids = np.argmax(logits, axis=-1)
         labels = class_name[selected_ids]
-        # print('labels', labels)
         return [[labels[i]] if pred_probs[i]>=threshold else [] for i in range(len(labels))], probs

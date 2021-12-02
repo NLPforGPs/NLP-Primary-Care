@@ -11,19 +11,17 @@ from transformers import AutoModelForMaskedLM, AutoTokenizer, BertConfig, BertFo
 import os
 import numpy as np
 import argparse
-from utils import load_data, merge_predictions, evaluate_classifications
 from torch.utils.data import DataLoader
-from dataset import DescLMDataset
 from sklearn.preprocessing import MultiLabelBinarizer
 from oneinamillion.resources import PCC_BASE_DIR
 from datasets import load_dataset
 from utils.preprocessing.data import prompt_encoding
+from utils.utils import one_hot_encoding
 
 
 if __name__ == __main__:
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_dir', type=str, default='./model')
-    # parser.add_argument('--model_list', type=str, default=)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--predict_data_dir', type=str, default='')
     parser.add_argument('--plm', type=str, default='microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext')
@@ -68,17 +66,17 @@ if __name__ == __main__:
         predict_loader = DataLoader(encoded_dataset,  batch_size=args.batch_size, shuffle=False)
 
         _, logits = classifier.predict(predict_loader, device, tokenizer, class_name=class_name)
+        # sum up all logits
         all_logits += logits
-
+    # take the average of logits of all models
     mean_logits = all_logits/len(model_lists)
+    # get ensembling prediction
     predictions = np.argmax(mean_logits, axis=-1)
     labels = class_name[selected_ids]
     labels = [[label] for label in labels]
 
-    mult_lbl_enc = MultiLabelBinarizer()
-    y_labels = [[label2name[code] for code in codes] for codes in dataset['codes']]
-    y_hot = mult_lbl_enc.fit_transform(y_labels)
-    predictions = mult_lbl_enc.transform(labels)
+    y_hot, predictions = one_hot_encoding(dataset['codes'], predictions, label2name)
+
     final_predictions = merge_predictions(splited_nums, predictions)
     print(evaluate_classifications(y_hot, final_predictions, list(mult_lbl_enc.classes_)), show_report=True))
 

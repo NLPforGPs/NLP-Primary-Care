@@ -1,32 +1,45 @@
+# coding: utf-8
+'''
+@filename:predict_plms.py
+@Createtime: 2021/12/02 13:24:41
+@author: Haishuo Fang
+@description: This script is used to generate supportive chunks for model decision
+'''
+
+
 import torch
-from model import DescClassifier
+from nn_model import DescClassifier
 from transformers import AutoModelForMaskedLM, AutoTokenizer, BertConfig, BertForSequenceClassification
 import os
 import numpy as np
 import json
 from utils.preprocessing.data import segment_without_overlapping
-from dataset import DescLMDataset, DescDataset
 from torch.utils.data import DataLoader
-from utils import heat_map, select_supportive_sentence, load_data, save_to_file
+from utils.utils import select_supportive_sentence, save_to_file
 import argparse
 from tqdm import tqdm
-
+from oneinamillion.resource import PCC_BASE_DIR
+from datasets import load_dataset
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--save_dir', type=str, default='./model')
-    parser.add_argument('--save_name', type=str, default='test')
+    parser.add_argument('--model_dir', type=str, default='./model')
+    parser.add_argument('--model_name', type=str, default='test')
     parser.add_argument('--data_dir', type=str, default='./data')
     parser.add_argument('--label_path', type=str, default='label2id.json')
     parser.add_argument('--write_file', type=str, default='support_setences.txt')
     parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--use_prompt', type=bool, default=False)
-    parser.add_argument('--interactive', type=bool, default=False)
+    parser.add_argument('--use_prompt', type=bool, default=False, action='store_true')
+    parser.add_argument('--interactive', type=bool, default=False, action='store_true')
 
-    parser.add_argument('--predict_datapath', type=str, default='./data/transcript/splitted_all_transcripts.json')
+    parser.add_argument('--predict_dir', type=str, default='./data/transcripts')
     parser.add_argument('--pretrained_model', type=str, default='microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract')
 
     args = parser.parse_args()
+
+    # path
+    predict_data_dir = os.path.join(PCC_BASE_DIR, args.predict_dir)
+    data_dir = os.path.join(PCC_BASE_DIR, args.data_dir)
 
     device = (torch.device('cuda') if torch.cuda.is_available()
                 else torch.device('cpu'))
@@ -36,7 +49,7 @@ if __name__ == '__main__':
     class_names = list(label2name.values())
 
 
-    with open(os.path.join(args.data_dir, args.label_path), 'r') as f:
+    with open(os.path.join(data_dir, args.label_path), 'r') as f:
         label2id = json.load(f)
     id2label = {label2id[label]: label2name[label] for label in label2id}
     print('id2label',id2label)
@@ -69,46 +82,43 @@ if __name__ == '__main__':
             if input_text == 'exit':
                 break
             chunks = segment_without_overlapping(tokenizer, input_text, maximum_length=50)
-            print('chunks', chunks)
             if args.use_prompt:
                 prompt = checkpoint['prompt']
                 print('prepare data')
-                dataset = DescLMDataset(data=chunks, prompt=prompt, label2name=None, pretrained_model= args.pretrained_model, do_train=False, random_mask=False)
-                
+                prompts = [prompt]*len(chunks)
+                batch = tokenizer(chunks, prompts, padding=True, truncation=True, return_tensors='pt')
+
             else:
-                dataset = DescDataset(data=chunks, pretrained_model=args.pretrained_model, label2name = None , do_train = False)
-            predict_dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False)
+                batch = tokenizer(chunks, padding=True, truncation=True, return_tensors='pt')
 
             print('predicting...')
-            predictions, probs = classifier.predict(predict_dataloader, device, tokenizer=tokenizer, id2class=id2label, use_prompt=args.use_prompt, class_names=np.array(class_names))
+            predictions, probs = classifier.predict(batch, device, tokenizer=tokenizer, id2class=id2label, use_prompt=args.use_prompt, class_names=np.array(class_names))
             # print(logits)
 
             res = select_supportive_sentence(probabilities=probs, chunks=chunks, class_names=np.array(class_names), threshold=0)
             # interative_map(logits, class_names, chunks)
         # heat_map(logits, class_names)
     else:
-        predict_data = load_data(args.predict_datapath)
-        data = predict_data['all_trans']
+        dataset = load_dataset('./oneinamillionwrapper/transcript_evaldataset.py', download_mode="force_redownload", data_dir= predict_data_dir)
+
         all_probs, total_chunks = [], []
 
-        for item in tqdm(data[:200]):
-            chunks = split_chunk(item, tokenizer, maximum_length=50)
+        for item in tqdm(dataset['transcripts'][:200]):
+            chunks = segment_without_overlapping(tokenizer, item, maximum_length=50)
             if args.use_prompt:
                 prompt = checkpoint['prompt']
-                # print('prepare data')
-                dataset = DescLMDataset(data=chunks, prompt=prompt, label2name=None, pretrained_model= args.pretrained_model, do_train=False, random_mask=False)
-                
+                prompts = [prompt]*len(chunks)
+                batch = tokenizer(chunks, prompts, padding=True, truncation=True, return_tensors='pt')
             else:
-                dataset = DescDataset(data=chunks, pretrained_model=args.pretrained_model, label2name = None , do_train = False)
-            predict_dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False)
+                batch = tokenizer(chunks, padding=True, truncation=True, return_tensors='pt')
 
             # print('predicting...')
-            predictions, probs = classifier.predict(predict_dataloader, device, tokenizer=tokenizer, id2class=id2label, use_prompt=args.use_prompt, class_names=np.array(class_names))
-            # print(logits)
+            predictions, probs = classifier.predict(batch, device, tokenizer=tokenizer, id2class=id2label, use_prompt=args.use_prompt, class_names=np.array(class_names))
 
             all_probs.extend(probs.tolist())
             total_chunks.extend(chunks)
+
         assert len(total_chunks) == len(all_probs)
         print('total_chunks', len(total_chunks))
         res = select_supportive_sentence(probabilities=np.array(all_probs), chunks=total_chunks, class_names=np.array(class_names), threshold=0)
-        save_to_file(res, os.path.join(args.data_dir, args.write_file))
+        save_to_file(res, os.path.join(data_dir, args.write_file))

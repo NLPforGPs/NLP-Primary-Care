@@ -1,12 +1,9 @@
 import json
-from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
-# from dataset import DescLMDataset, BinaryDescLMDataset, BinaryIterDataset, DescDataset
 from nn_model import DescClassifier
 import argparse
 import torch
 from transformers import AutoModelForMaskedLM, AutoTokenizer, BertConfig, BertForSequenceClassification
-from sklearn.preprocessing import MultiLabelBinarizer
 from utils.metrics import evaluate_classifications
 import numpy  as np
 import os
@@ -15,8 +12,7 @@ import datasets
 from datasets import load_dataset
 from prepare_data import generate_descriptions, prepare_transcripts_eval
 from utils.preprocessing.data import masking, labelmapping, prompt_encoding
-from utils.utils import merge_predictions
-from torch.utils.data import DataLoader
+from utils.utils import merge_predictions, one_hot_encode
 from oneinamillion.resources import PCC_BASE_DIR
 
 if __name__ == '__main__':
@@ -97,6 +93,7 @@ if __name__ == '__main__':
             # using masking method to generate prompt
             dataset = dataset.map(lambda e: masking(e['description'], e['codes'], label2name, tokenizer, args.prompt), batched=True)
             dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
+
             train_dataloader = DataLoader(dataset['train'], batch_size=args.batch_size, shuffle=True)
             dev_dataloader = DataLoader(dataset['test'], batch_size=args.batch_size, shuffle=False)
 
@@ -120,15 +117,13 @@ if __name__ == '__main__':
 
     if args.do_predict:
         logging.info('Predicting...')
-        if not os.path.exists(predict_data_dir):
+        if not os.path.exists(predict_data_dir): # this will generate a train and test datasets in adata_dir
             logging.info('data_dir not exists, generating data....')
             os.makedirs(predict_data_dir)
-        # this will generate a train and test datasets in args.data_dir
             prepare_transcripts_eval(tokenizer=tokenizer, max_length= args.chunk_size, save_path = predict_data_dir)
         
         # predict_data = load_data(args.predict_dir)
         if args.load_checkpoint:
-
             if device == torch.device('cpu'):
                 checkpoint = torch.load(os.path.join(
                     model_dir, args.model_name+'best-val-acc-model.pt'), map_location=device)
@@ -168,11 +163,10 @@ if __name__ == '__main__':
         # predictions,_ = classifier.predict(predict_dataloader, device, pos_id=tokenizer.convert_tokens_to_ids('really'), neg_id = tokenizer.convert_tokens_to_ids('not'), tokenizer=tokenizer, id2class=id2label, use_prompt=args.use_prompt, class_names=np.array(list(label2name.values())))
         # plot_heatmap(class_logits, predict_data['splited_nums'], class_names)
 
-        mult_lbl_enc = MultiLabelBinarizer()
-        labels = [[label2name[code] for code in codes] for codes in dataset['codes']]
-        y_hot = mult_lbl_enc.fit_transform(labels)
-        predictions = mult_lbl_enc.transform(predictions)
+        # convert labels to one-hot encoding for merging
+        y_hot, predictions = one_hot_encode(dataset['codes'], predictions, label2name)
 
+        # merge labels for each transcript
         final_predictions = merge_predictions(splited_nums, np.array(predictions))
         
         logging.info(evaluate_classifications(y_hot, final_predictions, list(mult_lbl_enc.classes_), show_report=True))

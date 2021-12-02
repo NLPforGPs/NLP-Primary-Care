@@ -38,10 +38,7 @@ class DescriptionDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         # These kwargs will be passed to _generate_examples
-        # data_path = {'train': '/Users/hsfang/workspace/consolidation/NLP-Primary-Care/data/cks_only/490_train_CKS_only.json', 
-        # 'test': '/Users/hsfang/workspace/consolidation/NLP-Primary-Care/data/cks_only/490_test_CKS_only.json'}
-        # dfiles = dl_manager.download_and_extract(data_files)
-        # print(self.config.data_files['train'][0])
+
         print(self.config.data_dir)
         return [
             datasets.SplitGenerator(
@@ -49,7 +46,6 @@ class DescriptionDataset(datasets.GeneratorBasedBuilder):
                 gen_kwargs={
                     "split": "train",
                     'filepath': os.path.join(self.config.data_dir, 'train.json')
-                    # "filepath": data_files['train']
 
                 },
             ),
@@ -76,7 +72,6 @@ class DescriptionDataset(datasets.GeneratorBasedBuilder):
 
 if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained('microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract', model_max_length=512)
-    # dataset = DescriptionDataset()
     dataset = load_dataset('/Users/hsfang/workspace/consolidation/NLP-Primary-Care/oneinamillionwrapper/description_dataset.py', 
     download_mode="force_redownload", data_dir='/Users/hsfang/workspace/consolidation/NLP-Primary-Care/data/cks_only')
     # load_dataset('json', data_files={'train': '/Users/hsfang/workspace/consolidation/NLP-Primary-Care/data/cks_only/490_train_CKS_only.json'})
