@@ -28,30 +28,30 @@ if __name__ == '__main__':
     parser.add_argument('--learning_rate', type=float, default=1e-4)
     parser.add_argument('--weight_decay', type=float, default=1e-4)
 
-    parser.add_argument('--train_datapath', type=str, default='./data/train.json')
-    parser.add_argument('--train_data_dir', type=str, default='./data')
-    parser.add_argument('--label_path', type=str, default='label2id.json')
-    parser.add_argument('--dev_datapath', type=str, default='./data/test.json')
-    parser.add_argument('--predict_data_dir', type=str, default='./data/splitted_transcripts.json')
-    parser.add_argument('--test_datapath', type=str, default='./data/splitted_transcripts.json')
-    parser.add_argument('--model_dir', type=str, default='./model')
-    parser.add_argument('--model_name', type=str, default='test')
-    parser.add_argument('--ckpt_name', type=str, default='test')
-    parser.add_argument('--prompt', type=str, default='This is a problem of {}.')
-    parser.add_argument('--selected_mode', type=str, default='CKS only')
-    parser.add_argument('--chunk_size', type=int, default=490)
-    parser.add_argument('--max_length', type=int, default=512)
+    parser.add_argument('--train_data_dir', type=str, default='/data', help='directory for train data')
+    parser.add_argument('--label_path', type=str, default='label2id.json', help='path of saved label2id mapping for conventional classifier')
+    parser.add_argument('--predict_data_dir', type=str, default='/data/transcript', help='directory for data to predict')
+    parser.add_argument('--model_dir', type=str, default='./model', help='directory to save model')
+    parser.add_argument('--model_name', type=str, default='test', help='name of the saved model')
+    parser.add_argument('--ckpt_name', type=str, default='test', help='name of the loaded model')
+    parser.add_argument('--prompt', type=str, default='This is a problem of {}.', help='prompt')
+    parser.add_argument('--selected_mode', type=str, default='CKS only', help='choose to use which description')
+    parser.add_argument('--chunk_size', type=int, default=490, help='used to split transcripts and descriptions into small chunks')
+    parser.add_argument('--max_length', type=int, default=512, help='max length used in PLMs')
     
 
-    parser.add_argument('--use_prompt', type=bool, default=False)
-    parser.add_argument('--do_train', type=bool, default=False)
-    parser.add_argument('--do_predict', type=bool, default=False)
-    parser.add_argument('--load_checkpoint', type=bool, default=False)
-    parser.add_argument('--multi_class', type=bool, default=False)
+    parser.add_argument('--use_prompt', type=bool, default=False, action="store_true", help='donot include it unless you use it')
+    parser.add_argument('--do_train', type=bool, default=False, action="store_true", help='do not include unless you use it')
+    parser.add_argument('--do_predict', type=bool, default=False, action="store_true", help='do not include unless you use it')
+    parser.add_argument('--load_checkpoint', type=bool, default=False, action="store_true", help='do not include unless you use it')
+    parser.add_argument('--multi_class', type=bool, default=False, action="store_true", help='do not include unless you use it')
 
 
     
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
+                    level=logging.INFO)
 
     # training data directory, descriptions
     train_data_dir = os.path.join(PCC_BASE_DIR, args.train_data_dir)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     device = (torch.device('cuda') if torch.cuda.is_available()
                 else torch.device('cpu'))
-
+    # This map would be used in prompt to predict real word
     label2name = {'A':'general', 'B':'blood', 'D':'digestive','F':'eye', 'H':'ear', 'K':'cardiovascular','L':'musculoskeletal',
     'N':'neurological','P':'psychological','R':'respiratory','S':'skin','T':'endocrine', 'U':'urological','W':'pregnancy','X':'female',
     'Y':'male'}
@@ -73,21 +73,17 @@ if __name__ == '__main__':
         model = AutoModelForMaskedLM.from_pretrained(args.pretrained_model)
     else:
         config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2name))
-        # config.num_labels = len(label2name)
-        # config.problem_type = 'single_label_classification'
-        # model = AutoModelForSequenceClassification.from_pretrained(args.pretrained_model)
         model = BertForSequenceClassification.from_pretrained(args.pretrained_model, config=config)
 
     model.to(device)
     
     classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
     tokenizer = AutoTokenizer.from_pretrained(args.pretrained_model)
-    # load data
-    
+
     if args.do_train:
         logging.info('training...')
 
-        if not os.path.exists(train_data_dir):
+        if not os.path.exists(train_data_dir): # prepare dataset for model training
             logging.info('data_dir not exists, generating data....')
             os.makedirs(train_data_dir)
             # this will generate a train and test datasets in data_dir
@@ -97,7 +93,7 @@ if __name__ == '__main__':
         dataset = load_dataset('./oneinamillionwrapper/description_dataset.py', download_mode="force_redownload", data_dir= train_data_dir)
 
         if args.use_prompt:
-            print('using prompt methods...')
+            logging.info('using prompt methods...')
             # using masking method to generate prompt
             dataset = dataset.map(lambda e: masking(e['description'], e['codes'], label2name, tokenizer, args.prompt), batched=True)
             dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
@@ -108,7 +104,7 @@ if __name__ == '__main__':
             # test_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
 
         else:
-            print('using traditional bert classifier...')
+            logging.info('using traditional bert classifier...')
             labels = list(set(dataset['train']['codes']))
             label2id = {key: ix for ix, key in enumerate(labels)}
             print('label2id',label2id)
@@ -123,7 +119,7 @@ if __name__ == '__main__':
         classifier.train(train_loader=train_dataloader, dev_loader=dev_dataloader, save_dir=model_dir, model_name=args.model_name, stop_epochs=args.stop_epochs, device=device, prompt=args.prompt, load_checkpoint=args.load_checkpoint, ckpt_name=args.ckpt_name)
 
     if args.do_predict:
-        print('Predicting...')
+        logging.info('Predicting...')
         if not os.path.exists(predict_data_dir):
             logging.info('data_dir not exists, generating data....')
             os.makedirs(predict_data_dir)
@@ -148,7 +144,7 @@ if __name__ == '__main__':
 
         # predict_loader = DataLoader(BinaryDescLMDataset(data=predict_data['all_trans'], prompt=prompt, label2name=label2name, pretrained_model= args.pretrained_model, do_train=False, random_mask=False), batch_size=args.batch_size, shuffle=False)
         if args.use_prompt:
-            print('Prompt based method.....')
+            logging.info('Prompt based method.....')
             encoded_dataset = dataset.map(lambda e: prompt_encoding(e['transcript'], tokenizer, args.prompt, args.max_length), batched=True, remove_columns=['transcript', 'codes', 'split_nums'])
             encoded_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
             
@@ -157,11 +153,11 @@ if __name__ == '__main__':
             id2label = None
 
         else:
-            print('conventional classifier...')
+            logging.info('conventional classifier...')
             with open(os.path.join(args.data_dir, args.label_path), 'r') as f:
                 label2id = json.load(f)
             id2label = {label2id[label]: label2name[label] for label in label2id}
-            print('id2label',id2label)
+            logging.info('id2label',id2label)
             encoded_dataset = dataset.map(lambda e: tokenizer(e['all_segments'], padding=True, truncation=True, max_length=args.max_length), batched=True, remove_columns=dataset.column_names)
             encoded_dataset = encoded_dataset.map(lambda e: {'targets': len(e['input_ids'])*[0]}, batched=True)
             encoded_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
@@ -179,4 +175,4 @@ if __name__ == '__main__':
 
         final_predictions = merge_predictions(splited_nums, np.array(predictions))
         
-        print(evaluate_classifications(y_hot, final_predictions, list(mult_lbl_enc.classes_), show_report=True))
+        logging.info(evaluate_classifications(y_hot, final_predictions, list(mult_lbl_enc.classes_), show_report=True))
