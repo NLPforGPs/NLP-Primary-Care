@@ -19,7 +19,6 @@ from oneinamillion.clinical_codes.cks import CksParser
 
 
 
-
 def prepare_original_data():
     # alternatively, you may override the variables in oneinamillion.resources.py
     os.environ['PCC_BASE_DIR'] = "Z:/"
@@ -76,15 +75,24 @@ def load_icpc_descriptions():
     return icpc_description_corpus
 
 
-def load_cks_descriptions():
+def load_cks_descriptions(cks_icpc=True):
+    '''
+    cks_icpc: True for coarse-grained labels, False for fine-grained labels
+    '''
     # Integrate with CKS descriptions
+
 
     # use from_raw to refresh cached cks descriptions, and headings_to_include to use different set of sub-sections to
     # include
     cks_parser = CksParser()
-    cks_description_corpus = cks_parser.get_pd()
-    # cks_description_corpus
-    return cks_description_corpus
+    if cks_icpc:
+        return cks_parser.get_pd()
+    else:
+        return cks_parser.get_cks_topic()
+
+def generate_fine_grained_descriptions():
+
+    pass
 
 
 def load_descriptions(selected_mode, class_name):

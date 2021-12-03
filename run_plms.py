@@ -159,7 +159,7 @@ if __name__ == '__main__':
             predict_dataloader = DataLoader(encoded_dataset, batch_size=args.batch_size, shuffle=False)
 
         class_names = list(label2name.values())
-        predictions, _ = classifier.predict(predict_dataloader, device, tokenizer=tokenizer, id2class=id2label, use_prompt=args.use_prompt, class_names=np.array(class_names))
+        predictions, pred_probs = classifier.predict(predict_dataloader, device, tokenizer=tokenizer, id2class=id2label, use_prompt=args.use_prompt, class_names=np.array(class_names))
         # predictions,_ = classifier.predict(predict_dataloader, device, pos_id=tokenizer.convert_tokens_to_ids('really'), neg_id = tokenizer.convert_tokens_to_ids('not'), tokenizer=tokenizer, id2class=id2label, use_prompt=args.use_prompt, class_names=np.array(list(label2name.values())))
         # plot_heatmap(class_logits, predict_data['splited_nums'], class_names)
 
@@ -168,5 +168,7 @@ if __name__ == '__main__':
 
         # merge labels for each transcript
         final_predictions = merge_predictions(splited_nums, np.array(predictions))
+        final_probs = merge_predictions(splited_nums, np.array(predictions), probs=True)
         
         logging.info(evaluate_classifications(y_hot, final_predictions, list(mult_lbl_enc.classes_), show_report=True))
+        logging.info(evaluate_classifications(y_hot, final_probs, list(mult_lbl_enc.classes_), show_report=True))

@@ -1,6 +1,7 @@
 import logging
 import re
 from os import path
+import json
 
 import pandas as pd
 
@@ -31,7 +32,9 @@ class CksParser:
     _cks_description_dic = {}
     _icpc_descriptions = {}
     _df = pd.DataFrame()
-    _cache_file = path.join(PCC_CKS_DIR, 'icpc_cks_description.csv')
+    _cache_file_1 = path.join(PCC_CKS_DIR, 'icpc_cks_description.csv')
+    _cache_file_2 = path.join(PCC_CKS_DIR, 'cks_description.csv')
+    _cks2icpc = path.join(PCC_CKS_DIR, 'cks2icpc.json')
 
     def __init__(self, headings_to_include=None, from_raw=False):
         """
@@ -42,15 +45,19 @@ class CksParser:
         if headings_to_include:
             self.headings_to_include = headings_to_include
 
-        if not path.exists(self._cache_file):
+        if not path.exists(self._cache_file_1) and not path.exists(self._cache_file_2):
             from_raw = True
 
         if from_raw:
             self._get_cks()
             self._get_link()
             self._build_icpc_keywords_from_cks()
+            self._get_cks_topic()
         else:
-            self._df = pd.read_csv(self._cache_file, index_col=0)
+            self._df = pd.read_csv(self._cache_file_1, index_col=0)
+            self._df_fine_grained = pd.read_csv(self._cache_file_2, index_col=0)
+            with open(self._json_cks2icpc) as f:
+                self._link_dic = json.load(f)
 
     def _get_cks(self):
         """
@@ -78,6 +85,7 @@ class CksParser:
 
         cks_file['sub-section_text_prepared'] = cks_file['sub-section_text'].apply(clean_text)
         cks_file = cks_file[['topic', 'sub-section_text_prepared']].groupby('topic').agg(' '.join)
+        # {topic:concated text} 
         self._cks_description_dic = cks_file.to_dict()['sub-section_text_prepared']
 
     def _get_link(self):
@@ -104,6 +112,7 @@ class CksParser:
         link_dic = {}
         for index, row in link_file.iterrows():
             link_dic[index] = [k for (k, v) in row.to_dict().items() if v == 1]
+        # {'A':[topic1, topic2,..]}
         self._link_dic = link_dic
 
     def _build_icpc_keywords_from_cks(self):
@@ -127,7 +136,17 @@ class CksParser:
             logger.info(
                 f"Please ensure that the title headings for CKS symptoms matches in both the cks and the link document.")
         self._df = pd.DataFrame.from_dict(self._icpc_descriptions, orient='index', columns=['cks descriptions'])
-        self._df.to_csv(self._cache_file)
+        self._df.to_csv(self._cache_file_1)
+
+    def _get_cks_topic(self):
+        self._df_fine_grained = pd.DataFrame.from_dict(self._cks_description_dic, orient='index', columns=['topics'])
+        self._df_fine_grained.to_csv(self._cache_file_2)
+        with open(self._cks2icpc, 'w') as f:
+            json.dump(self._link_dic, f)
+
+    def get_cks_topic(self):
+        return self._df_fine_grained, self._link_dic
+
 
     def get_pd(self):
         """

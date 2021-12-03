@@ -9,7 +9,7 @@ this question.
 - [Folder Structure](#folder-structure)
 - [Development Setup](#development-setup)
 - [Updating Source Datasets](#updating-source-datasets)
-- [Fine-tuning Pretrained Models with Distant Supervision](#fine-tuning-pretrained-models-with-distant-supervision)
+- [Fine-tune Pretrained Models with Distant Supervision](#fine-tune-pretrained-models-with-distant-supervision)
   - [FAQ](#faq)
 
 ## Folder Structure
@@ -148,7 +148,7 @@ as parsing and preparing raw consultation documents is a costly process.
 
 
 
-## Fine-tuning Pretrained Models with Distant Supervision
+## Fine-tune Pretrained Models with Distant Supervision
 > This method is to fine-tune the pretrained models using descriptions and adapt to transcripts
 
 - Train a classifier using descriptions

@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import f1_score, classification_report
+from sklearn.metrics import f1_score, classification_report, roc_auc_score
 
 
 def evaluate_classifications(targets,
@@ -28,6 +28,22 @@ def evaluate_classifications(targets,
 
     return f1_score(targets, predictions, average='macro')
 
-def softmax(logits):
-    normalized = np.exp(logits - np.max(logits, axis = -1, keepdims=True))
-    return normalized / np.sum(normalized, axis=-1, keepdims=True)
+
+def evaluate_probabilities(targets, predictions):
+    """
+    Evaluates the probabilities output by a classifier using the ROC curve.
+    :param targets: A matrix where each row is a one-hot representation of the gold labels for the sample.
+    :param predictions: A matrix where each row is a one-hot representation of the predicted labels for the sample.
+    :return:
+    """
+
+    keepclasses = np.any(targets, axis=0)
+    targets = targets[:, keepclasses]
+    predictions = predictions[:, keepclasses]
+
+    auroc = roc_auc_score(targets, predictions, average='macro') # [:, keepclasses], predictions[:, keepclasses])
+    # print(f'area under ROC curve: {auroc}')
+
+    return auroc
+
+
