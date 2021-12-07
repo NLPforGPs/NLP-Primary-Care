@@ -43,7 +43,6 @@ class DescClassifier(nn.Module):
     
                 output = self.model(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids, labels = targets)
                 loss, logits = output[0], output[1]
-                
                 self.optimizer.zero_grad()
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
@@ -68,7 +67,7 @@ class DescClassifier(nn.Module):
             if dev_acc > best_acc:
                 best_acc = dev_acc
                 save_epoch = epoch
-                utils.save_checkpoint(save_dir, epoch=epoch, name=save_name+'best-val-acc-model', state_dict=self.state_dict(
+                save_checkpoint(save_dir, epoch=epoch, name=save_name+'best-val-acc-model', state_dict=self.state_dict(
                 ), optimizer=self.optimizer.state_dict(), scheduler=scheduler.state_dict(), prompt=prompt)
                 logging.info(
                     f'the dev_acc is {best_acc}, the dev_loss is {dev_loss}, save best model to {os.path.join(save_dir, save_name+"best-val-acc-model")}')

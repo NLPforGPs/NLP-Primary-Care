@@ -15,6 +15,10 @@ and/or PCC_TRANSCRIPT_DIR (optional), PCC_PT_RECORD_DIR (optional)
 
 PCC_BASE_DIR = environ.get('PCC_BASE_DIR') or r"/Volumes/NLP_One_In_A_Million"
 
+ICPC_CKS_DESC = 'icpc_cks_description.csv'
+CKS_DESC = 'cks_description.csv'
+ICPC2CKS = 'icpc2cks.json'
+
 # Clinical Codes
 PCC_CODES_DIR = environ.get('PCC_CODES_DIR') or os.path.join(PCC_BASE_DIR, 'codes')
 # PCC_CODES_FILE = os.path.join(PCC_CODES_DIR, 'OiAM_ICPC-2.xlsx')

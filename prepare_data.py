@@ -1,7 +1,7 @@
 from utils.preprocessing.data import extract_icpc_categories
 from utils.transcripts import preprocess_transcripts, read_transcript
 from oneinamillion.pc_consultation import PCConsultation
-from oneinamillion.resources import PCC_BASE_DIR
+from oneinamillion.resources import PCC_BASE_DIR, ICPC2CKS
 import os
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.model_selection import train_test_split
@@ -16,6 +16,7 @@ nltk.download('punkt')
 from nltk import tokenize
 from utils.preprocessing.text import cleaner
 from oneinamillion.clinical_codes.cks import CksParser
+from utils.utils import load_json_file
 
 
 
@@ -90,9 +91,10 @@ def load_cks_descriptions(cks_icpc=True):
     else:
         return cks_parser.get_cks_topic()
 
-def generate_fine_grained_descriptions():
+# def generate_fine_grained_descriptions():
 
-    pass
+#     df_fined_desc = load_cks_descriptions(cks_icpc=False) 
+
 
 
 def load_descriptions(selected_mode, class_name):
@@ -115,17 +117,22 @@ def load_descriptions(selected_mode, class_name):
     icpc_corpus = icpc_corpus_df['keyword']
     return icpc_corpus
 
-def generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, save_path, class_name=None):
+def generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, save_path, class_name=None, fine_grained=False):
     '''
     split descriptions into smaller chunks.
     '''
     train_data, test_data = [], []
-    descriptions = load_descriptions(selected_mode, class_name)
+    if fine_grained:
+        descriptions = load_cks_descriptions(cks_icpc=False)
+    else:
+        descriptions = load_descriptions(selected_mode, class_name)
     for ii, _ in enumerate(descriptions):
         description = cleaner(descriptions[ii])
         sents = tokenize.sent_tokenize(description)
         chunks = segment_without_overlapping(tokenizer, sents, chunk_size)
         labels = [descriptions.index[ii]]*len(chunks)
+        if len(chunks) <=2:
+            continue
         train_examples, test_examples = train_test_split(list(zip(chunks, labels)), test_size=test_size,random_state=20211125)
         train_data.extend(train_examples)
         test_data.extend(test_examples)
@@ -135,6 +142,84 @@ def generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, save_
         # processed_data.extend(zip(chunks, labels))
         # texts.extend(chunks)
         # all_labels.extend(labels)
+
+# def generate_fine_grained_description(tokenizer, save_path):
+#     '''
+#     This function is used to generate fine-grained descriptions using CKS topics.
+#     '''
+#     train_data, test_data = [], []
+#     descriptions = load_cks_descriptions(cks_icpc=False)
+#     for ii, _ in enumerate(descriptions):
+#         description = cleaner(descriptions[ii])
+#         sents = tokenize.sent_tokenize(description)
+#         chunks = segment_without_overlapping(tokenizer, sents, chunk_size)
+#         labels = [descriptions.index[ii]]*len(chunks)
+#         train_examples, test_examples = train_test_split(list(zip(chunks, labels)), test_size=test_size,random_state=20211125)
+#         train_data.extend(train_examples)
+#         test_data.extend(test_examples)
+#     write_path(os.path.join(save_path, 'train.json'), train_data)
+#     write_path(os.path.join(save_path, 'test.json'), test_data)
+
+def generate_binary_cks_descriptions(tokenizer, chunk_size, test_size, selected_mode, multiclass_desc_path, save_path, class_name=None):
+    '''
+    Generate data for binary classification.
+    '''
+    if not os.path.exists(multiclass_desc_path):
+        print("Multiclass descriptions donot exist. Creating...")
+        generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, multiclass_desc_path, class_name)
+
+    train_multiclass = os.path.join(multiclass_desc_path, 'train.json')
+    test_multiclass = os.path.join(multiclass_desc_path, 'test.json')
+
+    classmap_file = os.path.join(PCC_CKS_DIR, ICPC2CKS)
+    classmap = load_json_file(classmap_file)
+    class2class = {}
+    if selected_mode == 'ICPC only':
+        for icpc1 in classmap:
+            if icpc1 not in class2class:
+                class2class[icpc1] = []
+            for icpc2 in classmap:
+                if set(classmap[icpc1]).intersection(set(classmap[icpc2])):
+                    class2class[icpc1].append(icpc2)
+    else:
+        class2class = {key:[] for key in classmap}
+
+    # nested list: [element, label]
+    raw_train_data = load_json_file(train_multiclass)
+    raw_test_data = load_json_file(test_multiclass)
+
+    train_data = generate_binary_per_class(raw_train_data, class2class)
+    test_data = generate_binary_per_class(raw_test_data, class2class)
+    write_path(os.path.join(save_path, 'train.json'), train_data)
+    write_path(os.path.join(save_path, 'test.json'), test_data)
+
+def generate_binary_per_class(raw_data, class2class, selected_mode):
+    '''
+    sample negative examples for each category
+    class2class: dictionary of class sharing the same health topic, which would be avioded when sampling
+    raw_data: list of description , [[desc, label], ...]
+    '''
+    processed_data = []
+    # dictionary of class to description
+    class2desc = {}
+    for item in raw_data:
+        if item[1] not in class2desc:
+            class2desc[item[1]] = []
+        class2desc[item[1]].append(item[0])
+
+    for key in class2desc:
+        num_examples = len(class2desc[key])
+        data.extend([[des, key, 1] for desc in class2desc[key]])
+        i = 0
+        while i < num_examples:
+            element = random.choice(raw_data, 1)
+            element.append(0)
+
+            if element[1] in class2class[key] or element in processed_data or element[1] == key:
+                continue
+            processed_data.append(element)
+            i += 1 
+    return processed_data
 
 def prepare_transcripts_eval(tokenizer, save_path, max_length=490):
     parser = PCConsultation()
@@ -149,7 +234,6 @@ def prepare_transcripts_eval(tokenizer, save_path, max_length=490):
     data = list(zip(orig_dataset['transcript__conversation_both'].tolist(), orig_dataset['codes'].tolist()))
 
     write_path(os.path.join(save_path, 'transcript.json'), data)
-
 
 
 if __name__ == '__main__':

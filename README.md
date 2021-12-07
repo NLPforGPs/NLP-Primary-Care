@@ -155,7 +155,7 @@ as parsing and preparing raw consultation documents is a costly process.
    -  Prompt
       -  running on local machine
          ```
-         python3 ./run_plms.py --batch_size 8 --do_train True --epoch 15 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --learning_rate 1e-4 --weight_decay 1e-4 --use_prompt True --model_dir models/prompt --model_name multiclass-abstract-optimal --multi_class True --train_data_dir "dl_data/desc/CKS only" --prompt "This is a problem of {}."
+         python3 ./run_plms.py --batch_size 8 --epoch 15 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --learning_rate 1e-4 --weight_decay 1e-4 --model_dir models/prompt --model_name multiclass-abstract-optimal --train_data_dir "dl_data/desc/CKS only" --prompt "This is a problem of {}." --do_train --use_prompt --multi_class
          ```
       - running on Bluepebble
          ```
@@ -165,7 +165,7 @@ as parsing and preparing raw consultation documents is a costly process.
    - Conventional(turn off `argument prompt`, change model to PubMedBERT(abstract-fulltext))
       - running on local machine
          ```
-         python3 ./run_plms.py --batch_size 32 --do_predict True  --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --use_prompt True --load_checkpoint True --multi_class True --model_dir models/coventional --model_name multiclass-abstract-conventional --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts'
+         python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --model_dir models/coventional --model_name multiclass-abstract-conventional --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts' --do_train --multi_class
          ```
       - running on Bluepebble
          ```
@@ -178,7 +178,7 @@ as parsing and preparing raw consultation documents is a costly process.
       -  running on local machine
 
          ```
-         python3 ./run_plms.py --batch_size 32 --do_predict True  --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --use_prompt True --load_checkpoint True --multi_class True --model_dir models/prompt --model_name multiclass-abstract-modified --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts'
+         python3 ./run_plms.py --batch_size 32  --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --model_dir models/prompt --model_name multiclass-abstract-modified --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts' --do_predict --use_prompt --load_checkpoint --multi_class
          ```
       - running on Bluepebble
          ```
@@ -187,7 +187,7 @@ as parsing and preparing raw consultation documents is a costly process.
    - Conventional
       - running on local machine
          ```
-         python3 ./run_plms.py --batch_size 32 --do_predict True  --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --load_checkpoint True --multi_class True --model_dir models/coventional --model_name multiclass-abstract-modified --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts'
+         python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --model_dir models/coventional --model_name multiclass-abstract-modified --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts' --do_predict --load_checkpoint --multi_class
          ```
       - running on Bluepebble
          ```

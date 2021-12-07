@@ -5,7 +5,7 @@ import json
 
 import pandas as pd
 
-from oneinamillion.resources import PCC_CODES_DIR, PCC_CODES_LINK_FILE, PCC_CKS_DIR, PCC_CKS_FILE
+from oneinamillion.resources import PCC_CODES_DIR, PCC_CODES_LINK_FILE, PCC_CKS_DIR, PCC_CKS_FILE, ICPC_CKS_DESC, ICPC2CKS, CKS_DESC
 from utils.preprocessing.text import utils_preprocess_text, utils_remove_questions, utils_remove_bracket_sources
 
 logger = logging.getLogger(__name__)
@@ -32,9 +32,9 @@ class CksParser:
     _cks_description_dic = {}
     _icpc_descriptions = {}
     _df = pd.DataFrame()
-    _cache_file_1 = path.join(PCC_CKS_DIR, 'icpc_cks_description.csv')
-    _cache_file_2 = path.join(PCC_CKS_DIR, 'cks_description.csv')
-    _cks2icpc = path.join(PCC_CKS_DIR, 'cks2icpc.json')
+    _cache_file_1 = path.join(PCC_CKS_DIR, ICPC_CKS_DESC)
+    _cache_file_2 = path.join(PCC_CKS_DIR, CKS_DESC)
+    _icpc2cks = path.join(PCC_CKS_DIR, ICPC2CKS)
 
     def __init__(self, headings_to_include=None, from_raw=False):
         """
@@ -45,7 +45,7 @@ class CksParser:
         if headings_to_include:
             self.headings_to_include = headings_to_include
 
-        if not path.exists(self._cache_file_1) and not path.exists(self._cache_file_2):
+        if not path.exists(self._cache_file_1) or not path.exists(self._cache_file_2):
             from_raw = True
 
         if from_raw:
@@ -56,8 +56,6 @@ class CksParser:
         else:
             self._df = pd.read_csv(self._cache_file_1, index_col=0)
             self._df_fine_grained = pd.read_csv(self._cache_file_2, index_col=0)
-            with open(self._json_cks2icpc) as f:
-                self._link_dic = json.load(f)
 
     def _get_cks(self):
         """
@@ -73,7 +71,7 @@ class CksParser:
         cks_file.columns = [re.sub(r'\s', '_', n.lower()) for n in list(cks_file.keys())]
 
         def include_heading(x):
-            return any([x in heading for heading in self.headings_to_include])
+            return any([str(x) in heading for heading in self.headings_to_include])
 
         filtered_ids = cks_file['sub-section_topic'].apply(include_heading)
         cks_file = cks_file.loc[filtered_ids]
@@ -121,6 +119,7 @@ class CksParser:
         :return:
         """
         icpc_keys = self._link_dic.keys()
+
         not_found = False  # to indicate if their are headings mismatch
         for current_icpc in icpc_keys:
             current_cks_descriptions = ''
@@ -141,11 +140,11 @@ class CksParser:
     def _get_cks_topic(self):
         self._df_fine_grained = pd.DataFrame.from_dict(self._cks_description_dic, orient='index', columns=['topics'])
         self._df_fine_grained.to_csv(self._cache_file_2)
-        with open(self._cks2icpc, 'w') as f:
+        with open(self._icpc2cks, 'w') as f:
             json.dump(self._link_dic, f)
 
     def get_cks_topic(self):
-        return self._df_fine_grained, self._link_dic
+        return self._df_fine_grained['topics']
 
 
     def get_pd(self):

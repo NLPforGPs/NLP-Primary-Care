@@ -52,8 +52,10 @@ def write_path(save_path, obj):
 
 
 def masking(examples, labels, label2name, tokenizer, prompt, max_length=512):
+    '''
+    used to do MLM task
+    '''
     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
-    print(len(examples))
     for i in range(len(examples)):
         example = examples[i]
     # encoded_input = tokenizer(example['description'], prompt.format('[MASK]'), padding='max_length', truncation=True)
@@ -92,16 +94,36 @@ def masking(examples, labels, label2name, tokenizer, prompt, max_length=512):
             'attention_mask': attention_mask, 'token_type_ids': token_type_ids,
             'targets': all_targets}
 
+def NSP(examples, labels, polarity, label2name, tokenizer, prompt, max_length=512):
+    print('polarity', type(polarity[0]))
+    all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
+    for i, example in enumerate(examples):
+        encoded_input = tokenizer(example, prompt.format(label2name[labels[i]]), padding='max_length', truncation=True, max_length=max_length)
+        all_input_ids.append(encoded_input['input_ids'])
+        attention_mask.append(encoded_input['attention_mask'])
+        token_type_ids.append(encoded_input['token_type_ids'])
+        all_targetes.append(int(polarity[i]))
+
+    return {'input_ids': all_input_ids, 
+            'attention_mask': attention_mask, 'token_type_ids': token_type_ids,
+            'targets': all_targets}
+
+
+
 def labelmapping(labels, label_map):
     labels = [label_map[l] for l in labels] 
-    return {'labels': labels}
+    return {'targets': labels}
 
-def prompt_encoding(examples, tokenizer, prompt, max_length=512):
+def prompt_encoding(examples, tokenizer, prompt, max_length=512, withoutmask=False):
+    '''used for prediction'''
     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
     all_segments = []
     for segments in examples:
         for seg in segments:
-            encoded_input = tokenizer(seg, prompt.format('[MASK]'), padding='max_length', truncation=True, max_length=max_length)
+            if withoutmask:
+                encoded_input = tokenizer(seg, padding='max_length', truncation=True, max_length=max_length)
+            else:
+                encoded_input = tokenizer(seg, prompt.format('[MASK]'), padding='max_length', truncation=True, max_length=max_length)
             input_ids = encoded_input['input_ids']
             all_input_ids.append(input_ids)
             targets = np.array(input_ids, copy=True)
@@ -114,7 +136,24 @@ def prompt_encoding(examples, tokenizer, prompt, max_length=512):
 # def normal_encoding(examples, tokenizer, prompt, max_length=512):
 #     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
 #     for example in examples:
-#         encoded_input = tokenizer(example, prompt.format('[MASK]'), padding='max_length', truncation=True, max_length=max_length)
-#         input_ids = encoded_input['input_ids']
-#         all_input_ids.append(input_ids)
+#         encoded_input = tokenizer(example, padding='max_length', truncation=True, max_length=max_length)
+#         all_input_ids.append(encoded_input['input_ids'])
+#         attention_mask.append(encoded_input['attention_mask'])
+#         token_type_ids.append(encoded_input['token_type_ids'])
+
+def cks2icpc(map_filename):
+    '''
+    convert cks topics to icpc labels    
+    '''
+    with open(map_filename,'r', encoding='utf8') as f:
+        icpc2cks = json.load(f)
+    cks2icpc_dic = {}
+    for icpc in icpc2cks:
+        for cks in icpc2cks[icpc]:
+            if cks not in cks2icpc_dic:
+                cks2icpc_dic[cks] = []
+            cks2icpc_dic[cks].append(icpc)
+    return cks2icpc_dic
+            
+
 

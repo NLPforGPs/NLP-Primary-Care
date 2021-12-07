@@ -1,6 +1,7 @@
 import os
 import numpy  as np
 from sklearn.preprocessing import MultiLabelBinarizer
+import torch
 
 def save_checkpoint(dir, epoch, name='checkpoint', **kwargs):
     state = {
@@ -23,17 +24,18 @@ def merge_predictions(record_cnt, predictions, probs=False):
         assert cum_sum[-1] == len(predictions)
         final_predictions = np.zeros((len(record_cnt), predictions.shape[1]))
         prev = 0
+
         for i in range(len(cum_sum)):
             entry = cum_sum[i]
             if probs:
-                final_predictions[i] = np.mean(predictions[prev:entry], axis=0).astype(int)
+                final_predictions[i] = np.mean(predictions[prev:entry], axis=0)
             else:
                 final_predictions[i] = np.any(predictions[prev:entry], axis=0).astype(int)
             prev = entry
         return final_predictions
 
 
-def one_hot_encode(labels, predict_labels, label2name):
+def one_hot_encode(labels, label2name):
     """
     convert labels to one-hot encoding
     labels: true labels of each transcript
@@ -43,9 +45,9 @@ def one_hot_encode(labels, predict_labels, label2name):
     labels = [[label2name[code] for code in item] for item in labels]
     mult_lbl_enc = MultiLabelBinarizer()
     y_hot = mult_lbl_enc.fit_transform(labels)
-    predictions = mult_lbl_enc.transform(predict_labels)
+    
 
-    return y_hot, predictions
+    return y_hot, mult_lbl_enc
 
 
 def select_supportive_sentence(probabilities, chunks, class_names, threshold):
@@ -74,3 +76,9 @@ def save_to_file(support_sentences, write_path):
         for cat in support_sentences:
             for item in support_sentences[cat]:
                 f.write(cat+'\t'+ item[0] + '\t' + str(item[1])+'\n')
+
+
+def load_json_file(data_path):
+    with open(data_path, 'r', encoding='utf8') as f:
+        data = json.load(f)
+    return data
