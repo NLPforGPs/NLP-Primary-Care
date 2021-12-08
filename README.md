@@ -172,7 +172,7 @@ Then, you need to set `/user/work/username/NLP_One_In_A_Million` as the 'PCC_BAS
 
 #### Create log directory
 
- Run `. ./scripts/create_logdir.sh` at first. You can find results in this dir.
+ Run `. ./scripts/create_logdir.sh` at first. Results will be written in this dir.
 
 ### GO Run it!
 
@@ -220,6 +220,8 @@ Then, you need to set `/user/work/username/NLP_One_In_A_Million` as the 'PCC_BAS
 
 ### Results
 > all these models using CKS descritpions to train, setups in the notebook and scripts.
+
+
 | models             | F1-score    |                            ROC-AUC         |
 |----------------------|----------------|---------------------------------------------------------------------------|
 | Navie Bayes Classifier | 0.34 | 0.78 |
