@@ -3,11 +3,11 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
-#SBATCH --time=0:20:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=10G
 #SBATCH --gres=gpu:1
-#SBATCH --output=./log/train-conventional-fine-grained.out
-#SBATCH --error=./log/train-conventional-fine-grained.err
+#SBATCH --output=./log/train/train-conventional-fine-grained.out
+#SBATCH --error=./log/train/train-conventional-fine-grained.err
 
 cd "${SLURM_SUBMIT_DIR}"
 
@@ -26,6 +26,6 @@ conda activate NLP_GP
 
 echo Start Time: $(date)
 
-time python3 ./run_plms.py --batch_size 8 --epoch 5 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --learning_rate 1e-4 --weight_decay 1e-4 --model_dir models/conventional/fine_grained --model_name multiclass-fine-grained-conventional --train_data_dir "prepared/dl_data/desc/fine_grained" --do_train --multi_class --fine_grained_desc --chunk_size 50
+time python3 ./run_plms.py --batch_size 8 --epoch 20 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --learning_rate 5e-5 --label_path fg_label2id.json --weight_decay 1e-4 --model_dir models/conventional/fine_grained --model_name fine-grained-conventional --ckpt_name fine-grained-conventional --multi_data_path fine_grained --do_train --fine_grained_desc --chunk_size 50 --load_checkpoint
 
 echo End Time: $(date)

@@ -10,43 +10,42 @@ import os
 import logging
 import datasets
 from datasets import load_dataset, set_caching_enabled
-from prepare_data import generate_descriptions, prepare_transcripts_eval, generate_binary_cks_descriptions
-from utils.preprocessing.data import masking, labelmapping, prompt_encoding, cks2icpc, NSP
+from prepare_data import generate_descriptions, prepare_transcripts_eval, generate_binary_descriptions
+from utils.preprocessing.data import masking, labelmapping, prediction_encoding, cks2icpc, NSP, binary_predictiton_encoding
 from utils.utils import merge_predictions, one_hot_encode
-from oneinamillion.resources import PCC_BASE_DIR, ICPC2CKS, PCC_CKS_DIR
+from oneinamillion.resources import PCC_BASE_DIR, ICPC2CKS, PCC_CKS_DIR, DL_DATA
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs', type=int, default=10)
-    parser.add_argument('--stop_epochs', type=int, default=2)
+    parser.add_argument('--stop_epochs', type=int, default=3)
     parser.add_argument('--pretrained_model', type=str, default="microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext")
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--learning_rate', type=float, default=1e-4)
     parser.add_argument('--weight_decay', type=float, default=1e-4)
 
 
-    parser.add_argument('--train_data_dir', type=str, default='/data/prepared/dl_data/desc', help='directory for train data')
-    parser.add_argument('--multi_sub_dir', type=str, default='/coarse_grained', help='directory for processed data in multiclass methods')
-    parser.add_argument('--binary_sub_dir', type=str, default='/binary', help='directory for processed data in the binary method')
+    parser.add_argument('--train_data_dir', type=str, default='desc', help='directory for train data')
+    parser.add_argument('--multi_data_path', type=str, default='coarse_grained', help='directory for processed data in multiclass methods')
+    parser.add_argument('--binary_data_path', type=str, default='binary', help='directory for processed data in the binary method')
     parser.add_argument('--label_path', type=str, default='label2id.json', help='path of saved label2id mapping for conventional classifier')
     parser.add_argument('--predict_data_dir', type=str, default='/data/transcript', help='directory for data to predict')
     parser.add_argument('--model_dir', type=str, default='./model', help='directory to save model')
     parser.add_argument('--model_name', type=str, default='test', help='name of the saved model')
     parser.add_argument('--ckpt_name', type=str, default='test', help='name of the loaded model')
     parser.add_argument('--prompt', type=str, default='This is a problem of {}.', help='prompt')
-    parser.add_argument('--selected_mode', type=str, default='CKS only', help='choose to use which description')
+    parser.add_argument('--selected_mode', type=str, default='CKS only', help='choose to use which description [CKS only, ICPC only]')
     parser.add_argument('--chunk_size', type=int, default=490, help='used to split transcripts and descriptions into small chunks')
     parser.add_argument('--max_length', type=int, default=512, help='max length used in PLMs')
     
     # boolean 
-    parser.add_argument('--use_mlm', default=False, action="store_true", help='donot include it unless you use it')
-    parser.add_argument('--use_nsp', default=False, action="store_true", help='donot include it unless you use it')
-    parser.add_argument('--do_train',  default=False, action="store_true", help='do not include unless you use it')
-    parser.add_argument('--do_predict',default=False, action="store_true", help='do not include unless you use it')
-    parser.add_argument('--load_checkpoint', default=False, action="store_true", help='do not include unless you use it')
-    parser.add_argument('--multi_class', default=False, action="store_true", help='do not include unless you use it')
-    parser.add_argument('--fine_grained_desc', default=False, action="store_true", help='do not include unless you use it')
+    parser.add_argument('--use_mlm', default=False, action="store_true", help='use MLM task (donot include it unless you use it)')
+    parser.add_argument('--use_nsp', default=False, action="store_true", help='use NSP task to do binary classification (donot include it unless you use it)')
+    parser.add_argument('--do_train',  default=False, action="store_true", help='train a model (do not include unless you use it)')
+    parser.add_argument('--do_predict',default=False, action="store_true", help='test the model (do not include unless you use it)')
+    parser.add_argument('--load_checkpoint', default=False, action="store_true", help='load checkpoint for cotinual training and prediction (do not include unless you use it)')
+    parser.add_argument('--fine_grained_desc', default=False, action="store_true", help='load fine-grained categories (do not include unless you use it)')
 
 
     
@@ -62,11 +61,12 @@ if __name__ == '__main__':
     
 
     # training data directory, descriptions
-    multi_train_data_dir = os.path.join(PCC_BASE_DIR, args.train_data_dir, args.mulit_sub_dir)
-    binary_train_data_dir = os.path.join(PCC_BASE_DIR, args.train_data_dir, args.binary_sub_dir)
+    multi_train_data_dir = os.path.join(DL_DATA, args.train_data_dir, args.selected_mode.lower().replace(' ','_'), args.multi_data_path)
+    binary_train_data_dir = os.path.join(DL_DATA, args.train_data_dir, args.selected_mode.lower().replace(' ','_'), args.binary_data_path)
+
 
     # prediction data directory, transcripts
-    predict_data_dir = os.path.join(PCC_BASE_DIR, args.predict_data_dir)
+    predict_data_dir = os.path.join(DL_DATA, args.predict_data_dir)
     # model save path
     model_dir = os.path.join(PCC_BASE_DIR, args.model_dir)
 
@@ -82,9 +82,9 @@ if __name__ == '__main__':
     elif args.use_nsp:
         model = BertForNextSentencePrediction.from_pretrained(args.pretrained_model)
     else:
-        config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2name))
-        model = BertForSequenceClassification.from_pretrained(args.pretrained_model, config=config)
 
+    #     config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2name))
+        model = BertForSequenceClassification.from_pretrained(args.pretrained_model)
     model.to(device)
     classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
     tokenizer = AutoTokenizer.from_pretrained(args.pretrained_model)
@@ -95,7 +95,7 @@ if __name__ == '__main__':
             if not os.path.exists(binary_train_data_dir): # prepare dataset for model training
                 logging.info(f'{binary_train_data_dir} not exists, generating data....')
                 os.makedirs(binary_train_data_dir)
-                generate_binary_cks_descriptions(tokenizer=tokenizer, chunk_size = args.chunk_size, test_size=0.2, selected_mode=args.selected_mode, multiclass_desc_path=multi_train_data_dir, save_path=binary_train_data_dir)
+                generate_binary_descriptions(tokenizer=tokenizer, chunk_size = args.chunk_size, test_size=0.2, selected_mode=args.selected_mode, multiclass_desc_path=multi_train_data_dir, save_path=binary_train_data_dir)
         else:
             if not os.path.exists(multi_train_data_dir):
                 logging.info(f'{multi_train_data_dir} not exists, generating data....')
@@ -111,43 +111,52 @@ if __name__ == '__main__':
         else:
             dataset = load_dataset('./oneinamillionwrapper/description_dataset.py', download_mode="force_redownload", data_dir= multi_train_data_dir)
             
-        logging.info('using prompt methods...')
         if args.use_mlm:
-            # using masking method to generate prompt
+            # using masking method to generate examples
+            logging.info('masking tokens...')
             dataset = dataset.map(lambda e: masking(e['description'], e['codes'], label2name, tokenizer, args.prompt), batched=True)
 
         elif args.use_nsp:
-            dataset.map(lambda e: NSP(e['description'], e['codes'], e['polarity'], label2name, tokenizer, args.prompt))
+            # print('desc', len(dataset['train']['description']))
+            dataset = dataset.map(lambda e: NSP(e['description'], e['codes'], e['polarity'], label2name, tokenizer, args.prompt), batched=True)
 
         else:
             logging.info('using traditional bert classifier...')
             labels = list(set(dataset['train']['codes']))
             label2id = {key: ix for ix, key in enumerate(labels)}
             print('label2id',label2id)
-            with open(os.path.join(train_data_dir, args.label_path), 'w') as f:
+
+            with open(os.path.join(DL_DATA, args.label_path), 'w') as f:
                 json.dump(label2id, f)
+
+             ### The reason I initialize it here is the model needs num_labels to initia lize, but for coarse-grained and fine-grained num_labels are different
+            config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2id))
+            model = BertForSequenceClassification.from_pretrained(args.pretrained_model, config=config)
+            model.to(device)
+            classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
+
             dataset = dataset.map(lambda e: labelmapping(e['codes'], label2id), batched=True)
             dataset = dataset.map(lambda e: tokenizer(e['description'], padding='max_length', truncation=True, max_length=args.max_length), batched=True)
 
         dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
         train_dataloader = DataLoader(dataset['train'], batch_size=args.batch_size, shuffle=True)
         dev_dataloader = DataLoader(dataset['test'], batch_size=args.batch_size, shuffle=False)
-
-
-        # if args.use_mlm:
-        #     model = AutoModelForMaskedLM.from_pretrained(args.pretrained_model)
-        # elif args.use_nsp:
-
-        # else:
-        #     config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2id))
-        #     model = BertForSequenceClassification.from_pretrained(args.pretrained_model, config=config)
-        # model.to(device)
-        # classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
-
+        
         classifier.train(train_loader=train_dataloader, dev_loader=dev_dataloader, save_dir=model_dir, save_name=args.model_name, stop_epochs=args.stop_epochs, device=device, prompt=args.prompt, load_checkpoint=args.load_checkpoint, ckpt_name=args.ckpt_name)
 
     if args.do_predict:
         logging.info('Predicting...')
+
+        if args.use_mlm:
+            model = AutoModelForMaskedLM.from_pretrained(args.pretrained_model)
+        elif args.use_nsp:
+            model = BertForNextSentencePrediction.from_pretrained(args.pretrained_model)
+        else:
+            config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2id))
+            model = BertForSequenceClassification.from_pretrained(args.pretrained_model, config=config)
+
+        model.to(device)
+        classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
         if not os.path.exists(predict_data_dir): # this will generate a train and test datasets in adata_dir
             logging.info(f'{predict_data_dir} not exists, generating data....')
             os.makedirs(predict_data_dir)
@@ -160,19 +169,28 @@ if __name__ == '__main__':
         dataset = dataset['test']
         splited_nums = dataset['split_nums']
 
+        # convert labels to one-hot encoding for merging
+        y_hot, mult_lbl_enc = one_hot_encode(dataset['codes'], label2name)
+        class_names = list(mult_lbl_enc.classes_)
+
         # predict_loader = DataLoader(BinaryDescLMDataset(data=predict_data['all_trans'], prompt=prompt, label2name=label2name, pretrained_model= args.pretrained_model, do_train=False, random_mask=False), batch_size=args.batch_size, shuffle=False)
-        if args.use_prompt:
-            logging.info('Prompt based method.....')
-            encoded_dataset = dataset.map(lambda e: prompt_encoding(e['transcript'], tokenizer, args.prompt, args.max_length), batched=True, remove_columns=['transcript', 'codes', 'split_nums'])
+        if args.use_mlm:
+            logging.info('MLM method.....')
+            encoded_dataset = dataset.map(lambda e: prediction_encoding(e['transcript'], tokenizer, args.prompt, args.max_length), batched=True, remove_columns=['transcript', 'codes', 'split_nums'])
             encoded_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
             
-            # encoded_dataset = dataset.map(lambda e: prompt_encoding(e['transcript'], tokenizer, args.prompt), batched=True, remove_columns=dataset.column_names)
-            predict_dataloader = DataLoader(encoded_dataset, batch_size=args.batch_size, shuffle=False)
+            # encoded_dataset = dataset.map(lambda e: prediction_encoding(e['transcript'], tokenizer, args.prompt), batched=True, remove_columns=dataset.column_names)
+            id2label = None
+
+        elif args.use_nsp:
+            logging.info('NSP method')
+            encoded_dataset = dataset.map(lambda e: binary_predictiton_encoding(e['transcript'], tokenizer, args.prompt, class_names, args.max_length), batched=True, remove_columns=['transcript', 'codes', 'split_nums'])
+            encoded_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
             id2label = None
 
         else:
             logging.info('conventional classifier...')
-            with open(os.path.join(train_data_dir, args.label_path), 'r') as f:
+            with open(os.path.join(DL_DATA, args.label_path), 'r') as f:
                 label2id = json.load(f)
             if args.fine_grained_desc:
                 id2label = {label2id[label]: label for label in label2id}
@@ -180,10 +198,11 @@ if __name__ == '__main__':
                 id2label = {label2id[label]: label2name[label] for label in label2id}
             classifier.model.config.num_labels = len(id2label)
             logging.info(f'id to label is {id2label}')
-            encoded_dataset = dataset.map(lambda e: prompt_encoding(e['transcript'], tokenizer, args.prompt, args.max_length, withoutmask=True), batched=True, remove_columns=dataset.column_names)
+            encoded_dataset = dataset.map(lambda e: prediction_encoding(e['transcript'], tokenizer, args.prompt, args.max_length, withoutmask=True), batched=True, remove_columns=dataset.column_names)
             encoded_dataset = encoded_dataset.map(lambda e: {'targets': len(e['input_ids'])*[0]}, batched=True)
             encoded_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
-            predict_dataloader = DataLoader(encoded_dataset, batch_size=args.batch_size, shuffle=False)
+
+        predict_dataloader = DataLoader(encoded_dataset, batch_size=args.batch_size, shuffle=False)
 
         if args.load_checkpoint:
             if device == torch.device('cpu'):
@@ -194,11 +213,8 @@ if __name__ == '__main__':
                     model_dir, args.model_name+'best-val-acc-model.pt'))
             classifier.load_state_dict(checkpoint['state_dict'])
 
-        # convert labels to one-hot encoding for merging
-        y_hot, mult_lbl_enc = one_hot_encode(dataset['codes'], label2name)
-        class_names = list(mult_lbl_enc.classes_)
         
-        predictions, pred_probs = classifier.predict(predict_dataloader, device, tokenizer=tokenizer, id2class=id2label, use_prompt=args.use_prompt, class_names=np.array(class_names))
+        predictions, pred_probs = classifier.predict(predict_dataloader, device, tokenizer=tokenizer, id2class=id2label, use_mlm=args.use_mlm, use_nsp=args.use_nsp, class_names=np.array(class_names))
         # print('raw_predictions',len(predictions))
         if args.fine_grained_desc:
             map_file = os.path.join(PCC_CKS_DIR, ICPC2CKS)

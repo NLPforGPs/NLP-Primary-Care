@@ -25,15 +25,14 @@ class PrimaryCareDataPair:
 
 
 class PCConsultation:
-    
-
+    record_parser = PatientRecordParser()
+    transcript_parser = TranscriptParser()
+    record_code_parser = RecordCodeParser()
     doc_ids: list = []
     _seed = 0
 
     def __init__(self, seed=None):
-        record_parser = PatientRecordParser()
-        transcript_parser = TranscriptParser()
-        record_code_parser = RecordCodeParser()
+        
         self._get_doc_ids()
 
         self._pd_path = os.path.join(PCC_PREPARED_PATH, 'consultation_PE.csv')

@@ -1,7 +1,7 @@
 from utils.preprocessing.data import extract_icpc_categories
 from utils.transcripts import preprocess_transcripts, read_transcript
 from oneinamillion.pc_consultation import PCConsultation
-from oneinamillion.resources import PCC_BASE_DIR, ICPC2CKS
+from oneinamillion.resources import PCC_BASE_DIR, ICPC2CKS, PCC_CKS_DIR
 import os
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.model_selection import train_test_split
@@ -17,6 +17,8 @@ from nltk import tokenize
 from utils.preprocessing.text import cleaner
 from oneinamillion.clinical_codes.cks import CksParser
 from utils.utils import load_json_file
+import random
+import logging
 
 
 
@@ -30,7 +32,7 @@ def prepare_original_data():
     orig_dataset = parser.get_pd()
 
     # orig_dataset.head()  # uncomment to inspect the original dataset
-
+    orig_dataset = orig_dataset.drop(orig_dataset[orig_dataset['icpc_codes']=="[nan]"].index)
     orig_dataset['codes'] = orig_dataset['icpc_codes'].apply(extract_icpc_categories)
     orig_dataset['transcript__conversation_clean'] = orig_dataset['transcript__conversation'].apply(
         preprocess_transcripts)
@@ -97,7 +99,7 @@ def load_cks_descriptions(cks_icpc=True):
 
 
 
-def load_descriptions(selected_mode, class_name):
+def load_descriptions(selected_mode, class_name=None):
     icpc_description_corpus = load_icpc_descriptions()
     cks_description_corpus = load_cks_descriptions()
     if class_name is None:
@@ -160,7 +162,7 @@ def generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, save_
 #     write_path(os.path.join(save_path, 'train.json'), train_data)
 #     write_path(os.path.join(save_path, 'test.json'), test_data)
 
-def generate_binary_cks_descriptions(tokenizer, chunk_size, test_size, selected_mode, multiclass_desc_path, save_path, class_name=None):
+def generate_binary_descriptions(tokenizer, chunk_size, test_size, selected_mode, multiclass_desc_path, save_path, class_name=None):
     '''
     Generate data for binary classification.
     '''
@@ -187,13 +189,14 @@ def generate_binary_cks_descriptions(tokenizer, chunk_size, test_size, selected_
     # nested list: [element, label]
     raw_train_data = load_json_file(train_multiclass)
     raw_test_data = load_json_file(test_multiclass)
-
+    print('generating training data...')
     train_data = generate_binary_per_class(raw_train_data, class2class)
+    print('generating test data...')
     test_data = generate_binary_per_class(raw_test_data, class2class)
     write_path(os.path.join(save_path, 'train.json'), train_data)
     write_path(os.path.join(save_path, 'test.json'), test_data)
 
-def generate_binary_per_class(raw_data, class2class, selected_mode):
+def generate_binary_per_class(raw_data, class2class):
     '''
     sample negative examples for each category
     class2class: dictionary of class sharing the same health topic, which would be avioded when sampling
@@ -209,14 +212,19 @@ def generate_binary_per_class(raw_data, class2class, selected_mode):
 
     for key in class2desc:
         num_examples = len(class2desc[key])
-        data.extend([[des, key, 1] for desc in class2desc[key]])
+        print('num_examples',num_examples)
+        processed_data.extend([[desc, key, 1] for desc in class2desc[key]])
         i = 0
         while i < num_examples:
-            element = random.choice(raw_data, 1)
+            selected = random.choice(raw_data)
+            element = selected[:]
             element.append(0)
-
+        
             if element[1] in class2class[key] or element in processed_data or element[1] == key:
+                # print('repeated', element)
+                # print('again...')
                 continue
+            element[1] = key
             processed_data.append(element)
             i += 1 
     return processed_data

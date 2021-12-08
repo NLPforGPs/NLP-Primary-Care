@@ -10,7 +10,14 @@ this question.
 - [Development Setup](#development-setup)
 - [Updating Source Datasets](#updating-source-datasets)
 - [Fine-tune Pretrained Models with Distant Supervision](#fine-tune-pretrained-models-with-distant-supervision)
-  - [FAQ](#faq)
+  - [Setup](#setup)
+    - [Initialise repo in your home directory](#initialise-repo-in-your-home-directory)
+    - [Copy RDSF file to workplace](#copy-rdsf-file-to-workplace)
+    - [Create log directory](#create-log-directory)
+  - [GO Run it!](#go-run-it)
+  - [Results](#results)
+    - [NSP Dataset Generation](#nsp-dataset-generation)
+    - [To Do](#to-do)
 
 ## Folder Structure
 ```
@@ -149,54 +156,105 @@ as parsing and preparing raw consultation documents is a costly process.
 
 
 ## Fine-tune Pretrained Models with Distant Supervision
-> This method is to fine-tune the pretrained models using descriptions and adapt to transcripts
+> This method is to fine-tune the pretrained models using descriptions and adapt to transcripts.
 
-- Train a classifier using descriptions
-   -  Prompt
-      -  running on local machine
-         ```
-         python3 ./run_plms.py --batch_size 8 --epoch 15 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --learning_rate 1e-4 --weight_decay 1e-4 --model_dir models/prompt --model_name multiclass-abstract-optimal --train_data_dir "dl_data/desc/CKS only" --prompt "This is a problem of {}." --do_train --use_prompt --multi_class
-         ```
-      - running on Bluepebble
-         ```
-         sbatch ./scripts/train/train-prompt.sh
-         ```
+### Setup
+#### Initialise repo in your home directory
+```
+git clone https://github.com/NLPforGPs/NLP-Primary-Care
+```
+#### Copy RDSF file to workplace
+```
+cp -r /projects/NLP_One_In_A_Million /user/work/username/
+```
 
-   - Conventional(turn off `argument prompt`, change model to PubMedBERT(abstract-fulltext))
-      - running on local machine
-         ```
-         python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --model_dir models/coventional --model_name multiclass-abstract-conventional --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts' --do_train --multi_class
-         ```
-      - running on Bluepebble
-         ```
-         sbatch ./scripts/train/train-conventional.sh
-         ```
-   
+Then, you need to set `/user/work/username/NLP_One_In_A_Million` as the 'PCC_BASE_DIR' env variable.
+
+#### Create log directory
+
+ Run `. ./scripts/create_logdir.sh` at first. You can find results in this dir.
+
+### GO Run it!
+
+- Train a classifier
+   -  MLM(multi-class)
+      ```
+      sbatch ./scripts/train/train-mlm.sh
+      ```
+   - NSP (binary)
+
+      ```
+      sbatch ./scripts/train/train-nsp.sh
+      ``` 
+
+   - Conventional BERT classifier
+      ```
+      sbatch ./scripts/train/train-conventional.sh
+      ```
+   - Fine-grained categories
+      ```
+      sbatch ./scripts/train/train-conventional-fine-grained.sh
+      ```
 
 - Evaluate performance using transcripts
-   -  Prompt
-      -  running on local machine
+  -  MLM(multi-class)
+      ```
+      sbatch ./scripts/test/test-mlm.sh
+      ```
+   - NSP (binary)
 
-         ```
-         python3 ./run_plms.py --batch_size 32  --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --model_dir models/prompt --model_name multiclass-abstract-modified --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts' --do_predict --use_prompt --load_checkpoint --multi_class
-         ```
-      - running on Bluepebble
-         ```
-         sbatch ./scripts/test/test-prompt.sh
-         ```
-   - Conventional
-      - running on local machine
-         ```
-         python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --model_dir models/coventional --model_name multiclass-abstract-modified --prompt 'This is a problem of {}.' --predict_data_dir 'dl_data/transcripts' --do_predict --load_checkpoint --multi_class
-         ```
-      - running on Bluepebble
-         ```
-         sbatch ./scripts/test/test-conventional.sh
-         ```
-   More details could be found in `./scripts/`
+      ```
+      sbatch ./scripts/test/test-nsp.sh
+      ``` 
+
+   - Conventional BERT classifier
+      ```
+      sbatch ./scripts/test/test-conventional.sh
+      ```
+   - Fine-grained categories
+      ```
+      sbatch ./scripts/test/test-conventional-fine-grained.sh
+      ```
+
+   More details could be found in `./scripts/`.
+
+### Results
+> all these models using CKS descritpions to train, setups in the notebook and scripts.
+| models             | F1-score    |                            ROC-AUC         |
+|----------------------|----------------|---------------------------------------------------------------------------|
+| Navie Bayes Classifier | 0.34 | 0.78 |
+| SVM Classifier | 0.36 | 0.83 |
+| Conventional BERT Classifier (original)| 0.55 | 0.53
+| Conventional BERT Classifier| 0.50 | 0.53
+| MLM Prompting (original)| 0.51 | 0.86|
+| MLM Prompting| 0.54 | 0.87|
+| NSP Prompting| 0.42| 0.87|
+| Fine-grained Conventional|  
+
+- Original is trained on Colab with larger batch size(16) and larger learning rate 1e-4 (GPU P100)
+- Because the single 2080Ti Gpu memory is 11G, I reduce batch size and learning rate to 8 and 5e-5
+- NSP F1-score is not as good as others since it predicts multiple labels for smaller chunks and they are merged for a transcript as a whole. This means they have higher recall(0.79).
+- ROC-AUC is an approximated value. the maxium vale of each category across different chunks are retained as the overall probability.
+
+#### NSP Dataset Generation
+It is implemented in `generate_binary_descriptions`(`prepare_data.py`). 
+- some health topics are mapped to multiple categories. When sampling negative examples, it will avoid sampling the same descriptions in other categories.
+- The dataset is balanced.
+- This dataset is based on multi-class datasets
 
 
-### FAQ
+#### Fine-grained Dataset Geneartion
+- There are over 400 health topics but when it is splitted into train and dev dataset, only topics with long sentences which can be divided into train/test datasets are retained, 319 topics in total.
+
+
+#### To Do
+
+- This structure is not the best structure. It could be improved like investigating if different datasets could be merged in one universal Dataset Class, like SQUAD.
+- Hyperparameters could be tuned. It showed different batch sizes and learning rate can affect the model performance. However, deep learning methods are more stable than traditional methods in this task.
+
+
+
+# FQA
 
 **Missing consultations but located in Drive**
 

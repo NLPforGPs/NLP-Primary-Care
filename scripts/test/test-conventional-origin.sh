@@ -6,8 +6,8 @@
 #SBATCH --time=0:20:00
 #SBATCH --mem=10G
 #SBATCH --gres=gpu:1
-#SBATCH --output=./log/test/test-conventional.out
-#SBATCH --error=./log/test/test-conventional.err
+#SBATCH --output=./log/test/test-conventional-origin.out
+#SBATCH --error=./log/test/test-conventional-origin.err
 
 cd "${SLURM_SUBMIT_DIR}"
 
@@ -27,6 +27,7 @@ conda activate NLP_GP
 
 echo Start Time: $(date)
 
-time python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --model_dir models/conventional --model_name full-text-conventional --predict_data_dir 'transcripts' --do_predict --load_checkpoint
+time python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --label_path origin_label2id.json --model_dir models/conventional --model_name conventional_cls --predict_data_dir 'transcripts' --do_predict --load_checkpoint
+
 
 echo End Time: $(date)

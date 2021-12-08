@@ -56,8 +56,7 @@ def masking(examples, labels, label2name, tokenizer, prompt, max_length=512):
     used to do MLM task
     '''
     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
-    for i in range(len(examples)):
-        example = examples[i]
+    for i, example in enumerate(examples):
     # encoded_input = tokenizer(example['description'], prompt.format('[MASK]'), padding='max_length', truncation=True)
         encoded_input = tokenizer(example, prompt.format('[MASK]'), padding='max_length', truncation=True, max_length=max_length)
         encoded_target = tokenizer(example, prompt.format(label2name[labels[i]]), padding='max_length', truncation=True, max_length=max_length)
@@ -69,12 +68,12 @@ def masking(examples, labels, label2name, tokenizer, prompt, max_length=512):
         rands = np.random.random(len(input_ids))
         source, target = [], []
         # for r, t in zip(rands, input_ids):
-        for i in range(len(input_ids)):
-            r, t = rands[i], input_ids[i]
+        for ii in range(len(input_ids)):
+            r, t = rands[ii], input_ids[ii]
             # maksed class name
             if t == tokenizer.mask_token_id:
                 source.append(t)
-                target.append(target_ids[i])
+                target.append(target_ids[ii])
             elif r < 0.15 * 0.8:
                 source.append(tokenizer.mask_token_id)
                 target.append(t)
@@ -95,29 +94,27 @@ def masking(examples, labels, label2name, tokenizer, prompt, max_length=512):
             'targets': all_targets}
 
 def NSP(examples, labels, polarity, label2name, tokenizer, prompt, max_length=512):
-    print('polarity', type(polarity[0]))
     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
     for i, example in enumerate(examples):
+        # print('exmaple',example)
         encoded_input = tokenizer(example, prompt.format(label2name[labels[i]]), padding='max_length', truncation=True, max_length=max_length)
         all_input_ids.append(encoded_input['input_ids'])
         attention_mask.append(encoded_input['attention_mask'])
         token_type_ids.append(encoded_input['token_type_ids'])
-        all_targetes.append(int(polarity[i]))
+        all_targets.append(int(polarity[i]))
 
     return {'input_ids': all_input_ids, 
             'attention_mask': attention_mask, 'token_type_ids': token_type_ids,
             'targets': all_targets}
 
 
-
 def labelmapping(labels, label_map):
     labels = [label_map[l] for l in labels] 
     return {'targets': labels}
 
-def prompt_encoding(examples, tokenizer, prompt, max_length=512, withoutmask=False):
-    '''used for prediction'''
+def prediction_encoding(examples, tokenizer, prompt, max_length=512, withoutmask=False):
+    '''used for prediction with MLM and conventional BERT classifier'''
     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
-    all_segments = []
     for segments in examples:
         for seg in segments:
             if withoutmask:
@@ -132,6 +129,26 @@ def prompt_encoding(examples, tokenizer, prompt, max_length=512, withoutmask=Fal
             attention_mask.append(encoded_input['attention_mask'])
             token_type_ids.append(encoded_input['token_type_ids'])
     return {'input_ids': all_input_ids,'attention_mask': attention_mask, 'token_type_ids': token_type_ids,'targets': all_targets}
+
+
+def binary_predictiton_encoding(examples, tokenizer, prompt, class_names, max_length=512):
+    '''
+    used for binary prediction in NSP task
+    '''
+    all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
+    for segments in examples:
+        for seg in segments:
+            for label in class_names:
+                encoded_input = tokenizer(seg, prompt.format(label), padding='max_length', truncation=True, max_length=max_length)
+                all_input_ids.append(encoded_input['input_ids'])
+                # fake labels
+                all_targets.append(0)
+                attention_mask.append(encoded_input['attention_mask'])
+                token_type_ids.append(encoded_input['token_type_ids'])
+
+    return {'input_ids': all_input_ids,'attention_mask': attention_mask, 'token_type_ids': token_type_ids,'targets': all_targets}
+
+
 
 # def normal_encoding(examples, tokenizer, prompt, max_length=512):
 #     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]

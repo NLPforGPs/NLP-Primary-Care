@@ -3,11 +3,11 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
-#SBATCH --time=0:20:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=10G
 #SBATCH --gres=gpu:1
-#SBATCH --output=./log/train-conventional.out
-#SBATCH --error=./log/train-conventional.err
+#SBATCH --output=./log/train/train-conventional.out
+#SBATCH --error=./log/train/train-conventional.err
 
 cd "${SLURM_SUBMIT_DIR}"
 
@@ -23,9 +23,9 @@ conda env create --file nlp_gp.yml
 eval "$(conda shell.bash hook)"
 conda activate NLP_GP
 
-
+ 
 echo Start Time: $(date)
 
-time python3 ./run_plms.py --batch_size 8 --epoch 15 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --learning_rate 1e-4 --weight_decay 1e-4 --model_dir models/conventional --model_name multiclass-fine-grained-conventional --train_data_dir "dl_data/desc/fine_grained" --prompt "This is a problem of {}."  --do_train --multi_class
+time python3 ./run_plms.py --batch_size 8 --epoch 10 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --learning_rate 5e-5 --weight_decay 1e-4 --model_dir models/conventional --model_name full-text-conventional --label_path label2id.json --multi_data_path coarse_grained --prompt "This is a problem of {}."  --do_train
 
 echo End Time: $(date)

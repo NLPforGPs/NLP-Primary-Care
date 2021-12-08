@@ -19,6 +19,8 @@ ICPC_CKS_DESC = 'icpc_cks_description.csv'
 CKS_DESC = 'cks_description.csv'
 ICPC2CKS = 'icpc2cks.json'
 
+DL_DATA = os.path.join(PCC_BASE_DIR, 'prepared/dl_data')
+
 # Clinical Codes
 PCC_CODES_DIR = environ.get('PCC_CODES_DIR') or os.path.join(PCC_BASE_DIR, 'codes')
 # PCC_CODES_FILE = os.path.join(PCC_CODES_DIR, 'OiAM_ICPC-2.xlsx')

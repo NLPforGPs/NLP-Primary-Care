@@ -3,11 +3,11 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
-#SBATCH --time=0:20:00
-#SBATCH --mem=10G
+#SBATCH --time=1:00:00
+#SBATCH --mem=20G
 #SBATCH --gres=gpu:1
-#SBATCH --output=./log/train/mlm.out
-#SBATCH --error=./log/train/mlm.err
+#SBATCH --output=./log/train/train-mlm-5e-5.out
+#SBATCH --error=./log/train/train-mlm-5e-5.err
 
 cd "${SLURM_SUBMIT_DIR}"
 
@@ -27,6 +27,6 @@ conda activate NLP_GP
 
 echo Start Time: $(date)
 
-time python3 ./run_plms.py --batch_size 8 --epoch 15 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --learning_rate 1e-4 --weight_decay 1e-4 --model_dir models/mlm --model_name multiclass-abstract --train_data_dir "dl_data/desc/Ccks_only" --prompt "This is a problem of {}."  --do_train --use_mlm
+time python3 ./run_plms.py --batch_size 6 --epoch 15 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract --learning_rate 5e-5 --stop_epochs 10 --weight_decay 1e-4 --model_dir models/mlm --model_name mlm-abstract-5e-5 --prompt "This is a problem of {}."  --do_train --use_mlm
 
 echo End Time: $(date)
