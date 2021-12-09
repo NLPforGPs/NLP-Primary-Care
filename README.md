@@ -226,17 +226,19 @@ Then, you need to set `/user/work/username/NLP_One_In_A_Million` as the 'PCC_BAS
 |----------------------|----------------|---------------------------------------------------------------------------|
 | Navie Bayes Classifier | 0.34 | 0.78 |
 | SVM Classifier | 0.36 | 0.83 |
-| Conventional BERT Classifier (original)| 0.55 | 0.53
+| Conventional BERT Classifier (original)| **0.55** | 0.53
 | Conventional BERT Classifier| 0.50 | 0.53
 | MLM Prompting (original)| 0.51 | 0.86|
-| MLM Prompting| 0.54 | 0.87|
+| MLM Prompting| **0.54** | 0.87|
 | NSP Prompting| 0.42| 0.87|
-| Fine-grained Conventional|  
+| Fine-grained Conventional|  0.45| - |
+| Fine-grained NSP| | - |
 
-- Original is trained on Colab with larger batch size(16) and larger learning rate 1e-4 (GPU P100)
-- Because the single 2080Ti Gpu memory is 11G, I reduce batch size and learning rate to 8 and 5e-5
-- NSP F1-score is not as good as others since it predicts multiple labels for smaller chunks and they are merged for a transcript as a whole. This means they have higher recall(0.79).
-- ROC-AUC is an approximated value. the maxium vale of each category across different chunks are retained as the overall probability.
+- Original is trained on Colab with larger batch size 16 and larger learning rate 1e-4 (GPU P100).
+- Prompting use PubMedBERT-abstract and conventional use PubMedBERT-abstract-fulltext
+- Because the single 2080Ti Gpu memory is 11G, I reduce batch size and learning rate to 8 and 5e-5, respectively.
+- NSP F1-score is not as good as others since it predicts multiple labels for smaller chunks and they are merged for a transcript as a whole. This means this method has higher recall(0.79).
+- ROC-AUC is an approximated value. The maxium value of each category across different chunks are considered as the overall probability for a complete transcript.
 
 #### NSP Dataset Generation
 It is implemented in `generate_binary_descriptions`(`prepare_data.py`). 

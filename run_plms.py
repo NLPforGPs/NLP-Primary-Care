@@ -27,8 +27,8 @@ if __name__ == '__main__':
 
 
     parser.add_argument('--train_data_dir', type=str, default='desc', help='directory for train data')
-    parser.add_argument('--multi_data_path', type=str, default='coarse_grained', help='directory for processed data in multiclass methods')
-    parser.add_argument('--binary_data_path', type=str, default='binary', help='directory for processed data in the binary method')
+    parser.add_argument('--multi_data_path', type=str, default='multiclass/coarse_grained', help='directory for processed data in multiclass methods')
+    parser.add_argument('--binary_data_path', type=str, default='binary/coarse_grained', help='directory for processed data in the binary method')
     parser.add_argument('--label_path', type=str, default='label2id.json', help='path of saved label2id mapping for conventional classifier')
     parser.add_argument('--predict_data_dir', type=str, default='/data/transcript', help='directory for data to predict')
     parser.add_argument('--model_dir', type=str, default='./model', help='directory to save model')
@@ -95,7 +95,7 @@ if __name__ == '__main__':
             if not os.path.exists(binary_train_data_dir): # prepare dataset for model training
                 logging.info(f'{binary_train_data_dir} not exists, generating data....')
                 os.makedirs(binary_train_data_dir)
-                generate_binary_descriptions(tokenizer=tokenizer, chunk_size = args.chunk_size, test_size=0.2, selected_mode=args.selected_mode, multiclass_desc_path=multi_train_data_dir, save_path=binary_train_data_dir)
+                generate_binary_descriptions(tokenizer=tokenizer, chunk_size = args.chunk_size, test_size=0.2, selected_mode=args.selected_mode, multiclass_desc_path=multi_train_data_dir, save_path=binary_train_data_dir, fine_grained=args.fine_grained_desc)
         else:
             if not os.path.exists(multi_train_data_dir):
                 logging.info(f'{multi_train_data_dir} not exists, generating data....')
@@ -118,16 +118,23 @@ if __name__ == '__main__':
 
         elif args.use_nsp:
             # print('desc', len(dataset['train']['description']))
-            dataset = dataset.map(lambda e: NSP(e['description'], e['codes'], e['polarity'], label2name, tokenizer, args.prompt), batched=True)
+            dataset = dataset.map(lambda e: NSP(e['description'], e['codes'], e['polarity'], label2name, tokenizer, args.prompt, fine_grained=args.fine_grained_desc), batched=True)
 
         else:
             logging.info('using traditional bert classifier...')
-            labels = list(set(dataset['train']['codes']))
-            label2id = {key: ix for ix, key in enumerate(labels)}
+            label_path = os.path.join(DL_DATA, args.label_path)
+            if os.path.exists(label_path):
+                logging.info('label file has existed!, using it...')
+                with open(label_path,'r') as f:
+                    label2id = json.load(f)
+            else:
+                labels = list(set(dataset['train']['codes']))
+                label2id = {key: ix for ix, key in enumerate(labels)}
+        
+                logging.info(f'save label file to {label_path}')
+                with open(os.path.join(label_path), 'w') as f:
+                    json.dump(label2id, f)
             print('label2id',label2id)
-
-            with open(os.path.join(DL_DATA, args.label_path), 'w') as f:
-                json.dump(label2id, f)
 
              ### The reason I initialize it here is the model needs num_labels to initia lize, but for coarse-grained and fine-grained num_labels are different
             config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2id))
@@ -147,16 +154,16 @@ if __name__ == '__main__':
     if args.do_predict:
         logging.info('Predicting...')
 
-        if args.use_mlm:
-            model = AutoModelForMaskedLM.from_pretrained(args.pretrained_model)
-        elif args.use_nsp:
-            model = BertForNextSentencePrediction.from_pretrained(args.pretrained_model)
-        else:
-            config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2id))
-            model = BertForSequenceClassification.from_pretrained(args.pretrained_model, config=config)
+        # if args.use_mlm:
+        #     model = AutoModelForMaskedLM.from_pretrained(args.pretrained_model)
+        # elif args.use_nsp:
+        #     model = BertForNextSentencePrediction.from_pretrained(args.pretrained_model)
+        # else:
+        #     config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2name))
+        #     model = BertForSequenceClassification.from_pretrained(args.pretrained_model, config=config)
 
-        model.to(device)
-        classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
+        # model.to(device)
+        # classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
         if not os.path.exists(predict_data_dir): # this will generate a train and test datasets in adata_dir
             logging.info(f'{predict_data_dir} not exists, generating data....')
             os.makedirs(predict_data_dir)
@@ -196,15 +203,22 @@ if __name__ == '__main__':
                 id2label = {label2id[label]: label for label in label2id}
             else:
                 id2label = {label2id[label]: label2name[label] for label in label2id}
-            classifier.model.config.num_labels = len(id2label)
+
+            config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2id))
+            model = BertForSequenceClassification.from_pretrained(args.pretrained_model, config=config)
+            model.to(device)
+            classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
             logging.info(f'id to label is {id2label}')
+            
             encoded_dataset = dataset.map(lambda e: prediction_encoding(e['transcript'], tokenizer, args.prompt, args.max_length, withoutmask=True), batched=True, remove_columns=dataset.column_names)
             encoded_dataset = encoded_dataset.map(lambda e: {'targets': len(e['input_ids'])*[0]}, batched=True)
             encoded_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
 
         predict_dataloader = DataLoader(encoded_dataset, batch_size=args.batch_size, shuffle=False)
 
-        if args.load_checkpoint:
+        if not args.load_checkpoint:
+            logging.warning("You are using the pretrained models to predict!")
+        else:
             if device == torch.device('cpu'):
                 checkpoint = torch.load(os.path.join(
                     model_dir, args.model_name+'best-val-acc-model.pt'), map_location=device)
@@ -218,14 +232,16 @@ if __name__ == '__main__':
         # print('raw_predictions',len(predictions))
         if args.fine_grained_desc:
             map_file = os.path.join(PCC_CKS_DIR, ICPC2CKS)
+            # map_file = os.path.join(PCC_CKS_DIR, ICPC2CKS.replace('.json','_1.json'))
             cks2icpc_dic = cks2icpc(map_file)
             mapped_predictions = []
             for pred in predictions:
                 labels_per_item = []
                 for label in pred:
-                    labels_per_item.extend([label2name[label] for label in cks2icpc_dic[label]])
+                    labels_per_item.extend([label2name[icpc] for icpc in cks2icpc_dic[label] if icpc != 'Z'])
                 mapped_predictions.append(labels_per_item)
-
+            # print('raw', predictions)
+            # print('predictions',mapped_predictions)
             predictions = mult_lbl_enc.transform(mapped_predictions)
         # print('convert predictions', len(predictions))
         # print(cks2icpc_dic)

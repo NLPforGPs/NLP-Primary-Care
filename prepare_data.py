@@ -162,37 +162,39 @@ def generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, save_
 #     write_path(os.path.join(save_path, 'train.json'), train_data)
 #     write_path(os.path.join(save_path, 'test.json'), test_data)
 
-def generate_binary_descriptions(tokenizer, chunk_size, test_size, selected_mode, multiclass_desc_path, save_path, class_name=None):
+def generate_binary_descriptions(tokenizer, chunk_size, test_size, selected_mode, multiclass_desc_path, save_path, class_name=None, fine_grained=False):
     '''
     Generate data for binary classification.
     '''
     if not os.path.exists(multiclass_desc_path):
         print("Multiclass descriptions donot exist. Creating...")
-        generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, multiclass_desc_path, class_name)
+        generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, multiclass_desc_path, class_name, fine_grained=fine_grained)
+
 
     train_multiclass = os.path.join(multiclass_desc_path, 'train.json')
     test_multiclass = os.path.join(multiclass_desc_path, 'test.json')
 
     classmap_file = os.path.join(PCC_CKS_DIR, ICPC2CKS)
     classmap = load_json_file(classmap_file)
+    # 
     class2class = {}
-    if selected_mode == 'ICPC only':
+    if not fine_grained:
         for icpc1 in classmap:
             if icpc1 not in class2class:
                 class2class[icpc1] = []
             for icpc2 in classmap:
                 if set(classmap[icpc1]).intersection(set(classmap[icpc2])):
                     class2class[icpc1].append(icpc2)
-    else:
-        class2class = {key:[] for key in classmap}
 
     # nested list: [element, label]
     raw_train_data = load_json_file(train_multiclass)
     raw_test_data = load_json_file(test_multiclass)
+
     print('generating training data...')
     train_data = generate_binary_per_class(raw_train_data, class2class)
     print('generating test data...')
     test_data = generate_binary_per_class(raw_test_data, class2class)
+
     write_path(os.path.join(save_path, 'train.json'), train_data)
     write_path(os.path.join(save_path, 'test.json'), test_data)
 
@@ -210,19 +212,22 @@ def generate_binary_per_class(raw_data, class2class):
             class2desc[item[1]] = []
         class2desc[item[1]].append(item[0])
 
+    # fake mapping when there is no overlapping descriptions
+    if not class2class:
+        class2class = {key:[] for key in class2desc}
+
     for key in class2desc:
         num_examples = len(class2desc[key])
-        print('num_examples',num_examples)
+        # add postive examples
         processed_data.extend([[desc, key, 1] for desc in class2desc[key]])
         i = 0
+        # sample negative examples
         while i < num_examples:
             selected = random.choice(raw_data)
             element = selected[:]
             element.append(0)
-        
+            # this example should not in category sharing the same description, not exist in processed data, should not from its own category
             if element[1] in class2class[key] or element in processed_data or element[1] == key:
-                # print('repeated', element)
-                # print('again...')
                 continue
             element[1] = key
             processed_data.append(element)
