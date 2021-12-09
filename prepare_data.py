@@ -244,7 +244,7 @@ def prepare_transcripts_eval(tokenizer, save_path, max_length=490):
         lambda t: read_transcript(t, return_format='list'))
     orig_dataset['transcript__conversation_both'] = orig_dataset['transcript__conversation_both'].apply(
         lambda t: segment_without_overlapping(tokenizer, t, max_length))
-    data = list(zip(orig_dataset['transcript__conversation_both'].tolist(), orig_dataset['codes'].tolist()))
+    data = list(zip(orig_dataset['transcript__conversation_both'].tolist(), orig_dataset['codes'].tolist(), orig_dataset['record_id'].tolist()))
 
     write_path(os.path.join(save_path, 'transcript.json'), data)
 

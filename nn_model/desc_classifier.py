@@ -8,6 +8,7 @@ from tqdm import trange
 import os
 import logging
 from utils.utils import save_checkpoint, softmax
+from tqdm import tqdm
 
 class DescClassifier(nn.Module):
     def __init__(self, model, epochs, learning_rate, weight_decay=1e-4):
@@ -105,7 +106,7 @@ class DescClassifier(nn.Module):
         self.model.eval()
         with torch.no_grad():
             
-            for batch in predict_loader:
+            for batch in tqdm(predict_loader):
                 input_ids = batch['input_ids'].to(device)
                 attention_mask = batch['attention_mask'].to(device)
                 token_type_ids = batch['token_type_ids'].to(device)

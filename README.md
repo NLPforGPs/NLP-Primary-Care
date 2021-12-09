@@ -227,18 +227,27 @@ Then, you need to set `/user/work/username/NLP_One_In_A_Million` as the 'PCC_BAS
 | Navie Bayes Classifier | 0.34 | 0.78 |
 | SVM Classifier | 0.36 | 0.83 |
 | Conventional BERT Classifier (original)| **0.55** | 0.53
-| Conventional BERT Classifier| 0.50 | 0.53
+| Conventional BERT Classifier| 0.53 | 0.55
 | MLM Prompting (original)| 0.51 | 0.86|
 | MLM Prompting| **0.54** | 0.87|
 | NSP Prompting| 0.42| 0.87|
 | Fine-grained Conventional|  0.45| - |
-| Fine-grained NSP| | - |
+| Fine-grained NSP-1| 0.38 | 0.87 |
+| Fine-grained NSP-2 |  | |
 
-- Original is trained on Colab with larger batch size 16 and larger learning rate 1e-4 (GPU P100).
+- Original is trained on Colab with a larger batch size 16 and larger learning rate 1e-4 (GPU P100). Because the single 2080Ti Gpu memory is 11G, I reduce batch size and learning rate to 6 and 5e-5 respectively.
+- Fine-grained NSP-1 represents directly predicting 16 categories while Fine-grained NSP-2 represents predicting with health topics at first and merging it into 16 categories.
 - Prompting use PubMedBERT-abstract and conventional use PubMedBERT-abstract-fulltext
-- Because the single 2080Ti Gpu memory is 11G, I reduce batch size and learning rate to 8 and 5e-5, respectively.
 - NSP F1-score is not as good as others since it predicts multiple labels for smaller chunks and they are merged for a transcript as a whole. This means this method has higher recall(0.79).
-- ROC-AUC is an approximated value. The maxium value of each category across different chunks are considered as the overall probability for a complete transcript.
+- ROC_AUC for fine-grained is not reported since you need to merge probabilities into 16 categories in many-to-many relationship.
+- ROC-AUC is an approximated value. The maxium value of each category across different chunks are considered as the overall category probability for a complete transcript.
+
+### Error Analysis
+It should be noted that when the chunk size gets smaller, the merged F1-score would be lower. This is because we just take the category with the highest probability as the predicted label of each chunk no matter how low it is. So i think you can set smaller chunks for analysis and larger chunk for evluation.
+
+Interesting finding: F1 score of Conventional BERT classifier descrese more dramatically than that of MLM when chunk size get smaller. I think it is corresponding to auc-roc
+
+
 
 #### NSP Dataset Generation
 It is implemented in `generate_binary_descriptions`(`prepare_data.py`). 
@@ -254,8 +263,10 @@ It is implemented in `generate_binary_descriptions`(`prepare_data.py`).
 #### To Do
 
 - This structure is not the best structure. It could be improved like investigating if different datasets could be merged in one universal Dataset Class, like SQUAD.
-- Hyperparameters could be tuned. It showed different batch sizes and learning rate can affect the model performance. However, deep learning methods are more stable than traditional methods in this task.
-
+- Hyperparameters could be tuned. It showed different batch sizes and learning rate can affect the model performance. I split descritpionts dataset into train and dev datasets to tune heyperparameters rather than using limited transcripts to tune hyperparmaeters. It seems to be out-of-distribution generalisation.
+  
+-  deep learning methods are more stable than traditional methods in this task.
+  
 
 
 # FQA
