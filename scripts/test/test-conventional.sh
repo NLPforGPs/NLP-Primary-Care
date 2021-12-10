@@ -27,6 +27,6 @@ conda activate NLP_GP
 
 echo Start Time: $(date)
 
-time python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --model_dir models/conventional --model_name full-text-conventional --predict_data_dir 'transcripts' --do_predict --load_checkpoint
+time python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --model_dir models/conventional --model_name full-text-conventional --predict_data_dir 'transcripts-490' --do_predict --load_checkpoint
 
 echo End Time: $(date)

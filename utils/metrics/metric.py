@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.metrics import f1_score, classification_report, roc_auc_score
 
 
+
 def evaluate_classifications(targets,
                              predictions,
                              class_names,
@@ -46,4 +47,30 @@ def evaluate_probabilities(targets, predictions):
 
     return auroc
 
+
+def error_analysis(predictions, probabilities, split_nums, segments, transcript_ids, save_file):
+    '''
+    This method is used to save the predictions for error analysis
+    predictions: nested list for each segment, [[label1, label2],..]
+    probabilities: probability for each segment [exmaples, classes]
+    split_nums: the number of segments for each transcript
+    segments: nested list, how many segments in each transcript, [[segment1, segment2],..]
+    transcript_ids: list, transcript id, [transcript1, transcript2,...]
+    '''
+
+    probs = np.max(probabilities, axis=1)
+
+    # flatten all segments
+    segments = [seg for segment in segments for seg in segment]
+    # align segment ids and transcript ids
+    segment_ids = []
+    seg_transcript_ids = []
+    for i, num in enumerate(split_nums):
+        segment_ids.extend(list(range(num)))
+        seg_transcript_ids.extend([transcript_ids[i]]*num)
+    assert len(segment_ids) == len(predictions)
+    with open(save_file, 'w') as f:
+        f.write('transcript_id\tsegment_id\tlabel\tprobability\n')
+        for i, label in enumerate(predictions):
+            f.write(seg_transcript_ids[i] + '\t' + str(segment_ids[i]) + '\t' + segments[i] + '\t' + ",".join(label) + '\t' + str(probs[i]) + '\n')
 

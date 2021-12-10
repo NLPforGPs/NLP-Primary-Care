@@ -1,0 +1,34 @@
+JOB ID: 275268
+Working Directory: /user/home/zu20361/NLP-Primary-Care
+Warning: you have pip-installed dependencies in your environment file, but you do not list pip itself as one of your conda dependencies.  Conda may not use the correct pip to install your packages, and they may end up in the wrong place.  Please add an explicit pip dependency.  I'm adding one for you, but still nagging you.
+Start Time: Fri Dec 10 13:45:29 GMT 2021
+loading codes from PE...
+Downloading and preparing dataset description_dataset/default (download: Unknown size, generated: 2.07 MiB, post-processed: Unknown size, total: 2.07 MiB) to /user/home/zu20361/.cache/huggingface/datasets/description_dataset/default-a2d0abb6534a5099/0.0.0/9a9f33ed1951859e6f0a536ab67cad76ef5b13196ce8d7b688334d25b0f51aa6...
+Dataset description_dataset downloaded and prepared to /user/home/zu20361/.cache/huggingface/datasets/description_dataset/default-a2d0abb6534a5099/0.0.0/9a9f33ed1951859e6f0a536ab67cad76ef5b13196ce8d7b688334d25b0f51aa6. Subsequent calls will reuse this data.
+classification_report:
+                 precision    recall  f1-score   support
+
+          blood       0.04      1.00      0.08         8
+ cardiovascular       0.17      1.00      0.29        32
+      digestive       0.27      0.91      0.42        44
+            ear       0.33      1.00      0.50        11
+      endocrine       0.12      1.00      0.22        24
+            eye       0.04      1.00      0.07         5
+         female       0.12      0.86      0.21        14
+        general       0.06      1.00      0.11        14
+           male       0.07      0.86      0.12         7
+musculoskeletal       0.28      1.00      0.44        65
+   neurological       0.09      1.00      0.17        20
+      pregnancy       0.10      1.00      0.17        11
+  psychological       0.21      1.00      0.35        50
+    respiratory       0.21      1.00      0.35        37
+           skin       0.14      0.97      0.25        32
+     urological       0.25      0.89      0.39        18
+
+      micro avg       0.15      0.97      0.26       392
+      macro avg       0.16      0.97      0.26       392
+   weighted avg       0.19      0.97      0.32       392
+    samples avg       0.15      0.97      0.25       392
+
+f1_score 0.2592451675895293
+End Time: Fri Dec 10 15:28:46 GMT 2021

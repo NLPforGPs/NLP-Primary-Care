@@ -11,8 +11,8 @@ import logging
 import datasets
 from datasets import load_dataset, set_caching_enabled
 from prepare_data import generate_descriptions, prepare_transcripts_eval, generate_binary_descriptions
-from utils.preprocessing.data import masking, labelmapping, prediction_encoding, cks2icpc, NSP, binary_predictiton_encoding
-from utils.utils import merge_predictions, one_hot_encode
+from utils.preprocessing.data import masking, labelmapping, prediction_encoding, NSP, binary_predictiton_encoding
+from utils.utils import merge_predictions, one_hot_encode, prediction_cks2icpc
 from oneinamillion.resources import PCC_BASE_DIR, ICPC2CKS, PCC_CKS_DIR, DL_DATA
 
 
@@ -64,7 +64,6 @@ if __name__ == '__main__':
     multi_train_data_dir = os.path.join(DL_DATA, args.train_data_dir, args.selected_mode.lower().replace(' ','_'), args.multi_data_path)
     binary_train_data_dir = os.path.join(DL_DATA, args.train_data_dir, args.selected_mode.lower().replace(' ','_'), args.binary_data_path)
 
-
     # prediction data directory, transcripts
     predict_data_dir = os.path.join(DL_DATA, args.predict_data_dir)
     # model save path
@@ -83,7 +82,6 @@ if __name__ == '__main__':
         model = BertForNextSentencePrediction.from_pretrained(args.pretrained_model)
     else:
 
-    #     config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2name))
         model = BertForSequenceClassification.from_pretrained(args.pretrained_model)
     model.to(device)
     classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
@@ -100,6 +98,7 @@ if __name__ == '__main__':
             if not os.path.exists(multi_train_data_dir):
                 logging.info(f'{multi_train_data_dir} not exists, generating data....')
                 os.makedirs(multi_train_data_dir)
+
                 # this will generate a train and test datasets in data_dir
                 generate_descriptions(tokenizer=tokenizer, chunk_size = args.chunk_size, test_size = 0.2, selected_mode=args.selected_mode, save_path = multi_train_data_dir, fine_grained = args.fine_grained_desc)
                 
@@ -141,7 +140,7 @@ if __name__ == '__main__':
             model = BertForSequenceClassification.from_pretrained(args.pretrained_model, config=config)
             model.to(device)
             classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
-
+            # map labels to ids for training
             dataset = dataset.map(lambda e: labelmapping(e['codes'], label2id), batched=True)
             dataset = dataset.map(lambda e: tokenizer(e['description'], padding='max_length', truncation=True, max_length=args.max_length), batched=True)
 
@@ -154,22 +153,10 @@ if __name__ == '__main__':
     if args.do_predict:
         logging.info('Predicting...')
 
-        # if args.use_mlm:
-        #     model = AutoModelForMaskedLM.from_pretrained(args.pretrained_model)
-        # elif args.use_nsp:
-        #     model = BertForNextSentencePrediction.from_pretrained(args.pretrained_model)
-        # else:
-        #     config = BertConfig.from_pretrained(args.pretrained_model, num_labels=len(label2name))
-        #     model = BertForSequenceClassification.from_pretrained(args.pretrained_model, config=config)
-
-        # model.to(device)
-        # classifier = DescClassifier(model = model, epochs = args.epochs, learning_rate = args.learning_rate, weight_decay = args.weight_decay)
         if not os.path.exists(predict_data_dir): # this will generate a train and test datasets in adata_dir
             logging.info(f'{predict_data_dir} not exists, generating data....')
             os.makedirs(predict_data_dir)
             prepare_transcripts_eval(tokenizer=tokenizer, max_length= args.chunk_size, save_path = predict_data_dir)
-        
-        # predict_data = load_data(args.predict_dir)
 
         # load data
         dataset = load_dataset('./oneinamillionwrapper/transcript_evaldataset.py', download_mode="force_redownload", data_dir= predict_data_dir)
@@ -188,7 +175,6 @@ if __name__ == '__main__':
         y_hot, mult_lbl_enc = one_hot_encode(dataset['codes'], label2name)
         class_names = list(mult_lbl_enc.classes_)
 
-        # predict_loader = DataLoader(BinaryDescLMDataset(data=predict_data['all_trans'], prompt=prompt, label2name=label2name, pretrained_model= args.pretrained_model, do_train=False, random_mask=False), batch_size=args.batch_size, shuffle=False)
         if args.use_mlm:
             logging.info('MLM method.....')
             encoded_dataset = dataset.map(lambda e: prediction_encoding(e['transcript'], tokenizer, args.prompt, args.max_length), batched=True, remove_columns=['transcript', 'codes', 'split_nums','record_id'])
@@ -201,8 +187,8 @@ if __name__ == '__main__':
             if args.fine_grained_desc:
                 with open(os.path.join(DL_DATA, args.label_path), 'r') as f:
                     label2id = json.load(f)
-                # id2label = {label2id[label]: label for label in label2id}
                 class_names = list(label2id.keys())
+                
             encoded_dataset = dataset.map(lambda e: binary_predictiton_encoding(e['transcript'], tokenizer, args.prompt, class_names, args.max_length), batched=True, remove_columns=['transcript', 'codes', 'split_nums', 'record_id'])
             encoded_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'targets'])
             id2label = None
@@ -240,30 +226,22 @@ if __name__ == '__main__':
         classifier.load_state_dict(checkpoint['state_dict'])
 
         predictions, pred_probs = classifier.predict(predict_dataloader, device, tokenizer=tokenizer, id2class=id2label, use_mlm=args.use_mlm, use_nsp=args.use_nsp, class_names=np.array(class_names))
-        # print('raw_predictions',len(predictions))
 
         ## Generate error analysis file
         if args.do_error_analysis:
-            ea_output_path = os.path.join(DL_DATA, args.ea_file)
+            ea_output_dir = os.path.join(DL_DATA, 'error_analysis') 
+            if not os.path.exists(ea_output_dir):
+                os.makedirs(ea_output_dir)
+            ea_output_path = os.path.join(ea_output_dir, args.ea_file)
             error_analysis(predictions, pred_probs, splited_nums, dataset['transcript'], dataset['record_id'], ea_output_path)
-            # exit()
-        ##### Evaluation Part
+
+        ##### Evaluation Part #####
         if args.fine_grained_desc:
+            # convert cks topics to icpc categories
             map_file = os.path.join(PCC_CKS_DIR, ICPC2CKS)
-            # map_file = os.path.join(PCC_CKS_DIR, ICPC2CKS.replace('.json','_1.json'))
-            cks2icpc_dic = cks2icpc(map_file)
-            mapped_predictions = []
-            for pred in predictions:
-                labels_per_item = []
-                for label in pred:
-                    labels_per_item.extend([label2name[icpc] for icpc in cks2icpc_dic[label] if icpc != 'Z'])
-                mapped_predictions.append(labels_per_item)
-            # print('raw', predictions)
-            # print('predictions',mapped_predictions)
+            mapped_predictions = prediction_cks2icpc(map_file, predictions, label2name)    
             predictions = mult_lbl_enc.transform(mapped_predictions)
-        # print('convert predictions', len(predictions))
-        # print(cks2icpc_dic)
-        # print('cumsum', np.cumsum(splited_nums))
+
         else:
             predictions = mult_lbl_enc.transform(predictions)
 
@@ -271,7 +249,7 @@ if __name__ == '__main__':
         final_predictions = merge_predictions(splited_nums, np.array(predictions))
         final_probs = merge_predictions(splited_nums, np.array(pred_probs), probs=True)
         # calculate f1 score and auc_roc score
-        f1_score = evaluate_classifications(y_hot, final_predictions, class_names, show_report=True)
+        f1_score = evaluate_classifications(y_hot, final_predictions, list(mult_lbl_enc.classes_), show_report=True)
         print('f1_score', f1_score)
         if not args.fine_grained_desc:
             auc = evaluate_probabilities(y_hot, final_probs)

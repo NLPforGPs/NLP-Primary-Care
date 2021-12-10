@@ -1,0 +1,27 @@
+cpu-bind=MASK - bp1-gpu007, task 4294967295 4294967295 [0]: mask 0x202 set
+
+CondaValueError: prefix already exists: /user/home/zu20361/.conda/envs/NLP_GP
+
+[nltk_data] Downloading package wordnet to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+Some weights of the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext were not used when initializing BertForSequenceClassification: ['cls.predictions.transform.dense.weight', 'cls.seq_relationship.bias', 'cls.predictions.bias', 'cls.seq_relationship.weight', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.decoder.bias', 'cls.predictions.transform.LayerNorm.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.decoder.weight']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext and are newly initialized: ['classifier.weight', 'classifier.bias']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+2021-12-08 14:15:30,677 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:150] - INFO: Predicting...
+2021-12-08 14:15:30,808 - /user/home/zu20361/.conda/envs/NLP_GP/lib/python3.9/site-packages/datasets/builder.py[line:377] - WARNING: Using custom data configuration default-a2d0abb6534a5099
+0 examples [00:00, ? examples/s]2021-12-08 14:15:31,011 - /user/home/zu20361/.cache/huggingface/modules/datasets_modules/datasets/transcript_evaldataset/4c048f6bc1501180d0c57dc4d2b8c0d9958946e6a0943b3c5b80a90f1d04b330/transcript_evaldataset.py[line:59] - INFO: Generating examples...
+                                  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 563.90it/s]
+2021-12-08 14:15:31,173 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:183] - INFO: conventional classifier...
+2021-12-08 14:15:31,174 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:191] - INFO: id to label is {0: 'general', 1: 'blood', 2: 'digestive', 3: 'eye', 4: 'ear', 5: 'cardiovascular', 6: 'musculoskeletal', 7: 'neurological', 8: 'psychological', 9: 'respiratory', 10: 'skin', 11: 'endocrine', 12: 'urological', 13: 'pregnancy', 14: 'female', 15: 'male'}
+  0%|          | 0/1 [00:00<?, ?ba/s]100%|██████████| 1/1 [00:01<00:00,  1.96s/ba]100%|██████████| 1/1 [00:01<00:00,  1.96s/ba]
+  0%|          | 0/2 [00:00<?, ?ba/s] 50%|█████     | 1/2 [00:00<00:00,  1.27ba/s]100%|██████████| 2/2 [00:01<00:00,  1.95ba/s]100%|██████████| 2/2 [00:01<00:00,  1.81ba/s]
+
+real	1m8.714s
+user	0m23.085s
+sys	0m10.242s

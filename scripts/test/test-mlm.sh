@@ -15,7 +15,6 @@ echo JOB ID: "${SLURM_JOBID}"
 
 echo Working Directory: $(pwd)
 
-mkdir -p ./log/test
 
 module add lang/python/anaconda/pytorch
 # module add lang/python/anaconda/3.8-2020.07

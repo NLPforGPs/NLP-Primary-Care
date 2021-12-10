@@ -20,13 +20,11 @@ def segment_without_overlapping(tokenizer, sents, maximum_length):
     
     for sent in sents:
         tokens = tokenizer.tokenize(sent)
-        # print('tokens', len(tokens))
         if len(prev)+len(tokens) < maximum_length:
             chunks[-1] += " "+ sent
             prev += tokens
 
         else:
-            # print('length', len(tokens))
             chunks.append(sent)
             prev = tokens
     if '' in chunks:
@@ -57,7 +55,6 @@ def masking(examples, labels, label2name, tokenizer, prompt, max_length=512):
     '''
     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
     for i, example in enumerate(examples):
-    # encoded_input = tokenizer(example['description'], prompt.format('[MASK]'), padding='max_length', truncation=True)
         encoded_input = tokenizer(example, prompt.format('[MASK]'), padding='max_length', truncation=True, max_length=max_length)
         encoded_target = tokenizer(example, prompt.format(label2name[labels[i]]), padding='max_length', truncation=True, max_length=max_length)
         input_ids = encoded_input['input_ids'] 
@@ -93,11 +90,20 @@ def masking(examples, labels, label2name, tokenizer, prompt, max_length=512):
             'attention_mask': attention_mask, 'token_type_ids': token_type_ids,
             'targets': all_targets}
 
-def NSP(examples, labels, polarity, label2name, tokenizer, prompt, max_length=512):
+def NSP(examples, labels, polarity, label2name, tokenizer, prompt, max_length=512, fine_grained=False):
+    '''
+    examples: list, training examples
+    labels: list, training labels
+    polarity: list, '1': postive, '0': negative
+    fined_grained: fine_grained class names are multiple tokens
+    '''
     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
     for i, example in enumerate(examples):
         # print('exmaple',example)
-        encoded_input = tokenizer(example, prompt.format(label2name[labels[i]]), padding='max_length', truncation=True, max_length=max_length)
+        if fine_grained:
+            encoded_input = tokenizer(example, prompt.format(labels[i]), padding='max_length', truncation=True, max_length=max_length)
+        else:
+            encoded_input = tokenizer(example, prompt.format(label2name[labels[i]]), padding='max_length', truncation=True, max_length=max_length)
         all_input_ids.append(encoded_input['input_ids'])
         attention_mask.append(encoded_input['attention_mask'])
         token_type_ids.append(encoded_input['token_type_ids'])
@@ -113,7 +119,11 @@ def labelmapping(labels, label_map):
     return {'targets': labels}
 
 def prediction_encoding(examples, tokenizer, prompt, max_length=512, withoutmask=False):
-    '''used for prediction with MLM and conventional BERT classifier'''
+    '''used for prediction with MLM and conventional BERT classifier
+        examples: nested list [[segment1, segment2,...],...]
+        tokenizer: BERT tokenizer
+        withoutmask: is used for conventional BERT classifier
+    '''
     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
     for segments in examples:
         for seg in segments:
@@ -138,7 +148,7 @@ def binary_predictiton_encoding(examples, tokenizer, prompt, class_names, max_le
     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
     for segments in examples:
         for seg in segments:
-            for label in class_names:
+            for label in class_names: # iterate all class names for each example
                 encoded_input = tokenizer(seg, prompt.format(label), padding='max_length', truncation=True, max_length=max_length)
                 all_input_ids.append(encoded_input['input_ids'])
                 # fake labels
@@ -147,30 +157,6 @@ def binary_predictiton_encoding(examples, tokenizer, prompt, class_names, max_le
                 token_type_ids.append(encoded_input['token_type_ids'])
 
     return {'input_ids': all_input_ids,'attention_mask': attention_mask, 'token_type_ids': token_type_ids,'targets': all_targets}
-
-
-
-# def normal_encoding(examples, tokenizer, prompt, max_length=512):
-#     all_input_ids, all_targets, attention_mask, token_type_ids = [], [], [],[]
-#     for example in examples:
-#         encoded_input = tokenizer(example, padding='max_length', truncation=True, max_length=max_length)
-#         all_input_ids.append(encoded_input['input_ids'])
-#         attention_mask.append(encoded_input['attention_mask'])
-#         token_type_ids.append(encoded_input['token_type_ids'])
-
-def cks2icpc(map_filename):
-    '''
-    convert cks topics to icpc labels    
-    '''
-    with open(map_filename,'r', encoding='utf8') as f:
-        icpc2cks = json.load(f)
-    cks2icpc_dic = {}
-    for icpc in icpc2cks:
-        for cks in icpc2cks[icpc]:
-            if cks not in cks2icpc_dic:
-                cks2icpc_dic[cks] = []
-            cks2icpc_dic[cks].append(icpc)
-    return cks2icpc_dic
             
 
 

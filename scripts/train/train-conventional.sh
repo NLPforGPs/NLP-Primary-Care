@@ -26,6 +26,6 @@ conda activate NLP_GP
  
 echo Start Time: $(date)
 
-time python3 ./run_plms.py --batch_size 8 --epoch 10 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --learning_rate 5e-5 --weight_decay 1e-4 --model_dir models/conventional --model_name full-text-conventional --label_path label2id.json --multi_data_path coarse_grained --prompt "This is a problem of {}."  --do_train
+time python3 ./run_plms.py --batch_size 8 --epoch 10 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --learning_rate 5e-5 --weight_decay 1e-4 --model_dir models/conventional --model_name full-text-conventional --label_path label2id.json --prompt "This is a problem of {}."  --do_train
 
 echo End Time: $(date)

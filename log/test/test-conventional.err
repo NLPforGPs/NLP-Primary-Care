@@ -1,0 +1,32 @@
+cpu-bind=MASK - bp1-gpu012, task 4294967295 4294967295 [0]: mask 0x101 set
+
+CondaValueError: prefix already exists: /user/home/zu20361/.conda/envs/NLP_GP
+
+[nltk_data] Downloading package wordnet to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+Some weights of the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext were not used when initializing BertForSequenceClassification: ['cls.predictions.transform.LayerNorm.bias', 'cls.predictions.decoder.weight', 'cls.predictions.transform.LayerNorm.weight', 'cls.seq_relationship.weight', 'cls.predictions.decoder.bias', 'cls.predictions.bias', 'cls.predictions.transform.dense.weight', 'cls.predictions.transform.dense.bias', 'cls.seq_relationship.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+2021-12-09 22:42:05,404 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:155] - INFO: Predicting...
+2021-12-09 22:42:05,449 - /user/home/zu20361/.conda/envs/NLP_GP/lib/python3.9/site-packages/datasets/builder.py[line:377] - WARNING: Using custom data configuration default-135fbc7b45d5ff11
+0 examples [00:00, ? examples/s]2021-12-09 22:42:05,653 - /user/home/zu20361/.cache/huggingface/modules/datasets_modules/datasets/transcript_evaldataset/9a9f33ed1951859e6f0a536ab67cad76ef5b13196ce8d7b688334d25b0f51aa6/transcript_evaldataset.py[line:60] - INFO: Generating examples...
+130 examples [00:00, 1299.18 examples/s]                                          0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 401.60it/s]
+2021-12-09 22:42:05,811 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:212] - INFO: conventional classifier...
+Some weights of the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext were not used when initializing BertForSequenceClassification: ['cls.predictions.transform.LayerNorm.bias', 'cls.predictions.decoder.weight', 'cls.predictions.transform.LayerNorm.weight', 'cls.seq_relationship.weight', 'cls.predictions.decoder.bias', 'cls.predictions.bias', 'cls.predictions.transform.dense.weight', 'cls.predictions.transform.dense.bias', 'cls.seq_relationship.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+2021-12-09 22:42:08,232 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:224] - INFO: id to label is {0: 'blood', 1: 'endocrine', 2: 'general', 3: 'psychological', 4: 'male', 5: 'skin', 6: 'pregnancy', 7: 'female', 8: 'cardiovascular', 9: 'ear', 10: 'digestive', 11: 'urological', 12: 'neurological', 13: 'musculoskeletal', 14: 'eye', 15: 'respiratory'}
+  0%|          | 0/1 [00:00<?, ?ba/s]100%|██████████| 1/1 [00:01<00:00,  1.87s/ba]100%|██████████| 1/1 [00:01<00:00,  1.87s/ba]
+  0%|          | 0/2 [00:00<?, ?ba/s] 50%|█████     | 1/2 [00:00<00:00,  1.22ba/s]100%|██████████| 2/2 [00:01<00:00,  1.95ba/s]100%|██████████| 2/2 [00:01<00:00,  1.79ba/s]
+
+real	0m40.205s
+user	0m22.300s
+sys	0m9.753s

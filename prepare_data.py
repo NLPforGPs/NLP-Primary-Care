@@ -141,26 +141,7 @@ def generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, save_
 
     write_path(os.path.join(save_path, 'train.json'), train_data)
     write_path(os.path.join(save_path, 'test.json'), test_data)
-        # processed_data.extend(zip(chunks, labels))
-        # texts.extend(chunks)
-        # all_labels.extend(labels)
 
-# def generate_fine_grained_description(tokenizer, save_path):
-#     '''
-#     This function is used to generate fine-grained descriptions using CKS topics.
-#     '''
-#     train_data, test_data = [], []
-#     descriptions = load_cks_descriptions(cks_icpc=False)
-#     for ii, _ in enumerate(descriptions):
-#         description = cleaner(descriptions[ii])
-#         sents = tokenize.sent_tokenize(description)
-#         chunks = segment_without_overlapping(tokenizer, sents, chunk_size)
-#         labels = [descriptions.index[ii]]*len(chunks)
-#         train_examples, test_examples = train_test_split(list(zip(chunks, labels)), test_size=test_size,random_state=20211125)
-#         train_data.extend(train_examples)
-#         test_data.extend(test_examples)
-#     write_path(os.path.join(save_path, 'train.json'), train_data)
-#     write_path(os.path.join(save_path, 'test.json'), test_data)
 
 def generate_binary_descriptions(tokenizer, chunk_size, test_size, selected_mode, multiclass_desc_path, save_path, class_name=None, fine_grained=False):
     '''

@@ -1,0 +1,51 @@
+cpu-bind=MASK - bp1-gpu003, task 4294967295 4294967295 [0]: mask 0x1010 set
+
+CondaValueError: prefix already exists: /user/home/zu20361/.conda/envs/NLP_GP
+
+[nltk_data] Downloading package wordnet to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+Some weights of the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.predictions.transform.dense.bias', 'cls.seq_relationship.bias', 'cls.predictions.transform.LayerNorm.bias', 'cls.predictions.decoder.weight', 'cls.seq_relationship.weight', 'cls.predictions.bias', 'cls.predictions.transform.dense.weight', 'cls.predictions.transform.LayerNorm.weight']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext and are newly initialized: ['classifier.weight', 'classifier.bias']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+2021-12-09 22:29:51,409 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:95] - INFO: training...
+2021-12-09 22:29:51,437 - /user/home/zu20361/.conda/envs/NLP_GP/lib/python3.9/site-packages/datasets/builder.py[line:377] - WARNING: Using custom data configuration default-b5fba57daf09edd7
+0 examples [00:00, ? examples/s]2021-12-09 22:29:51,637 - /user/home/zu20361/.cache/huggingface/modules/datasets_modules/datasets/description_dataset/d1e7e6de6d47305aa98cf02bede76588ca92ee8c617b143052c51e176d9c6484/description_dataset.py[line:65] - INFO: Generating examples...
+                                0 examples [00:00, ? examples/s]2021-12-09 22:29:51,699 - /user/home/zu20361/.cache/huggingface/modules/datasets_modules/datasets/description_dataset/d1e7e6de6d47305aa98cf02bede76588ca92ee8c617b143052c51e176d9c6484/description_dataset.py[line:65] - INFO: Generating examples...
+                                  0%|          | 0/2 [00:00<?, ?it/s]100%|██████████| 2/2 [00:00<00:00, 506.65it/s]
+2021-12-09 22:29:51,739 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:126] - INFO: using traditional bert classifier...
+2021-12-09 22:29:51,740 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:136] - INFO: save label file to /user/work/zu20361/PCC/prepared/dl_data/label2id.json
+Some weights of the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.predictions.transform.dense.bias', 'cls.seq_relationship.bias', 'cls.predictions.transform.LayerNorm.bias', 'cls.predictions.decoder.weight', 'cls.seq_relationship.weight', 'cls.predictions.bias', 'cls.predictions.transform.dense.weight', 'cls.predictions.transform.LayerNorm.weight']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext and are newly initialized: ['classifier.weight', 'classifier.bias']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  0%|          | 0/1 [00:00<?, ?ba/s]100%|██████████| 1/1 [00:00<00:00, 145.08ba/s]
+  0%|          | 0/1 [00:00<?, ?ba/s]100%|██████████| 1/1 [00:00<00:00, 421.33ba/s]
+  0%|          | 0/1 [00:00<?, ?ba/s]100%|██████████| 1/1 [00:00<00:00,  1.97ba/s]100%|██████████| 1/1 [00:00<00:00,  1.97ba/s]
+  0%|          | 0/1 [00:00<?, ?ba/s]100%|██████████| 1/1 [00:00<00:00,  7.46ba/s]100%|██████████| 1/1 [00:00<00:00,  7.44ba/s]
+  0%|          | 0/10 [00:00<?, ?it/s]2021-12-09 22:30:09,444 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 0/10, train_loss: 2.6963155534532337, train_accuracy:0.11388888888888889
+2021-12-09 22:30:13,768 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.2708333333333333, the dev_loss is 2.4647065798441568, save best model to /user/work/zu20361/PCC/models/conventional/full-text-conventionalbest-val-acc-model
+ 10%|█         | 1/10 [00:18<02:49, 18.86s/it]2021-12-09 22:30:28,250 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 1/10, train_loss: 1.6776774843533835, train_accuracy:0.6129629629629629
+2021-12-09 22:30:32,597 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.7663690476190476, the dev_loss is 1.0254652053117752, save best model to /user/work/zu20361/PCC/models/conventional/full-text-conventionalbest-val-acc-model
+ 20%|██        | 2/10 [00:37<02:30, 18.84s/it]2021-12-09 22:30:47,247 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 2/10, train_loss: 0.663609583179156, train_accuracy:0.875
+2021-12-09 22:30:51,615 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.7991071428571428, the dev_loss is 0.7136403198043505, save best model to /user/work/zu20361/PCC/models/conventional/full-text-conventionalbest-val-acc-model
+ 30%|███       | 3/10 [00:56<02:12, 18.92s/it]2021-12-09 22:31:06,201 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 3/10, train_loss: 0.29777016341686247, train_accuracy:0.9527777777777777
+2021-12-09 22:31:10,565 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.8333333333333334, the dev_loss is 0.6876261010766029, save best model to /user/work/zu20361/PCC/models/conventional/full-text-conventionalbest-val-acc-model
+ 40%|████      | 4/10 [01:15<01:53, 18.93s/it]2021-12-09 22:31:25,204 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 4/10, train_loss: 0.1890780428217517, train_accuracy:0.9638888888888889
+2021-12-09 22:31:29,521 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.8645833333333334, the dev_loss is 0.5091649938064317, save best model to /user/work/zu20361/PCC/models/conventional/full-text-conventionalbest-val-acc-model
+ 50%|█████     | 5/10 [01:34<01:34, 18.94s/it]2021-12-09 22:31:44,169 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 5/10, train_loss: 0.09831873944236172, train_accuracy:0.9777777777777777
+ 60%|██████    | 6/10 [01:50<01:11, 17.91s/it]2021-12-09 22:32:00,043 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 6/10, train_loss: 0.08254487489660581, train_accuracy:0.9777777777777777
+ 70%|███████   | 7/10 [02:06<00:51, 17.24s/it]2021-12-09 22:32:15,922 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 7/10, train_loss: 0.052385479605032335, train_accuracy:0.9833333333333333
+ 80%|████████  | 8/10 [02:22<00:33, 16.81s/it]2021-12-09 22:32:31,804 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 8/10, train_loss: 0.030056166886869403, train_accuracy:0.9916666666666667
+2021-12-09 22:32:33,081 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:75] - INFO: stopping without any improvement after 3
+ 80%|████████  | 8/10 [02:38<00:39, 19.77s/it]
+
+real	2m55.927s
+user	1m52.901s
+sys	0m53.508s

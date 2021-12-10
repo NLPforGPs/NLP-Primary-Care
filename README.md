@@ -156,7 +156,7 @@ as parsing and preparing raw consultation documents is a costly process.
 
 
 ## Fine-tune Pretrained Models with Distant Supervision
-> This method is to fine-tune the pretrained models using descriptions and adapt to transcripts.
+> This method is to fine-tune the pretrained models using descriptions and adapt them to transcripts.
 
 ### Setup
 #### Initialise repo in your home directory
@@ -218,10 +218,21 @@ Then, you need to set `/user/work/username/NLP_One_In_A_Million` as the 'PCC_BAS
 
    More details could be found in `./scripts/`.
 
+### Parameters Explanation
+
+- `--model_dir`, `--model_name` `--label_path` decide what model to use. `fg_label2id.json` is for fine-grained models while `label2id.json` is for conventional models. `origin_label2id.json` is for original conventional BERT classifier.
+- To `--do_train` or `--do_predict` is a question
+- `--use_mlm` or `--use_nsp` could be specified
+- `--fine_grained_desc` decide whether to use health topics
+- `--multi_data_path` is the data path for multiclas(conventional, mlm)and `--binary_data_path` for nsp method
+- `--predict_data_dir` is often the path of `transcripts, which could be combined with chunk_size to generate new datasets.
+- error anlysis is detailed in error analysis section
+
+
 ### Results
 > all these models using CKS descritpions to train, setups in the notebook and scripts.
 
-
+#### Coarse-grained Results
 | models             | F1-score    |                            ROC-AUC         |
 |----------------------|----------------|---------------------------------------------------------------------------|
 | Navie Bayes Classifier | 0.34 | 0.78 |
@@ -231,41 +242,61 @@ Then, you need to set `/user/work/username/NLP_One_In_A_Million` as the 'PCC_BAS
 | MLM Prompting (original)| 0.51 | 0.86|
 | MLM Prompting| **0.54** | 0.87|
 | NSP Prompting| 0.42| 0.87|
-| Fine-grained Conventional|  0.45| - |
-| Fine-grained NSP-1| 0.38 | 0.87 |
-| Fine-grained NSP-2 |  | |
+
+
+#### Fine-grained Results
+|models | F1-score|
+|-------|---------|
+| NB Classifier| 0.23|
+|SVM Classifier| 0.35|
+| Conventional BERT|  0.45|
+| Fine-grained NSP-1| 0.38 |
+| Fine-grained NSP-2| 0.26 |
 
 - Original is trained on Colab with a larger batch size 16 and larger learning rate 1e-4 (GPU P100). Because the single 2080Ti Gpu memory is 11G, I reduce batch size and learning rate to 6 and 5e-5 respectively.
-- Fine-grained NSP-1 represents directly predicting 16 categories while Fine-grained NSP-2 represents predicting with health topics at first and merging it into 16 categories.
-- Prompting use PubMedBERT-abstract and conventional use PubMedBERT-abstract-fulltext
+- Fine-grained NSP-1 represents directly using 16 categories to do prediction while Fine-grained NSP-2 represents predicting with health topics at first and merging it into 16 categories. NSP-2 takes longer time to get the results. Binary classification is done for each health topic (315 times) for each example.
+- For MLM method, apart from masking class names, randomly masking is adpoted as BERT. It can improve performance since solely masking class names lead to overfitting. 
+
 - NSP F1-score is not as good as others since it predicts multiple labels for smaller chunks and they are merged for a transcript as a whole. This means this method has higher recall(0.79).
 - ROC_AUC for fine-grained is not reported since you need to merge probabilities into 16 categories in many-to-many relationship.
 - ROC-AUC is an approximated value. The maxium value of each category across different chunks are considered as the overall category probability for a complete transcript.
+- PLMs choosing: Prompting use PubMedBERT-abstract and conventional use PubMedBERT-abstract-fulltext
+- Predicted label choosing: The above results are obtained by tagging the label with the highest probability as the predicted label.
 
-### Error Analysis
-It should be noted that when the chunk size gets smaller, the merged F1-score would be lower. This is because we just take the category with the highest probability as the predicted label of each chunk no matter how low it is. So i think you can set smaller chunks for analysis and larger chunk for evluation.
+### Error Analysis and HeatMap
+It should be noted that when the chunk size gets smaller, the merged F1-score would be lower. This is because we just take the category with the highest probability as the predicted label of each chunk no matter how low it is. So i think  smaller chunks could be set for analysis and larger chunk for evluation.
 
-Interesting finding: F1 score of Conventional BERT classifier descrese more dramatically than that of MLM when chunk size get smaller. I think it is corresponding to auc-roc
+Interesting finding: F1 score of Conventional BERT classifier descreses more dramatically than that of MLM when chunk size get smaller. I think it is corresponding to auc-roc
+
+#### Usage
+`sbatch ./scripts/test/error_analysis.sh` 
+- use `--model_dir`,`--model_name`,``--label_path` to specify a model. 
+- use `--fine_grained_desc` to use health topics. 
+- `--chunk_size` is used to generate examples shorter than the chunk size if not exist. `--predict_data_dir "transcripts-50"` specifies predict_data path
+- `--ea_file` specifies name of the output file. It is in the `DL_DATA/error_analysis/`
 
 
 
 #### NSP Dataset Generation
 It is implemented in `generate_binary_descriptions`(`prepare_data.py`). 
-- some health topics are mapped to multiple categories. When sampling negative examples, it will avoid sampling the same descriptions in other categories.
+- some health topics are related to multiple ICPC categories. When sampling negative examples, it will avoid sampling the same descriptions in other categories.
 - The dataset is balanced.
-- This dataset is based on multi-class datasets
+- This dataset is generated based on multi-class datasets
 
 
 #### Fine-grained Dataset Geneartion
-- There are over 400 health topics but when it is splitted into train and dev dataset, only topics with long sentences which can be divided into train/test datasets are retained, 319 topics in total.
+- There are over 400 health topics but when it is splitted into train and dev dataset, only topics with long sentences which can be divided into train/test datasets are retained, 315 topics in total.
 
 
 #### To Do
 
-- This structure is not the best structure. It could be improved like investigating if different datasets could be merged in one universal Dataset Class, like SQUAD.
+- This structure is not the perfect structure. It could be improved like investigating if different datasets could be merged in one universal Dataset Class, like SQUAD. How to manage different models and datasets is what I am still learning.
+
+- 'Z' should be removed in original spreadsheet. 
+
 - Hyperparameters could be tuned. It showed different batch sizes and learning rate can affect the model performance. I split descritpionts dataset into train and dev datasets to tune heyperparameters rather than using limited transcripts to tune hyperparmaeters. It seems to be out-of-distribution generalisation.
   
--  deep learning methods are more stable than traditional methods in this task.
+- deep learning methods are more stable than traditional methods in this task.
   
 
 

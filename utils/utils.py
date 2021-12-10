@@ -37,6 +37,33 @@ def merge_predictions(record_cnt, predictions, probs=False):
     return final_predictions
 
 
+def prediction_cks2icpc(map_file, predictions, label2name):
+    '''
+    Convert fine-grained predictions(cks topics) to icpc categories
+    '''
+    cks2icpc_dic = cks2icpc(map_file)
+    mapped_predictions = []
+    for pred in predictions:
+        labels_per_item = []
+        for label in pred:
+            labels_per_item.extend([label2name[icpc] for icpc in cks2icpc_dic[label] if icpc != 'Z'])
+        mapped_predictions.append(labels_per_item)
+    return mapped_predictions
+
+def cks2icpc(map_filename):
+    '''
+    convert cks topics to icpc labels    
+    '''
+    with open(map_filename,'r', encoding='utf8') as f:
+        icpc2cks = json.load(f)
+    cks2icpc_dic = {}
+    for icpc in icpc2cks:
+        for cks in icpc2cks[icpc]:
+            if cks not in cks2icpc_dic:
+                cks2icpc_dic[cks] = []
+            cks2icpc_dic[cks].append(icpc)
+    return cks2icpc_dic
+
 def one_hot_encode(labels, label2name):
     """
     convert labels to one-hot encoding

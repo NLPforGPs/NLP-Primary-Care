@@ -21,7 +21,8 @@ FEATURES = datasets.Features(
     {
     "transcript": datasets.Sequence(datasets.Value("string")),
     "codes": datasets.Sequence(datasets.Value("string")),
-    "split_nums": datasets.Value("int32")
+    "split_nums": datasets.Value("int32"),
+    "record_id": datasets.Value("string")
     }
 )
 
@@ -60,7 +61,7 @@ class DescriptionDataset(datasets.GeneratorBasedBuilder):
         with open(filepath, 'r') as f:
             data = json.load(f)
         for ii, item in enumerate(data):
-            yield ii, {'transcript': item[0], 'codes': item[1], 'split_nums': len(item[0])}
+            yield ii, {'transcript': item[0], 'codes': item[1], 'split_nums': len(item[0]), 'record_id': item[2]}
 
 
 

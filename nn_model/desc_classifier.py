@@ -168,9 +168,6 @@ class DescClassifier(nn.Module):
         # [batch_size, vocab_size]
         logits = np.array(logits)
         logits = logits[:, class_ids]
-        # print('logits', logits)
-        # [batch_size,]
-        # selected_ids = torch.argmax(logits, dim=-1)
         probs = softmax(logits)
         pred_probs = np.max(probs, axis=-1)
         selected_ids = np.argmax(logits, axis=-1)

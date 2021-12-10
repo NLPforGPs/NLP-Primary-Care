@@ -1,0 +1,22 @@
+cpu-bind=MASK - bp1-gpu003, task 4294967295 4294967295 [0]: mask 0x1010 set
+usage: conda-env [-h] {create,export,list,remove,update,config} ...
+conda-env: error: invalid choice: 'createa' (choose from 'create', 'export', 'list', 'remove', 'update', 'config')
+[nltk_data] Downloading package wordnet to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+Some weights of the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract were not used when initializing BertForNextSentencePrediction: ['cls.predictions.transform.dense.weight', 'cls.predictions.decoder.weight', 'cls.predictions.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.decoder.bias']
+- This IS expected if you are initializing BertForNextSentencePrediction from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForNextSentencePrediction from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+2021-12-09 13:53:56,358 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:155] - INFO: Predicting...
+2021-12-09 13:53:56,388 - /user/home/zu20361/.conda/envs/NLP_GP/lib/python3.9/site-packages/datasets/builder.py[line:377] - WARNING: Using custom data configuration default-a2d0abb6534a5099
+0 examples [00:00, ? examples/s]2021-12-09 13:53:56,569 - /user/home/zu20361/.cache/huggingface/modules/datasets_modules/datasets/transcript_evaldataset/4c048f6bc1501180d0c57dc4d2b8c0d9958946e6a0943b3c5b80a90f1d04b330/transcript_evaldataset.py[line:59] - INFO: Generating examples...
+                                  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 389.52it/s]
+2021-12-09 13:53:56,671 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:193] - INFO: NSP method
+  0%|          | 0/1 [00:00<?, ?ba/s]100%|██████████| 1/1 [00:31<00:00, 31.56s/ba]100%|██████████| 1/1 [00:31<00:00, 31.56s/ba]
+
+real	5m27.479s
+user	3m49.424s
+sys	1m31.311s

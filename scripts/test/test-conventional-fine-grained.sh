@@ -6,8 +6,8 @@
 #SBATCH --time=0:20:00
 #SBATCH --mem=10G
 #SBATCH --gres=gpu:1
-#SBATCH --output=./log/test-conventional-fine-grained.out
-#SBATCH --error=./log/test-conventional-fine-grained.err
+#SBATCH --output=./log/test/test-conventional-fine-grained.out
+#SBATCH --error=./log/test/test-conventional-fine-grained.err
 
 cd "${SLURM_SUBMIT_DIR}"
 
@@ -15,7 +15,6 @@ echo JOB ID: "${SLURM_JOBID}"
 
 echo Working Directory: $(pwd)
 
-mkdir -p ./log/test
 
 module add lang/python/anaconda/pytorch
 # module add lang/python/anaconda/3.8-2020.07
@@ -27,7 +26,10 @@ conda activate NLP_GP
 
 
 echo Start Time: $(date)
-
-time python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --learning_rate 1e-4 --weight_decay 1e-4 --train_data_dir "prepared/dl_data/desc/fine_grained" --model_dir models/conventional/fine_grained --model_name multiclass-fine-grained-conventional --predict_data_dir "transcripts/" --do_predict --multi_class --fine_grained_desc --chunk_size 50
+# --model_name should fit with the one in train.script
+# --label_path is required in conventional classifier
+# ----fine_grained_desc should be used
+time python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --model_dir models/conventional/fine_grained --model_name fine-grained-conventional-20epochs-16cat --label_path fg_label2id.json --predict_data_dir "transcripts/" --do_predict --load_checkpoint --fine_grained_desc --chunk_size 50
+# time python3 ./run_plms.py --batch_size 32 --pretrained_model microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext --model_dir models/conventional/fine_grained --model_name fine-grained-conventional-20epochs --label_path fg_label2id_new.json --predict_data_dir "transcripts/" --do_predict --load_checkpoint --fine_grained_desc --chunk_size 50
 
 echo End Time: $(date)

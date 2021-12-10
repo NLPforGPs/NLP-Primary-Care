@@ -15,12 +15,10 @@ echo JOB ID: "${SLURM_JOBID}"
 
 echo Working Directory: $(pwd)
 
-mkdir -p ./log/test/
-
 module add lang/python/anaconda/pytorch
 # module add lang/python/anaconda/3.8-2020.07
 
-conda env create --file nlp_gp.yml
+conda env createa --file nlp_gp.yml
 
 eval "$(conda shell.bash hook)"
 conda activate NLP_GP

@@ -56,6 +56,8 @@ class CksParser:
         else:
             self._df = pd.read_csv(self._cache_file_1, index_col=0)
             self._df_fine_grained = pd.read_csv(self._cache_file_2, index_col=0)
+            with open(self._icpc2cks, 'r') as f:
+                self._link_dic = json.load(f)
 
     def _get_cks(self):
         """
@@ -144,7 +146,13 @@ class CksParser:
             json.dump(self._link_dic, f)
 
     def get_cks_topic(self):
-        return self._df_fine_grained['topics']
+        topics = set([t for topic in list(self._link_dic.values()) for t in topic])
+        index = set(self._df_fine_grained.index.tolist())
+        removal = list(index - topics)
+        print(f'those topics {removal} not fit with icpc')
+        filtered = self._df_fine_grained.drop(removal)
+
+        return filtered['topics']
 
 
     def get_pd(self):

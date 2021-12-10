@@ -1,1 +1,1 @@
-from .metric import evaluate_classifications, evaluate_probabilities
+from .metric import evaluate_classifications, evaluate_probabilities, error_analysis
