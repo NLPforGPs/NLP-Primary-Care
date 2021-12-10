@@ -238,25 +238,25 @@ source ~/.bashrc
 > all these models using CKS descritpions to train, setups in the notebook and scripts.
 
 #### Coarse-grained Results
-| models             | F1-score    |                            ROC-AUC         |
-|----------------------|----------------|---------------------------------------------------------------------------|
-| Navie Bayes Classifier | 0.34 | 0.78 |
-| SVM Classifier | 0.36 | 0.83 |
-| Conventional BERT Classifier (original)| **0.55** | 0.53
-| Conventional BERT Classifier| 0.53 | 0.55
-| MLM Prompting (original)| 0.51 | 0.86|
-| MLM Prompting| **0.54** | 0.87|
-| NSP Prompting| 0.42| 0.87|
+| models                                           | F1-score | ROC-AUC |
+|--------------------------------------------------|----------|---------|
+| Naive Bayes Classifier                           | 0.34     | 0.78    |
+| SVM (Support Vector Machine) Classifier          | 0.36     | 0.83    |
+| Conventional BERT Classifier (original)          | **0.55** | 0.53    |
+| Conventional BERT Classifier                     | 0.53     | 0.55    |
+| Masked Language Model (MLM) Prompting (original) | 0.51     | 0.86    |
+| MLM Prompting                                    | **0.54** | 0.87    |
+| Next Sentence Prediction (NSP) Prompting         | 0.42     | 0.87    |
 
 
 #### Fine-grained Results
-|models | F1-score|
-|-------|---------|
-| NB Classifier| 0.23|
-|SVM Classifier| 0.35|
-| Conventional BERT|  0.45|
-| Fine-grained NSP-1| 0.38 |
-| Fine-grained NSP-2| 0.26 |
+| models                                  | F1-score |
+|-----------------------------------------|----------|
+| NB Classifier                           | 0.23     |
+| SVM (Support Vector Machine) Classifier | 0.35     |
+| Conventional BERT                       | 0.45     |
+| Fine-grained NSP-1                      | 0.38     |
+| Fine-grained NSP-2                      | 0.26     |
 
 - Original is trained on Colab with a larger batch size 16 and larger learning rate 1e-4 (GPU P100). Because the single 2080Ti Gpu memory is 11G, I reduce batch size and learning rate to 6 and 5e-5 respectively.
 - Fine-grained NSP-1 represents directly using 16 categories to do prediction while Fine-grained NSP-2 represents predicting with health topics at first and merging it into 16 categories. NSP-2 takes longer time to get the results. Binary classification is done for each health topic (315 times) for each example.
