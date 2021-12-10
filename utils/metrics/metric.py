@@ -70,7 +70,7 @@ def error_analysis(predictions, probabilities, split_nums, segments, transcript_
         seg_transcript_ids.extend([transcript_ids[i]]*num)
     assert len(segment_ids) == len(predictions)
     with open(save_file, 'w') as f:
-        f.write('transcript_id\tsegment_id\tlabel\tprobability\n')
+        f.write('transcript_id\tsegment_id\ttext\tlabel\tprobability\n')
         for i, label in enumerate(predictions):
             f.write(seg_transcript_ids[i] + '\t' + str(segment_ids[i]) + '\t' + segments[i] + '\t' + ",".join(label) + '\t' + str(probs[i]) + '\n')
 

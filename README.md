@@ -168,7 +168,12 @@ git clone https://github.com/NLPforGPs/NLP-Primary-Care
 cp -r /projects/NLP_One_In_A_Million /user/work/username/
 ```
 
-Then, you need to set `/user/work/username/NLP_One_In_A_Million` as the 'PCC_BASE_DIR' env variable.
+Then, you need to set `/user/work/username/NLP_One_In_A_Million` as the 'PCC_BASE_DIR' env variable. 
+```
+vi ~/.bashrc
+export PCC_BASE_DIR='/user/work/username/NLP_One_In_A_Million/'
+source ~/.bashrc
+```
 
 #### Create log directory
 
