@@ -263,20 +263,6 @@ Then, you need to set `/user/work/username/NLP_One_In_A_Million` as the 'PCC_BAS
 - PLMs choosing: Prompting use PubMedBERT-abstract and conventional use PubMedBERT-abstract-fulltext
 - Predicted label choosing: The above results are obtained by tagging the label with the highest probability as the predicted label.
 
-### Error Analysis and HeatMap
-It should be noted that when the chunk size gets smaller, the merged F1-score would be lower. This is because we just take the category with the highest probability as the predicted label of each chunk no matter how low it is. So i think  smaller chunks could be set for analysis and larger chunk for evluation.
-
-Interesting finding: F1 score of Conventional BERT classifier descreses more dramatically than that of MLM when chunk size get smaller. I think it is corresponding to auc-roc
-
-#### Usage
-`sbatch ./scripts/test/error_analysis.sh` 
-- use `--model_dir`,`--model_name`,``--label_path` to specify a model. 
-- use `--fine_grained_desc` to use health topics. 
-- `--chunk_size` is used to generate examples shorter than the chunk size if not exist. `--predict_data_dir "transcripts-50"` specifies predict_data path
-- `--ea_file` specifies name of the output file. It is in the `DL_DATA/error_analysis/`
-
-
-
 #### NSP Dataset Generation
 It is implemented in `generate_binary_descriptions`(`prepare_data.py`). 
 - some health topics are related to multiple ICPC categories. When sampling negative examples, it will avoid sampling the same descriptions in other categories.
@@ -292,12 +278,27 @@ It is implemented in `generate_binary_descriptions`(`prepare_data.py`).
 
 - This structure is not the perfect structure. It could be improved like investigating if different datasets could be merged in one universal Dataset Class, like SQUAD. How to manage different models and datasets is what I am still learning.
 
-- 'Z' should be removed in original spreadsheet. 
+- 'Z' should be removed in original spreadsheet(I aovid it in the programme but delete it physically will be better to avoid incorrect file generation). 
 
 - Hyperparameters could be tuned. It showed different batch sizes and learning rate can affect the model performance. I split descritpionts dataset into train and dev datasets to tune heyperparameters rather than using limited transcripts to tune hyperparmaeters. It seems to be out-of-distribution generalisation.
   
 - deep learning methods are more stable than traditional methods in this task.
-  
+
+### Error Analysis and HeatMap
+It should be noted that when the chunk size gets smaller, the merged F1-score would be lower. This is because we just take the category with the highest probability as the predicted label of each chunk no matter how low it is. So i think  smaller chunks could be set for analysis and larger chunk for evluation. 
+
+Interesting finding: F1 score of Conventional BERT classifier descreses more dramatically than that of MLM when chunk size get smaller. I think it is corresponding to auc-roc
+
+#### Usage
+`sbatch ./scripts/test/error_analysis.sh` 
+- use `--model_dir`,`--model_name`,``--label_path` to specify a model. 
+- use `--fine_grained_desc` to use health topics. 
+- `--chunk_size` is used to generate examples shorter than the chunk size if not exist. `--predict_data_dir "transcripts-50"` specifies predict_data path
+- `--ea_file` specifies name of the output file. It is in the 
+
+#### Generated Files
+It can be found in `/Volumes/NLP_One_In_A_Million/prepared/dl_data/error_analysis/`. There are two files `error_analysis-50.xls` and `error_analysis-490.xls` which are generated using conventional BERT with different chunk sizes.
+
 
 
 # FQA
