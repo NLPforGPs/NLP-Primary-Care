@@ -21,36 +21,42 @@ this question.
 
 ## Folder Structure
 ```
-├── README.md
-├── acknowledgements.md
 ├── classification.ipynb
-├── nlp_gp.yml
-├── nn_model
+├── log                                         // used to save results
+│   ├── test
+│   └── train
+├── nlp_gp.yml                                  // Conda Environment
+├── nn_model                                    // Deep learning models   
 │   ├── __init__.py
-│   └── desc_classifier.py                    // deep learning classifiers
-├── oneinamillion                             // data extraction and preparation
+│   └── desc_classifier.py
+├── oneinamillion                               // data extraction and preparation 
 │   ├── __init__.py
-│   ├── __pycache__
 │   ├── clinical_codes
 │   ├── common.py
 │   ├── pc_consultation.py
 │   ├── primary_care
 │   └── resources.py
-├── oneinamillionwrapper                       // Dataset for deep learning model
+├── oneinamillionwrapper                        // Datasets for DL methods
 │   ├── __init__.py
-│   ├── description_dataset.py                 // Load description dataset using dataset API
-│   ├── one_in_a_million.py                     
-│   └── transcript_evaldataset.py              // Load transcript dataset using dataset API
-├── prepare_data.py                            // Prepare and split transcript data and descritpion data  
+│   ├── binary_dataset.py
+│   ├── description_dataset.py
+│   ├── one_in_a_million.py
+│   └── transcript_evaldataset.py
+├── prepare_data.py                             // Split and Prepare descritpions and transcripts
 ├── requirements_conda.txt
 ├── requirements_pip.txt
-├── run_plms.py                                 // entrypoint for run deep learning models
-└── utils                                       // Tools used in other components
+├── run_plms.py                                 // Entrypoint of DL models
+├── scripts                                     // Scripts for BP
+│   ├── create_logdir.sh
+│   ├── test
+│   └── train
+└── utils                                       // useful tools for other modules
     ├── __init__.py
     ├── metrics
     ├── preprocessing
     ├── stopwords
-    └── transcripts.py
+    ├── transcripts.py
+    └── utils.py
 ```
 
 
@@ -60,10 +66,13 @@ this question.
 |                      | clinical_codes | class for getting ICPC or CKS codes                                       |
 |                      | primary_care   | contains sub-package classes to parse transcripts/ gp records             |
 | oneinamillionwrapper |                | Datasets(transcripts and descripts) used in deep learning models using HuggingFace datasets|
+|                      | binary_dataset | Used for NSP method |
+|                      | description_dataset| Used for MLM and conventional classifier |
+|                      | transcript_evaldataset| Used for model evaluation |
 | utils                |                | Commonly used methods                                                     |
 |                      | preprocessing  | methods for data preprocessing                                            |
+|                      | metrics        | package for model evaluation
 | nn_model             |                | package for different deep learning models                                |
-| metrics              |                | package for model evaluation                                              |
 
 
 ## Development Setup
