@@ -1,0 +1,36 @@
+cpu-bind=MASK - bp1-gpu016, task 4294967295 4294967295 [0]: mask 0x101 set
+
+CondaValueError: prefix already exists: /user/home/zu20361/.conda/envs/NLP_GP
+
+[nltk_data] Downloading package wordnet to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+Some weights of the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract were not used when initializing BertForMaskedLM: ['cls.seq_relationship.bias', 'cls.seq_relationship.weight']
+- This IS expected if you are initializing BertForMaskedLM from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForMaskedLM from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+2021-12-08 10:35:38,460 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:93] - INFO: training...
+2021-12-08 10:35:38,528 - /user/home/zu20361/.conda/envs/NLP_GP/lib/python3.9/site-packages/datasets/builder.py[line:377] - WARNING: Using custom data configuration default-0edc5cf9a905c05a
+0 examples [00:00, ? examples/s]2021-12-08 10:35:38,749 - /user/home/zu20361/.cache/huggingface/modules/datasets_modules/datasets/description_dataset/d1e7e6de6d47305aa98cf02bede76588ca92ee8c617b143052c51e176d9c6484/description_dataset.py[line:65] - INFO: Generating examples...
+                                0 examples [00:00, ? examples/s]2021-12-08 10:35:38,803 - /user/home/zu20361/.cache/huggingface/modules/datasets_modules/datasets/description_dataset/d1e7e6de6d47305aa98cf02bede76588ca92ee8c617b143052c51e176d9c6484/description_dataset.py[line:65] - INFO: Generating examples...
+                                  0%|          | 0/2 [00:00<?, ?it/s]100%|██████████| 2/2 [00:00<00:00, 412.44it/s]
+  0%|          | 0/1 [00:00<?, ?ba/s]100%|██████████| 1/1 [00:01<00:00,  1.70s/ba]100%|██████████| 1/1 [00:01<00:00,  1.70s/ba]
+  0%|          | 0/1 [00:00<?, ?ba/s]100%|██████████| 1/1 [00:00<00:00,  2.39ba/s]100%|██████████| 1/1 [00:00<00:00,  2.38ba/s]
+  0%|          | 0/15 [00:00<?, ?it/s]2021-12-08 10:36:13,327 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 0/15, train_loss: 3.074387816588084, train_accuracy:0.5133150826529014
+2021-12-08 10:36:21,794 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.6037844173897353, the dev_loss is 2.1259716227650642, save best model to /user/work/zu20361/PCC/models/mlm/mlm-abstractbest-val-acc-model
+  7%|▋         | 1/15 [00:40<09:31, 40.80s/it]2021-12-08 10:36:54,044 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 1/15, train_loss: 1.8316016296545665, train_accuracy:0.6456383071643669
+2021-12-08 10:37:02,678 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.6272422100405601, the dev_loss is 1.9974871128797531, save best model to /user/work/zu20361/PCC/models/mlm/mlm-abstractbest-val-acc-model
+ 13%|█▎        | 2/15 [01:21<08:51, 40.85s/it]2021-12-08 10:37:35,018 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 2/15, train_loss: 1.075558270017306, train_accuracy:0.7560667477958665
+2021-12-08 10:37:43,607 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.6298697840687166, the dev_loss is 2.1070503145456314, save best model to /user/work/zu20361/PCC/models/mlm/mlm-abstractbest-val-acc-model
+ 20%|██        | 3/15 [02:02<08:10, 40.88s/it]2021-12-08 10:38:16,027 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 3/15, train_loss: 0.5858013525605201, train_accuracy:0.8490659681444093
+ 27%|██▋       | 4/15 [02:40<07:16, 39.72s/it]2021-12-08 10:38:54,021 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 4/15, train_loss: 0.32458350583910944, train_accuracy:0.9107185389982593
+ 33%|███▎      | 5/15 [03:18<06:31, 39.11s/it]2021-12-08 10:39:32,090 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 5/15, train_loss: 0.21046729845305284, train_accuracy:0.9399170406993778
+ 40%|████      | 6/15 [03:56<05:48, 38.75s/it]2021-12-08 10:40:10,182 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 6/15, train_loss: 0.13945497659345468, train_accuracy:0.9601787675516807
+2021-12-08 10:40:15,724 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:75] - INFO: stopping without any improvement after 3
+ 40%|████      | 6/15 [04:34<06:52, 45.79s/it]
+
+real	4m55.822s
+user	3m3.130s
+sys	1m43.301s

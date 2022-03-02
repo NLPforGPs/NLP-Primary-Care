@@ -9,7 +9,8 @@ class RecordCodeParser:
     _id_code_dict = {}
 
     def __init__(self):
-        self._get_pc_codes()
+        # self._get_pc_codes()
+        self._get_pc_codes_from_pe()
 
     def _get_pc_codes(self):
         df: pd.DataFrame
@@ -28,6 +29,24 @@ class RecordCodeParser:
                         self._id_code_dict[current_id].append(code)
                     else:
                         self._id_code_dict[current_id] = [code]
+
+    def _get_pc_codes_from_pe(self):
+        print('loading codes from PE...')
+        df: pd.DataFrame
+        df = pd.read_excel(PCC_CODES_FILE)
+        df['One in a Million record id'] = df['One in a Million record id'].astype(str)
+        self._id_code_dict = df.groupby('One in a Million record id')['icpc_problem_short'].apply(list).to_dict()
+
+
+        # for ii, row in enumerate(df):
+        #     current_id = df.loc[ii, 'One in a Million record id']
+        #     current_id = df.loc[ii, 'One in a Million record id']
+        #     current_id : str
+        #     if current_id not in self._id_code_dict:
+        #         self._id_code_dict[current_id] = []
+        #     else:
+        #         self._id_code_dict[current_id].append() 
+
 
     # lookup the ICPC codes for the record
     def get(self, record_id):

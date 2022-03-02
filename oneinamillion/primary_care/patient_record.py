@@ -134,7 +134,9 @@ class PatientRecordParser:
 
             word_doc = docx.Document(os.path.join(PCC_PT_RECORD_RAW_DIR, doc_name))
             if len(word_doc.tables) != 1:
-                raise ValueError("must contain only one table for GP record")
+                logging.warning(f"{doc_name} has multiple tables, must contain only one table for GP record")
+                continue
+                # raise ValueError(f"{doc_name} has multiple tables, must contain only one table for GP record")
             _records = self._parse_table(word_doc.tables[0])
 
             pt_records = PatientRecords(_id, _records)
@@ -193,7 +195,7 @@ class PatientRecordParser:
         self.doc_ids = [_extract_id_from_name(filename) for filename in txt_docs]
         self.doc_ids.sort()
 
-    @lru_cache
+    @lru_cache(maxsize=128, typed=False)
     def get(self, record_id):
         if record_id in self.doc_ids:
             target = f"{record_id}_pt_record.txt"

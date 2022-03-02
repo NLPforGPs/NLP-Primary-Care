@@ -1,0 +1,43 @@
+cpu-bind=MASK - bp1-gpu003, task 4294967295 4294967295 [0]: mask 0x1010 set
+
+CondaValueError: prefix already exists: /user/home/zu20361/.conda/envs/NLP_GP
+
+[nltk_data] Downloading package wordnet to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+Some weights of the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract were not used when initializing BertForNextSentencePrediction: ['cls.predictions.bias', 'cls.predictions.transform.dense.weight', 'cls.predictions.transform.LayerNorm.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.decoder.bias', 'cls.predictions.decoder.weight', 'cls.predictions.transform.dense.bias']
+- This IS expected if you are initializing BertForNextSentencePrediction from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForNextSentencePrediction from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+2021-12-09 11:53:57,647 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:93] - INFO: training...
+2021-12-09 11:53:57,686 - /user/home/zu20361/.conda/envs/NLP_GP/lib/python3.9/site-packages/datasets/builder.py[line:377] - WARNING: Using custom data configuration default-91040993a7c9842f
+0 examples [00:00, ? examples/s]2021-12-09 11:53:57,888 - /user/home/zu20361/.cache/huggingface/modules/datasets_modules/datasets/binary_dataset/ee485923f4c329690a5227aaa3b2a93b210c3e9e3523f78ec2bf8cb196a683a7/binary_dataset.py[line:66] - INFO: Generating examples...
+1810 examples [00:00, 18097.82 examples/s]5725 examples [00:00, 30478.29 examples/s]                                          0 examples [00:00, ? examples/s]2021-12-09 11:53:58,131 - /user/home/zu20361/.cache/huggingface/modules/datasets_modules/datasets/binary_dataset/ee485923f4c329690a5227aaa3b2a93b210c3e9e3523f78ec2bf8cb196a683a7/binary_dataset.py[line:66] - INFO: Generating examples...
+                                  0%|          | 0/2 [00:00<?, ?it/s]100%|██████████| 2/2 [00:00<00:00, 658.45it/s]
+  0%|          | 0/7 [00:00<?, ?ba/s] 14%|█▍        | 1/7 [00:00<00:02,  2.22ba/s] 29%|██▊       | 2/7 [00:00<00:02,  2.44ba/s] 43%|████▎     | 3/7 [00:01<00:01,  2.58ba/s] 57%|█████▋    | 4/7 [00:01<00:01,  2.64ba/s] 71%|███████▏  | 5/7 [00:01<00:00,  2.66ba/s] 86%|████████▌ | 6/7 [00:02<00:00,  2.70ba/s]100%|██████████| 7/7 [00:02<00:00,  3.45ba/s]100%|██████████| 7/7 [00:02<00:00,  2.90ba/s]
+  0%|          | 0/2 [00:00<?, ?ba/s] 50%|█████     | 1/2 [00:00<00:00,  2.49ba/s]100%|██████████| 2/2 [00:00<00:00,  2.77ba/s]100%|██████████| 2/2 [00:00<00:00,  2.72ba/s]
+  0%|          | 0/20 [00:00<?, ?it/s]2021-12-09 11:58:13,731 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 0/20, train_loss: 0.5837202694803747, train_accuracy:0.853219696969697
+2021-12-09 11:58:42,617 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.9485294117647058, the dev_loss is 0.25853386250624877, save best model to /user/work/zu20361/PCC/models/nsp/fine_grained/fine-grained-nsp-20epochs-abstractbest-val-acc-model
+  5%|▌         | 1/20 [04:41<1:29:03, 281.23s/it]2021-12-09 12:02:55,020 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 1/20, train_loss: 0.23550220159861532, train_accuracy:0.9471275252525253
+ 10%|█         | 2/20 [09:19<1:23:46, 279.26s/it]2021-12-09 12:07:32,960 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 2/20, train_loss: 0.16149892228151952, train_accuracy:0.9665404040404041
+2021-12-09 12:08:01,937 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.9522058823529411, the dev_loss is 0.2505239081891573, save best model to /user/work/zu20361/PCC/models/nsp/fine_grained/fine-grained-nsp-20epochs-abstractbest-val-acc-model
+ 15%|█▌        | 3/20 [14:00<1:19:24, 280.26s/it]2021-12-09 12:12:14,310 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 3/20, train_loss: 0.0915471246323091, train_accuracy:0.9829545454545454
+ 20%|██        | 4/20 [18:38<1:14:28, 279.31s/it]2021-12-09 12:16:52,212 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 4/20, train_loss: 0.05789540842144189, train_accuracy:0.9897411616161617
+2021-12-09 12:17:21,228 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.9543067226890757, the dev_loss is 0.3343362015151828, save best model to /user/work/zu20361/PCC/models/nsp/fine_grained/fine-grained-nsp-20epochs-abstractbest-val-acc-model
+ 25%|██▌       | 5/20 [23:19<1:10:01, 280.08s/it]2021-12-09 12:21:33,657 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 5/20, train_loss: 0.05722091774065681, train_accuracy:0.9894255050505051
+ 30%|███       | 6/20 [27:57<1:05:10, 279.33s/it]2021-12-09 12:26:11,651 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 6/20, train_loss: 0.04443456524705019, train_accuracy:0.9917929292929293
+ 35%|███▌      | 7/20 [32:35<1:00:25, 278.90s/it]2021-12-09 12:30:49,674 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 7/20, train_loss: 0.04639699826290293, train_accuracy:0.9910037878787878
+ 40%|████      | 8/20 [37:13<55:43, 278.63s/it]  2021-12-09 12:35:27,674 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 8/20, train_loss: 0.024466392496487493, train_accuracy:0.9965277777777778
+2021-12-09 12:35:56,676 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:72] - INFO: the dev_acc is 0.9574579831932774, the dev_loss is 0.35511686657423336, save best model to /user/work/zu20361/PCC/models/nsp/fine_grained/fine-grained-nsp-20epochs-abstractbest-val-acc-model
+ 45%|████▌     | 9/20 [41:55<51:14, 279.53s/it]2021-12-09 12:40:09,634 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 9/20, train_loss: 0.02350805341722887, train_accuracy:0.9958964646464646
+ 50%|█████     | 10/20 [46:33<46:31, 279.19s/it]2021-12-09 12:44:47,881 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 10/20, train_loss: 0.02187448337643487, train_accuracy:0.9968434343434344
+ 55%|█████▌    | 11/20 [51:11<41:50, 278.90s/it]2021-12-09 12:49:26,083 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 11/20, train_loss: 0.009163780614043283, train_accuracy:0.9985795454545454
+ 60%|██████    | 12/20 [55:50<37:09, 278.69s/it]2021-12-09 12:54:04,258 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:65] - INFO: Epochs: 12/20, train_loss: 0.0029740920785244645, train_accuracy:0.9995265151515151
+2021-12-09 12:54:29,716 - /user/home/zu20361/NLP-Primary-Care/nn_model/desc_classifier.py[line:75] - INFO: stopping without any improvement after 3
+ 60%|██████    | 12/20 [1:00:28<40:18, 302.36s/it]
+
+real	60m47.825s
+user	41m54.244s
+sys	18m46.645s

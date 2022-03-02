@@ -1,0 +1,10 @@
+JOB ID: 272458
+Working Directory: /user/home/zu20361/NLP-Primary-Care
+Warning: you have pip-installed dependencies in your environment file, but you do not list pip itself as one of your conda dependencies.  Conda may not use the correct pip to install your packages, and they may end up in the wrong place.  Please add an explicit pip dependency.  I'm adding one for you, but still nagging you.
+Start Time: Thu Dec 9 22:29:38 GMT 2021
+loading codes from PE...
+Downloading and preparing dataset description_dataset/default to /user/home/zu20361/.cache/huggingface/datasets/description_dataset/default-b5fba57daf09edd7/0.0.0/d1e7e6de6d47305aa98cf02bede76588ca92ee8c617b143052c51e176d9c6484...
+/user/work/zu20361/PCC/prepared/dl_data/desc/cks_only/multiclass/coarse_grained
+Dataset description_dataset downloaded and prepared to /user/home/zu20361/.cache/huggingface/datasets/description_dataset/default-b5fba57daf09edd7/0.0.0/d1e7e6de6d47305aa98cf02bede76588ca92ee8c617b143052c51e176d9c6484. Subsequent calls will reuse this data.
+label2id {'B': 0, 'T': 1, 'A': 2, 'P': 3, 'Y': 4, 'S': 5, 'W': 6, 'X': 7, 'K': 8, 'H': 9, 'D': 10, 'U': 11, 'N': 12, 'L': 13, 'F': 14, 'R': 15}
+End Time: Thu Dec 9 22:32:33 GMT 2021

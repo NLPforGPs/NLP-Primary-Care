@@ -1,0 +1,23 @@
+cpu-bind=MASK - bp1-gpu020, task 4294967295 4294967295 [0]: mask 0x1010 set
+
+CondaValueError: prefix already exists: /user/home/zu20361/.conda/envs/NLP_GP
+
+[nltk_data] Downloading package wordnet to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt to
+[nltk_data]     /user/home/zu20361/nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+Some weights of the model checkpoint at microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract were not used when initializing BertForNextSentencePrediction: ['cls.predictions.decoder.weight', 'cls.predictions.decoder.bias', 'cls.predictions.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.bias', 'cls.predictions.transform.dense.weight', 'cls.predictions.transform.LayerNorm.weight']
+- This IS expected if you are initializing BertForNextSentencePrediction from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForNextSentencePrediction from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+2021-12-08 13:45:27,811 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:150] - INFO: Predicting...
+2021-12-08 13:45:28,163 - /user/home/zu20361/.conda/envs/NLP_GP/lib/python3.9/site-packages/datasets/builder.py[line:377] - WARNING: Using custom data configuration default-a2d0abb6534a5099
+0 examples [00:00, ? examples/s]2021-12-08 13:45:28,379 - /user/home/zu20361/.cache/huggingface/modules/datasets_modules/datasets/transcript_evaldataset/4c048f6bc1501180d0c57dc4d2b8c0d9958946e6a0943b3c5b80a90f1d04b330/transcript_evaldataset.py[line:59] - INFO: Generating examples...
+                                  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 295.96it/s]
+2021-12-08 13:45:28,593 - /user/home/zu20361/NLP-Primary-Care/./run_plms.py[line:177] - INFO: NSP method
+  0%|          | 0/1 [00:00<?, ?ba/s]100%|██████████| 1/1 [00:29<00:00, 29.67s/ba]100%|██████████| 1/1 [00:29<00:00, 29.68s/ba]
+
+real	6m3.704s
+user	3m52.334s
+sys	1m31.848s

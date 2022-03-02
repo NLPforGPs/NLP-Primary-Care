@@ -28,14 +28,14 @@ class PCConsultation:
     record_parser = PatientRecordParser()
     transcript_parser = TranscriptParser()
     record_code_parser = RecordCodeParser()
-
     doc_ids: list = []
     _seed = 0
 
     def __init__(self, seed=None):
+        
         self._get_doc_ids()
 
-        self._pd_path = os.path.join(PCC_PREPARED_PATH, 'consultation.csv')
+        self._pd_path = os.path.join(PCC_PREPARED_PATH, 'consultation_PE.csv')
 
         if seed:
             self._seed = seed
@@ -65,14 +65,20 @@ class PCConsultation:
 
     # return list of indexes for train and test sets
     def create_train_test_split(self, n_splits=1, test_size=0.2):
-        codes = [self.record_code_parser.get(doc) for doc in self.doc_ids]
+        # codes = [self.record_code_parser.get(doc) for doc in self.doc_ids]
         flattened_pairs = []
-        for _id, _codes in zip(self.doc_ids, codes):
-            if type(_codes) == list:
+
+        for doc in self.doc_ids:
+            _codes = self.record_code_parser.get(doc)
+            if _codes is None or str(_codes[0]) == 'nan':
+                continue
+            elif type(_codes) == list:
                 for c in _codes:
-                    flattened_pairs.append((_id, c))
+                    if c[0] != '-':
+                        flattened_pairs.append((doc, c))
             else:
-                flattened_pairs.append((_id, _codes))
+                flattened_pairs.append((doc, _codes))
+
         doc_ids, codes = zip(*flattened_pairs)
         n_samples = len(doc_ids)
         doc_ids = np.array(doc_ids).reshape((n_samples, -1))
@@ -81,7 +87,8 @@ class PCConsultation:
         classified_codes = np.array(classified_codes).reshape((n_samples,))
         split = StratifiedShuffleSplit(n_splits=n_splits, test_size=test_size, random_state=self._seed)
         for train_index, test_index in split.split(doc_ids, classified_codes):
-            yield doc_ids_flatten[train_index], doc_ids_flatten[test_index]
+            yield doc_ids_flatten[train_index], doc_ids_flatten[test_index], classified_codes[train_index],classified_codes[test_index]
+
 
     def get_pd(self, from_raw=False):
         if os.path.exists(self._pd_path) and not from_raw:
@@ -112,5 +119,5 @@ class PCConsultation:
 
 if __name__ == '__main__':
     pc = PCConsultation()
-    x = pc.get_pd()
+    x = pc.get_pd(from_raw=True)
 
