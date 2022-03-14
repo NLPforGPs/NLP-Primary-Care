@@ -42,6 +42,7 @@ def prediction_cks2icpc(map_file, predictions, label2name):
     Convert fine-grained predictions(cks topics) to icpc categories
     '''
     cks2icpc_dic = cks2icpc(map_file)
+    # print(cks2icpc_dic)
     mapped_predictions = []
     for pred in predictions:
         labels_per_item = []

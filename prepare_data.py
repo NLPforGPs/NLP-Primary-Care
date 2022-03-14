@@ -98,7 +98,6 @@ def load_cks_descriptions(cks_icpc=True):
 #     df_fined_desc = load_cks_descriptions(cks_icpc=False) 
 
 
-
 def load_descriptions(selected_mode, class_name=None):
     icpc_description_corpus = load_icpc_descriptions()
     cks_description_corpus = load_cks_descriptions()
@@ -118,6 +117,7 @@ def load_descriptions(selected_mode, class_name=None):
     icpc_corpus_df = pd.DataFrame.from_dict(icpc_description_dic, orient='index', columns=['keyword'])
     icpc_corpus = icpc_corpus_df['keyword']
     return icpc_corpus
+
 
 def generate_descriptions(tokenizer, chunk_size, test_size, selected_mode, save_path, class_name=None, fine_grained=False):
     '''
