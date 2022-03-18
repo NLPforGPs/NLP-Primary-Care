@@ -1,0 +1,240 @@
+	record_id	icpc_codes	cks_nearest_centroid_prediction
+0	30301	['U99', 'B80']	Acute kidney injury
+1	40416	['S96', 'P76']	Autism in adults
+2	20106	['Y07', 'T91', 'A91']	Vitamin D deficiency in adults
+3	50614	['L86']	Leg ulcer - venous
+4	11107	['L99', 'W11']	Chest pain
+5	71014	['L08']	Shoulder pain
+6	122201	['L08']	Shoulder pain
+7	11108	['U70']	Palliative cancer care - pain
+8	20113	['P74']	Generalized anxiety disorder
+9	30312	['D99']	Dyspepsia - proven GORD
+10	40409	['L92']	Shoulder pain
+11	20206	['P03']	Palliative care - general issues
+12	50701	['L98', 'N01', 'K86']	Hypertension
+13	60909	['P08']	Autism in adults
+14	122113	['N06', 'K07']	Leg ulcer - venous
+15	111907	['K96']	Anal fissure
+16	40410	['P86']	Alcohol - problem drinking
+17	50602	['N94']	Back pain - low (without radiculopathy)
+18	40412	['R78']	Chest pain
+19	40403	['L81']	Autism in adults
+20	50703	['X72', 'P03', 'S23']	Alopecia areata
+21	40411	['U99']	Pyelonephritis - acute
+22	101802	['S87', 'H28']	Hearing loss in adults
+23	11113	['L91']	Shoulder pain
+24	111913	['D83', 'R96']	Cough
+25	50616	['K86', 'D07']	Hypertension
+26	81311	['R09']	Epistaxis (nosebleeds)
+27	101807	['T91', 'D90']	Anaemia - iron deficiency
+28	30305	['N99']	Trigeminal neuralgia
+29	91408	['S88', 'T07', 'F29']	Vitamin D deficiency in adults
+30	91512	['A98', 'D70']	Diarrhoea - adult's assessment
+31	10107	['R74']	Cough
+32	50608	['K74']	Chest pain
+33	71003	['R05']	Cough
+34	20101	['L18', 'D01']	Hypertension
+35	20115	['A98', 'D89', 'Y13']	Contraception - sterilization
+36	60801	['L90']	Plantar fasciitis
+37	50710	['P03', 'D99']	Chronic pain
+38	11105	['L99']	Cough
+39	30308	['K84']	Heart failure - chronic
+40	112009	['D99', 'R23']	Lung and pleural cancers - recognition and referral
+41	122111	['P76']	Autism in adults
+42	40406	['W14']	Diarrhoea - adult's assessment
+43	81609	['L76', 'R74']	Common cold
+44	111910	['L91']	Gout
+45	60907	['H99', 'P76']	Autism in adults
+46	81312	['N89', 'H82', 'L15']	Migraine
+47	30507	['L86']	Radiculopathy (lumbar) - sciatica
+48	11101	['K86']	Hypertension
+49	71009	['R81']	Cough
+50	40408	['P76']	Antenatal and postnatal depression
+51	81615	['X11', 'U29', 'N03']	Autism in adults
+52	60903	['L18']	Neck pain - non-specific
+53	11117	['X08']	Breast pain - cyclical
+54	111915	['P74', 'D95']	Autism in adults
+55	91413	['U99', 'K07', 'R95']	Autism in adults
+56	112010	['F29', 'S84', 'R76']	Cough
+57	10102	['-30']	Atrial fibrillation
+58	122202	['D07']	Infertility
+59	101708	['Y99', 'K84']	Hypertension
+60	60905	['T82']	Eating disorders
+61	81605	['L04', 'L84']	Sprains and strains
+62	91414	['D07']	Palliative care - nausea and vomiting
+63	101710	['W11']	Hypertension
+64	50711	['L91']	Osteoarthritis
+65	50716	['L99']	Palliative cancer care - pain
+66	81309	['D83', 'S87']	Eating disorders
+67	122109	['D87']	Gastrointestinal tract (upper) cancers - recognition and referral
+68	91510	['R96', 'K86']	Infertility
+69	50705	['K27', 'P74']	Hypertension
+70	40401	['U99', 'P06', 'S03']	Obstructive sleep apnoea syndrome
+71	91407	['S04', 'K86', 'R05']	Hypertension
+72	60910	['L99', 'D09', 'X06']	Baker's cyst
+73	20207	['K85', 'P76', 'N94']	Hypertension
+74	20112	['L89']	Osteoporosis - prevention of fragility fractures
+75	30302	['R96']	Cough
+76	91401	['X99', 'L89', 'R02']	Vitamin D deficiency in adults
+77	11118	['P03', 'K99', 'S74']	Chronic pain
+78	10108	['L99']	Fungal skin infection - foot
+79	40404	['N01']	Superficial vein thrombosis (superficial thrombophlebitis)
+80	30504	['B80']	Anaemia - iron deficiency
+81	71013	['A98', 'S93', 'L99', 'L99']	Plantar fasciitis
+82	10113	['U71']	Prostate cancer
+83	60804	['P01']	Autism in adults
+84	91409	['F15', 'L99']	Hypertension
+85	112011	['P74', 'W11']	Autism in adults
+86	50606	['S76']	Bites and stings - insect
+87	20203	['-30']	Learning disabilities
+88	60902	['P76']	Autism in adults
+89	122203	['R74', 'D93', 'N75']	Chronic pain
+90	60808	['D93']	Diarrhoea - adult's assessment
+91	111901	['K96', 'L84', 'R96']	Chest pain
+92	50712	['X87']	Infertility
+93	50714	['W78', 'P76']	Pre-conception - advice and management
+94	10106	['D91']	Autism in adults
+95	112007	['T08']	Eating disorders
+96	50601	['P15', 'K85']	Alcohol - problem drinking
+97	40402	['D95', 'S82']	Anal fissure
+98	101810	['P76', 'P19']	Obsessive-compulsive disorder
+99	122105	['N93', 'P76']	Carpal tunnel syndrome
+100	71005	['L08']	Shoulder pain
+101	81302	['P99', 'U95', 'K86']	Hypertension
+102	20201	['X86', 'W11']	Cervical cancer and HPV
+103	20219	['S74', 'X26', 'S29', 'K86']	Hypertension
+104	10104	['S16', 'R05']	Hypertension
+105	91509	['P76']	Antenatal and postnatal depression
+106	50613	['L84', 'Y06', 'R07']	Prostate cancer
+107	20209	['X07', 'B02', 'S86']	Neck lump
+108	20102	['T92', 'K87', 'U99']	Acute kidney injury
+109	50604	['A98', 'P16', 'R99']	Alcohol - problem drinking
+110	122103	['D89']	Scrotal pain and swelling
+111	40415	['W14', 'D94']	Hypercalcaemia
+112	71011	['R05']	Cough
+113	81303	['D12']	Autism in adults
+114	81304	['L18']	Hypertension
+115	81306	['D21']	Cough
+116	20220	['D93']	Irritable bowel syndrome
+117	101702	['R74', 'T93', 'T89']	Diabetes - type 2
+118	122205	['S87']	Eczema - atopic
+119	10110	['L02']	Sleep disorders - shift work and jet lag
+120	40405	['T86', 'W11']	Hypertension
+121	50708	['U07', 'P76']	Autism in adults
+122	50611	['R05', 'D01']	Cough
+123	60901	['P01']	Autism in adults
+124	60809	['P73', 'F04']	Autism in adults
+125	111914	['D01', 'R95']	Chest pain
+126	20110	['T27', 'S10', 'S74', 'L96']	Knee pain - assessment
+127	91501	['L87']	Neck pain - non-specific
+128	10112	['T93', 'L88', 'K85', 'P76']	Hypertension
+129	20114	['L11', 'L02', 'W14']	Bruising
+130	20204	['R96']	Cough
+131	112008	['D82', 'L92', 'H01']	Shoulder pain
+132	81612	['H84', 'D01']	Hearing loss in adults
+133	30314	['S76']	Sleep disorders - shift work and jet lag
+134	20103	['T99']	Pre-conception - advice and management
+135	60908	['L15']	Baker's cyst
+136	111909	['Y07', 'T93', 'D94']	Hypertension
+137	20210	['Y02', 'N93', 'R83', 'T91']	Carpal tunnel syndrome
+138	60803	['R99']	Autism in adults
+139	81602	['L92', 'H84', 'X11']	Hearing loss in adults
+140	91507	['A92', 'K87', 'L99', 'R95', 'T82', 'U04', 'D91']	Hypertension
+141	30502	['D01']	Diverticular disease
+142	20218	['P76']	Infertility
+143	50615	['R96']	Asthma
+144	111911	['D18', 'B80']	Anaemia - iron deficiency
+145	60813	['R78']	Cough
+146	50707	['B80']	Anaemia - iron deficiency
+147	60912	['U07', 'N29']	Parkinson's disease
+148	11103	['S74', 'T85']	Chronic pain
+149	30313	['P01']	Cellulitis - acute
+150	60807	['T85', 'T91']	Vitamin D deficiency in adults
+151	30506	['K07', 'B82']	Leg ulcer - venous
+152	10111	['T86']	Hypertension
+153	50603	['N94']	Hypertension
+154	112013	['R09', 'P02', 'D99']	Back pain - low (without radiculopathy)
+155	20208	['H82']	Headache - assessment
+156	30306	['R04']	Cough
+157	101701	['L18']	Cholecystitis - acute
+158	30508	['H02']	Hearing loss in adults
+159	122207	['K07', 'S99', 'T91']	Vitamin D deficiency in adults
+160	30304	['S70', 'X11']	Chickenpox
+161	20205	['P04', 'U02']	Sleep disorders - shift work and jet lag
+162	122209	['L17']	Fungal skin infection - foot
+163	11116	['D07']	Palliative cancer care - pain
+164	91406	['L20', 'B78', 'L95']	Gallstones
+165	101808	['L03', 'P76']	Infertility
+166	91508	['U02']	Prostate cancer
+167	81614	['S70']	Chickenpox
+168	81604	['D87']	Constipation in children
+169	20109	['X11', 'L03', 'A04']	Hyperthyroidism
+170	20215	['P76', 'B80']	Anaemia - iron deficiency
+171	11111	['L90']	Osteoarthritis
+172	30505	['L84']	Radiculopathy (lumbar) - sciatica
+173	101804	['T90', 'L87']	Carpal tunnel syndrome
+174	81313	['W12']	Learning disabilities
+175	122206	['P06', 'K78', 'T99', 'K96', 'S91', 'S80']	Obstructive sleep apnoea syndrome
+176	11120	['N94', 'F83']	Vitamin D deficiency in adults
+177	11112	['S96']	Rosacea
+178	20214	['R81']	Cough
+179	60815	['A04']	Vitamin D deficiency in adults
+180	91403	['L04']	Osteoarthritis
+181	20202	['P74']	Autism in adults
+182	30303	['N94', 'L15']	Shoulder pain
+183	60805	['L92']	Shoulder pain
+184	11110	['P70']	Autism in adults
+185	81314	['P03']	Autism in adults
+186	60802	['S05']	Infertility
+187	101706	['L18']	Neck pain - non-specific
+188	111912	['H71']	Otitis externa
+189	40413	['D93', 'L99']	Diarrhoea - adult's assessment
+190	50704	['P74']	Eating disorders
+191	20211	['D07', 'N05', 'L18']	Autism in adults
+192	81307	['A98', 'L99', 'P20']	Dementia
+193	20108	['Y77']	Autism in adults
+194	40419	['S96']	Ectopic pregnancy
+195	122108	['A98', 'N17', 'L93']	Tennis elbow
+196	101805	['T82', 'D07', 'W11']	Hypertension
+197	20111	['S99', 'P76']	Autism in adults
+198	91502	['D12']	Constipation in children
+199	91511	['D29']	Sore throat - acute
+200	111902	['U13']	Hypertension
+201	50612	['D10']	Poisoning or overdose
+202	71006	['A98', 'H70', 'D07']	Hypertension
+203	91505	['L86', 'S93']	Cervical radiculopathy - neck pain
+204	122112	['S90']	Infertility
+205	20217	['K80', 'R96']	Palpitations
+206	50706	['K95', 'K78', 'L87']	Superficial vein thrombosis (superficial thrombophlebitis)
+207	40407	['H01']	Otitis media - chronic suppurative
+208	101809	['R95']	Vitamin D deficiency in adults
+209	81613	['P76']	Autism in adults
+210	10101	['A04', 'L86']	Radiculopathy (lumbar) - sciatica
+211	20212	['L87', 'D84']	Cough
+212	30307	['U71']	Pyelonephritis - acute
+213	40418	['P74']	Pre-conception - advice and management
+214	11109	['K92', 'P76']	Autism in adults
+215	11104	['N92']	Vitamin D deficiency in adults
+216	81315	['P19']	Autism in adults
+217	122107	['L99', 'P74']	Knee pain - assessment
+218	71004	['L99']	Osteoarthritis
+219	71008	['S82']	Autism in adults
+220	122208	['L86']	Leg ulcer - venous
+221	11106	['K85']	Hypertension
+222	20104	['L98']	Bunions
+223	81301	['N19', 'P01']	Autism in adults
+224	50709	['R96', 'D12', 'U04']	Constipation
+225	112001	['R74']	Red eye
+226	50702	['U02', 'L83']	Neck pain - non-specific
+227	11102	['T90', 'R75']	Epistaxis (nosebleeds)
+228	10109	['K96']	Haemorrhoids
+229	60911	['X72']	Pyelonephritis - acute
+230	91412	['K86', 'S76']	Hypertension
+231	30310	['L81']	Autism in adults
+232	122204	['K07', 'P70', 'A91']	Dementia
+233	91415	['N99']	Red eye
+234	50715	['S80']	Itch - widespread
+235	40414	['A11', 'A91']	Chest pain
+236	101703	['T93', 'K86']	Hypertension
+237	91504	['P76', 'L15', 'T82']	Depression in children
+238	50607	['X11']	Menopause
