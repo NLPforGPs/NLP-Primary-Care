@@ -15,9 +15,9 @@ this question.
     - [Copy RDSF file to workplace](#copy-rdsf-file-to-workplace)
     - [Create log directory](#create-log-directory)
   - [GO Run it!](#go-run-it)
-  - [Results](#results)
-    - [NSP Dataset Generation](#nsp-dataset-generation)
-    - [To Do](#to-do)
+  - [Results](./RESULTS.md)
+  - [NSP Dataset Generation](#nsp-dataset-generation)
+  - [To Do](#to-do)
 
 ## Folder Structure
 ```

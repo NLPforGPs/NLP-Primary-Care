@@ -15,12 +15,25 @@ and medical and custom stopwords are used.
 | Binary Naïve Bayes                               | 0.18 | 0.75 | 0.19 | 0.78 |
 | Multi-class SVM                                  | 0.36 | 0.83 | 0.39 | 0.86 |
 | Binary SVM                                       | 0.00 | 0.84 | 0.00 | 0.86 |
-| Nearest centroid                                 | 0.36 | ---- | 0.39 | ---- |
-| Conventional BERT Classifier (original)          | **0.55** | 0.53    | | |
+| Nearest centroid                                 | 0.36 | 0.64 | 0.39 | 0.65 |
 | Conventional BERT Classifier                     | 0.53     | 0.55    | | |
-| Masked Language Model (MLM) Prompting (original) | 0.51     | 0.86    | | |
-| MLM Prompting                                    | **0.54** | 0.87    | | |
+| Masked Language Model (MLM)                      | **0.54** | 0.87    | | |
 | Next Sentence Prediction (NSP) Prompting         | 0.42     | 0.87    | | |
+
+We also tested different combinations of stopwords and different
+sets of descriptions as the training text (CKS topics, ICPC code descriptions, both)
+for all the non-neural network methods. In all cases, CKS topics were the best
+training descriptions, and medical and custom stopwords give the best performance.
+The table below shows F1 scores with different sets of stopwords with CKS topics for training:
+
+
+| models                       | m,c | m | c | e |
+|------------------------------|----------|---------|----------|---------|
+| Multi-class Naïve Bayes      | 0.34 | 0.11 | 0.08 | 0.12 |
+| Binary Naïve Bayes           | 0.18 | 0.00 | 0.01 | 0.00 |
+| Multi-class SVM              | 0.36 | 0.04 | 0.03 | 0.04 |
+| Nearest centroid             | 0.36 | 0.04 | 0.03 | 0.04 |
+
 
 #### Distant Supervision, Fine-grained Topics
 
@@ -39,9 +52,8 @@ and medical and custom stopwords are used.
 | Binary Naïve Bayes                      | 0.00 |
 | Multi-class SVM                         | 0.36 |
 | Nearest centroid                        | 0.36 |
-| Conventional BERT                       | 0.45 |
-| Fine-grained NSP-1                      | 0.38 |
-| Fine-grained NSP-2                      | 0.26 |
+| Conventional BERT classifier            | 0.45 |
+| Next Sentence Prediction (NSP) Prompting| 0.26 |
 
 #### Supervision with Transcripts, Coarse-grained Topics
 
@@ -59,31 +71,26 @@ Medical and custom stopwords are used.
 | Binary Naïve Bayes                               | 0.28 | 0.77 |
 | Multi-class SVM                                  | 0.18 | 0.68 |
 | Binary SVM                                       | 0.16 | 0.77 |
-| Nearest neighbours (k=3)                         | 0.16 | 0.56 |
-| Conventional BERT Classifier (original)          |  |   |
-| Conventional BERT Classifier                     |  |   |
-| Masked Language Model (MLM) Prompting (original) |  |   |
-| MLM Prompting                                    |  |   |
-| Next Sentence Prediction (NSP) Prompting         |  |   |
+| Nearest neighbours (k=3)                         | 0.16 | 0.59 |
+| Nearest centroid                                 | 0.28 | 0.61 |
+
 
 #### Stopwords + Supervision with Transcripts, Coarse-grained Topics
 
 As above, except we test different combinations of stopwords and show
 the best result.
 
-| models                                           | F1-score | Stopwords |
+| models                                           | F1-score | ROC-AUC | Stopwords |
 |--------------------------------------------------|----------|--------- |
-| Multi-class Naïve Bayes                          | 0.32 | m, c, e |
-| Binary Naïve Bayes                               | 0.30 | m |
-| Multi-class SVM                                  | 0.20 | c, e |  
-| Binary SVM                                       | 0.18 | e |   
-| Nearest neighbours (k=3)                         | 0.17 | m, c, e |
-| Nearest centroid                                 | 0.30 | m, e |
-| Conventional BERT Classifier (original)          |  |   |
-| Conventional BERT Classifier                     |  |   |
-| Masked Language Model (MLM) Prompting (original) |  |   |
-| MLM Prompting                                    |  |   |
-| Next Sentence Prediction (NSP) Prompting         |  |   |
+| Multi-class Naïve Bayes                          | 0.32 | 0.77 | m, c, e |
+| Binary Naïve Bayes                               | 0.30 | 0.77 | m |
+| Multi-class SVM                                  | 0.20 | 0.71 | c, e |  
+| Binary SVM                                       | 0.18 | 0.77 | e |   
+| Nearest neighbours (k=3)                         | 0.18 | 0.59 | m, c, e |
+| Nearest centroid                                 | 0.30 | 0.62 | m, e |
+
+
+-------------------------------------------------------------------------------
 
 ## Results added by Haishuo
 
@@ -101,7 +108,7 @@ the best result.
 | MLM Prompting                                    | **0.54** | 0.87    |
 | Next Sentence Prediction (NSP) Prompting         | 0.42     | 0.87    |
 
-- Original is trained on Colab with a larger batch size 16 and larger learning rate 1e-4 (GPU P100). Because the single 2080Ti Gpu memory is 11G, I reduce batch size and learning rate to 6 and 5e-5 respectively.
+- Original MLM and conventional BERT classifier were trained on Colab with a larger batch size 16 and larger learning rate 1e-4 (GPU P100). Because the single 2080Ti Gpu memory is 11G, I reduce batch size and learning rate to 6 and 5e-5 respectively.
 - For MLM method, apart from masking class names, randomly masking is adopted from BERT. It can improve performance since solely masking class names lead to overfitting.
 - ROC-AUC is an approximated value. The maxium value of each category across different chunks are considered as the overall category probability for a complete transcript.
 
