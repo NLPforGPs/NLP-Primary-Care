@@ -15,9 +15,9 @@ this question.
     - [Copy RDSF file to workplace](#copy-rdsf-file-to-workplace)
     - [Create log directory](#create-log-directory)
   - [GO Run it!](#go-run-it)
-  - [Results](./RESULTS.md)
-  - [NSP Dataset Generation](#nsp-dataset-generation)
+  - [Dataset Generation](#dataset-generation)
   - [To Do](#to-do)
+- [Results](./RESULTS.md)
 
 ## Folder Structure
 ```
@@ -164,7 +164,7 @@ as parsing and preparing raw consultation documents is a costly process.
 
 
 
-## Fine-tune Pretrained Models with Distant Supervision
+## Deep Learning: Fine-tune Pretrained Models with Distant Supervision
 > This method is to fine-tune the pretrained models using descriptions and adapt them to transcripts.
 
 ### Setup
@@ -240,12 +240,21 @@ source ~/.bashrc
 - `--fine_grained_desc` decide whether to use health topics
 - `--multi_data_path` is the data path for multiclas(conventional, mlm)and `--binary_data_path` for nsp method
 - `--predict_data_dir` is often the path of `transcripts, which could be combined with chunk_size to generate new datasets.
-- error anlysis is detailed in error analysis section
+- error analysis is detailed in error analysis section
+
+### Dataset Generation
+
+#### NSP Dataset Generation
+It is implemented in `generate_binary_descriptions`(`prepare_data.py`).
+- some health topics are related to multiple ICPC categories. When sampling negative examples, it will avoid sampling the same descriptions in other categories.
+- The dataset is balanced.
+- This dataset is generated based on multi-class datasets
 
 
+#### Fine-grained Dataset Generation
+- There are over 400 health topics but when it is splitted into train and dev dataset, only topics with long sentences which can be divided into train/test datasets are retained, 315 topics in total.
 
-
-#### To Do
+### To Do
 
 - This structure is not the perfect structure. It could be improved like investigating if different datasets could be merged in one universal Dataset Class, like SQUAD. How to manage different models and datasets is what I am still learning.
 

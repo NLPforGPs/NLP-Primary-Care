@@ -81,7 +81,7 @@ As above, except we test different combinations of stopwords and show
 the best result.
 
 | models                                           | F1-score | ROC-AUC | Stopwords |
-|--------------------------------------------------|----------|--------- |
+|--------------------------------------------------|----------|-------- | --------- |
 | Multi-class Naïve Bayes                          | 0.32 | 0.77 | m, c, e |
 | Binary Naïve Bayes                               | 0.30 | 0.77 | m |
 | Multi-class SVM                                  | 0.20 | 0.71 | c, e |  
@@ -130,13 +130,3 @@ the best result.
 
 - PLMs choosing: Prompting use PubMedBERT-abstract and conventional use PubMedBERT-abstract-fulltext
 - Predicted label choosing: The above results are obtained by tagging the label with the highest probability as the predicted label.
-
-#### NSP Dataset Generation
-It is implemented in `generate_binary_descriptions`(`prepare_data.py`).
-- some health topics are related to multiple ICPC categories. When sampling negative examples, it will avoid sampling the same descriptions in other categories.
-- The dataset is balanced.
-- This dataset is generated based on multi-class datasets
-
-
-#### Fine-grained Dataset Generation
-- There are over 400 health topics but when it is splitted into train and dev dataset, only topics with long sentences which can be divided into train/test datasets are retained, 315 topics in total.
