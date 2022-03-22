@@ -2,6 +2,9 @@
 
 ### Results added by Edwin on 18th March 2022
 
+This represents the current and most complete set of results. The previous
+section is retained below as it includes a few extra details. 
+
 #### Distant Supervision, Coarse-grained Topics
 
 The goal of this experiment is to predict the top-level ICPC codes.
