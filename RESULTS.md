@@ -31,7 +31,7 @@ and medical and custom stopwords are used.
 | Binary Naïve Bayes                               | 0.18 | 0.75 | 0.19 | 0.78 |
 | Multi-class SVM                                  | 0.36 | 0.83 | 0.39 | 0.86 |
 | Binary SVM                                       | 0.18 | 0.84 | 0.18 | 0.86 |
-| Nearest centroid                                 | 0.36 | 0.64 | 0.39 | 0.65 |
+| Nearest centroid                                 | 0.37 | 0.64 | 0.40 | 0.65 |
 | Conventional BERT Classifier                     | 0.53     | 0.55    | | |
 | Masked Language Model (MLM)                      | **0.54** | 0.87    | | |
 | Next Sentence Prediction (NSP) Prompting         | 0.42     | 0.87    | | |
