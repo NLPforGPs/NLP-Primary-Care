@@ -88,7 +88,7 @@ Medical and custom stopwords are used.
 | Multi-class Naïve Bayes                          | 0.30 | 0.77 |
 | Binary Naïve Bayes                               | 0.28 | 0.77 |
 | Multi-class SVM                                  | 0.18 | 0.68 |
-| Binary SVM                                       | 0.16 | 0.77 |
+| Binary SVM                                       | 0.18 | 0.77 |
 | Nearest neighbours (k=3)                         | 0.16 | 0.59 |
 | Nearest centroid                                 | 0.28 | 0.61 |
 
