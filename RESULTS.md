@@ -15,6 +15,8 @@ Next sentence prediction (NSP) prompting = A pretrained model (PubMedBERT-abstra
 
 For all three methods, the transcripts are split into chunks of up to 490 tokens. Each chunk is then treated as a separate data point. We merge the predictions for a whole transcript by predicting any labels that were assigned to any chunks in the transcript. For the probabilities, we take the maximum probability that each label received for any chunk in the transcript, then re-normalise. Conventional BERT and MLM are therefore multiclass classifiers for each chunk, but could output multiple labels across a long transcript. NSP is a binary classifier for each label.
 
+The naive Bayes methods will assign any labels that have probability > 0.1. This means that they can assign multiple labels (even in the multiclass case), if more than one class has probability > 0.1.
+
 
 #### Distant Supervision, Coarse-grained Topics
 
