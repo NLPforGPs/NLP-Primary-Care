@@ -5,6 +5,17 @@
 This represents the current and most complete set of results. The previous
 section is retained below as it includes a few extra details. 
 
+#### Methods
+
+Conventional BERT = A pretrained model (PubMedBERT-abstract-fulltext) with a linear layer on top.
+
+Masked language model (MLM) prompting = A pretrained model (PubMedBERT-abstract) is given part of the transcript as input followed by a prompt. The prompt contains a missing word, which the model must guess. The prompt is: 'This is a problem of {}.' The word in '{}' is the class label that is to be predicted by the model. 
+
+Next sentence prediction (NSP) prompting = A pretrained model (PubMedBERT-abstract) is used as a binary classifier for each possible label. For each label, it is given two inputs: part of the transcript and a prompt sentence as in MLM with the label filled in, e.g., 'This is a problem of Musculo-skeletal.'
+
+For all three methods, the transcripts are split into chunks of up to 490 tokens. Each chunk is then treated as a separate data point. We merge the predictions for a whole transcript by predicting any labels that were assigned to any chunks in the transcript. For the probabilities, we take the maximum probability that each label received for any chunk in the transcript, then re-normalise. Conventional BERT and MLM are therefore multiclass classifiers for each chunk, but could output multiple labels across a long transcript. NSP is a binary classifier for each label.
+
+
 #### Distant Supervision, Coarse-grained Topics
 
 The goal of this experiment is to predict the top-level ICPC codes.
