@@ -34,6 +34,8 @@ and medical and custom stopwords are used.
 | Masked Language Model (MLM)                      | **0.54** | 0.87    | | |
 | Next Sentence Prediction (NSP) Prompting         | 0.42     | 0.87    | | |
 
+The ROC-AUC for Conventional BERT is low because the model outputs overly confident probabilities that get rounded to 1 for the selected class. This happens less for the prompting methods: NSP is less confident that the prompt would follow the transcript; MLM outputs the probability distribution over all words in the vocabulary, which we then filter down to just the class names, and BERT does not tend to put high probability on any one particular word in the vocabulary.
+
 We also tested different combinations of stopwords and different
 sets of descriptions as the training text (CKS topics, ICPC code descriptions, both)
 for all the non-neural network methods. In all cases, CKS topics were the best
