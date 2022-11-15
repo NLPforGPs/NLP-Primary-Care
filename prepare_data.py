@@ -31,8 +31,16 @@ def prepare_original_data():
     parser = PCConsultation()  # the only class needed to obtain all PC consultation data-pairs
     orig_dataset = parser.get_pd()
 
+    print(f'Number of rows in dataset: {len(orig_dataset)}')
+        
     # orig_dataset.head()  # uncomment to inspect the original dataset
+    orig_dataset['icpc_codes'] = orig_dataset['icpc_codes'].fillna("[nan]")
+    # orig_dataset = orig_dataset.astype({'icpc_codes': 'string'})
     orig_dataset = orig_dataset.drop(orig_dataset[orig_dataset['icpc_codes']=="[nan]"].index)
+    # orig_dataset = orig_dataset.drop(orig_dataset[orig_dataset['icpc_codes']=="<NA>"].index)
+        
+    print(f'Number of rows in dataset after dropping transcripts with no ICPC code: {len(orig_dataset)}')
+    
     orig_dataset['codes'] = orig_dataset['icpc_codes'].apply(extract_icpc_categories)
     orig_dataset['transcript__conversation_clean'] = orig_dataset['transcript__conversation'].apply(
         preprocess_transcripts)

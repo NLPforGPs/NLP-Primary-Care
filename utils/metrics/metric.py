@@ -1,6 +1,23 @@
 import numpy as np
-from sklearn.metrics import f1_score, classification_report, roc_auc_score
+from sklearn.metrics import f1_score, classification_report, roc_auc_score, precision_score, recall_score
 
+
+def evaluate_per_class(targets,
+                       predictions):
+    """
+    Evaluates the discrete classification labels.
+    :param targets: A matrix where each row is a one-hot representation of the gold labels for the sample.
+    :param predictions: A matrix where each row is a one-hot representation of the predicted labels for the sample.
+    :return:
+    """
+
+    keepclasses = np.any(targets, axis=0)
+    targets = targets[:, keepclasses]
+    predictions = predictions[:, keepclasses]
+
+    return f1_score(targets, predictions, average=None, zero_division=0), \
+           precision_score(targets, predictions, average=None, zero_division=0), \
+           recall_score(targets, predictions, average=None, zero_division=0)
 
 
 def evaluate_classifications(targets,
@@ -27,7 +44,9 @@ def evaluate_classifications(targets,
             f"classification_report:\n{classification_report(targets, predictions, target_names=class_names, zero_division=0)}"
         )
 
-    return f1_score(targets, predictions, average='macro')
+    return f1_score(targets, predictions, average='macro', zero_division=0), \
+           precision_score(targets, predictions, average='macro', zero_division=0), \
+           recall_score(targets, predictions, average='macro', zero_division=0)
 
 
 def evaluate_probabilities(targets, predictions):
@@ -42,7 +61,7 @@ def evaluate_probabilities(targets, predictions):
     targets = targets[:, keepclasses]
     predictions = predictions[:, keepclasses]
 
-    auroc = roc_auc_score(targets, predictions, average='macro') # [:, keepclasses], predictions[:, keepclasses])
+    auroc = roc_auc_score(targets, predictions, average='macro')  # [:, keepclasses], predictions[:, keepclasses])
     # print(f'area under ROC curve: {auroc}')
 
     return auroc
@@ -67,10 +86,10 @@ def error_analysis(predictions, probabilities, split_nums, segments, transcript_
     seg_transcript_ids = []
     for i, num in enumerate(split_nums):
         segment_ids.extend(list(range(num)))
-        seg_transcript_ids.extend([transcript_ids[i]]*num)
+        seg_transcript_ids.extend([transcript_ids[i]] * num)
     assert len(segment_ids) == len(predictions)
     with open(save_file, 'w') as f:
         f.write('transcript_id\tsegment_id\ttext\tlabel\tprobability\n')
         for i, label in enumerate(predictions):
-            f.write(seg_transcript_ids[i] + '\t' + str(segment_ids[i]) + '\t' + segments[i] + '\t' + ",".join(label) + '\t' + str(probs[i]) + '\n')
-
+            f.write(seg_transcript_ids[i] + '\t' + str(segment_ids[i]) + '\t' + segments[i] + '\t' + ",".join(
+                label) + '\t' + str(probs[i]) + '\n')

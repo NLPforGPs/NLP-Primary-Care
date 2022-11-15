@@ -5,6 +5,7 @@ import numpy as np
 
 # trim the number from the ICPC code and return the alphabetical categories
 def extract_icpc_categories(codes: Any, remove_admin=True) -> List[str]:
+    print(codes)
     codes = literal_eval(codes)
     codes = [c[0].strip().upper() for c in codes]
     if remove_admin:

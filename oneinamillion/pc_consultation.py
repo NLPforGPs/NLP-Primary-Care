@@ -59,7 +59,7 @@ class PCConsultation:
         only_record = set(pt_record_list) - set(transcript_list)
         only_transcript = set(transcript_list) - set(pt_record_list)
 
-        logger.info(f"Total primary care data-pairs: {len(self.doc_ids)}")
+        logger.warning(f"Total primary care data-pairs: {len(self.doc_ids)}")
         logger.warning(f"The current IDs only have record documents.\n{np.sort(np.array(list(only_record)))}")
         logger.warning(f"The current IDs only have transcript documents.\n{np.sort(np.array(list(only_transcript)))}")
 
@@ -94,6 +94,7 @@ class PCConsultation:
         if os.path.exists(self._pd_path) and not from_raw:
             df = pd.read_csv(self._pd_path, index_col=0)
             df.reset_index(inplace=True)
+            print(f"Reading from prepared file: {self._pd_path}")
         else:
             # this will force a cache refresh from the two parsers
             self.record_parser.clear_cache()
@@ -102,6 +103,9 @@ class PCConsultation:
             columns = ['record_id', 'icpc_codes', 'pt_records',
                        'transcript__start_date', 'transcript__duration', 'transcript__conversation']
             df = pd.DataFrame(columns=columns)
+            
+            print(df.shape)
+            
             for ii, record_id in enumerate(tqdm(ids)):
                 record = self.get_single(record_id)
                 data = {
