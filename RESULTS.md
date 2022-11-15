@@ -5,6 +5,19 @@
 This represents the current and most complete set of results. The previous
 section is retained below as it includes a few extra details. 
 
+#### Methods
+
+Conventional BERT = A pretrained model (PubMedBERT-abstract-fulltext) with a linear layer on top.
+
+Masked language model (MLM) prompting = A pretrained model (PubMedBERT-abstract) is given part of the transcript as input followed by a prompt. The prompt contains a missing word, which the model must guess. The prompt is: 'This is a problem of {}.' The word in '{}' is the class label that is to be predicted by the model. 
+
+Next sentence prediction (NSP) prompting = A pretrained model (PubMedBERT-abstract) is used as a binary classifier for each possible label. For each label, it is given two inputs: part of the transcript and a prompt sentence as in MLM with the label filled in, e.g., 'This is a problem of Musculo-skeletal.'
+
+For all three methods, the transcripts are split into chunks of up to 490 tokens. Each chunk is then treated as a separate data point. We merge the predictions for a whole transcript by predicting any labels that were assigned to any chunks in the transcript. For the probabilities, we take the maximum probability that each label received for any chunk in the transcript, then re-normalise. Conventional BERT and MLM are therefore multiclass classifiers for each chunk, but could output multiple labels across a long transcript. NSP is a binary classifier for each label.
+
+The naive Bayes methods will assign any labels that have probability > 0.1. This means that they can assign multiple labels (even in the multiclass case), if more than one class has probability > 0.1.
+
+
 #### Distant Supervision, Coarse-grained Topics
 
 The goal of this experiment is to predict the top-level ICPC codes.
@@ -17,11 +30,13 @@ and medical and custom stopwords are used.
 | Multi-class Naïve Bayes                          | 0.34 | 0.78 | 0.36 | 0.79 |
 | Binary Naïve Bayes                               | 0.18 | 0.75 | 0.19 | 0.78 |
 | Multi-class SVM                                  | 0.36 | 0.83 | 0.39 | 0.86 |
-| Binary SVM                                       | 0.00 | 0.84 | 0.00 | 0.86 |
-| Nearest centroid                                 | 0.36 | 0.64 | 0.39 | 0.65 |
+| Binary SVM                                       | 0.18 | 0.84 | 0.18 | 0.86 |
+| Nearest centroid                                 | 0.37 | 0.64 | 0.40 | 0.65 |
 | Conventional BERT Classifier                     | 0.53     | 0.55    | | |
 | Masked Language Model (MLM)                      | **0.54** | 0.87    | | |
 | Next Sentence Prediction (NSP) Prompting         | 0.42     | 0.87    | | |
+
+The ROC-AUC for Conventional BERT is low because the model outputs overly confident probabilities that get rounded to 1 for the selected class. This happens less for the prompting methods: NSP is less confident that the prompt would follow the transcript; MLM outputs the probability distribution over all words in the vocabulary, which we then filter down to just the class names, and BERT does not tend to put high probability on any one particular word in the vocabulary.
 
 We also tested different combinations of stopwords and different
 sets of descriptions as the training text (CKS topics, ICPC code descriptions, both)
@@ -73,7 +88,7 @@ Medical and custom stopwords are used.
 | Multi-class Naïve Bayes                          | 0.30 | 0.77 |
 | Binary Naïve Bayes                               | 0.28 | 0.77 |
 | Multi-class SVM                                  | 0.18 | 0.68 |
-| Binary SVM                                       | 0.16 | 0.77 |
+| Binary SVM                                       | 0.18 | 0.77 |
 | Nearest neighbours (k=3)                         | 0.16 | 0.59 |
 | Nearest centroid                                 | 0.28 | 0.61 |
 
