@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -l
+
 #SBATCH --time=6:00:00
 #SBATCH --partition=gpu_short
 #SBATCH --gres=gpu:1
@@ -18,9 +19,9 @@ module add lang/python/anaconda/pytorch
 # module add lang/python/anaconda/3.8-2020.07
 
 #conda env create --file nlp_gp.yml
-eval "$(conda shell.bash hook)"
+#eval "$(conda shell.bash hook)"
 conda activate NLP_GP
-conda install datasets --yes
+#conda install datasets --yes
 
 echo Start Time: $(date)
 conda run -n NLP_GP --no-capture-output python -u ./run_transcript_supervision.py
