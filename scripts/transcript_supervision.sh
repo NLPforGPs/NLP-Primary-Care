@@ -7,8 +7,8 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=16G
-#SBATCH --output=/user/work/es1595/oiam_distant.out
-#SBATCH --error=/user/work/es1595/oiam_distant.err
+#SBATCH --output=/user/work/es1595/oiam_distant.out.%j
+#SBATCH --error=/user/work/es1595/oiam_distant.err.%j
 
 cd "${SLURM_SUBMIT_DIR}"
 
@@ -20,7 +20,7 @@ module add lang/python/anaconda/pytorch
 
 #conda env create --file nlp_gp.yml
 #eval "$(conda shell.bash hook)"
-conda activate NLP_GP
+#conda activate NLP_GP
 #conda install datasets --yes
 
 echo Start Time: $(date)

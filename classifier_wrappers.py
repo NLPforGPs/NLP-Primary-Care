@@ -20,7 +20,7 @@ from nltk import tokenize
 from utils.utils import merge_predictions, stratified_multi_label_split
 
 
-pretrained_model = 'prajjwal1/bert-tiny'  # 'microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext'
+pretrained_model = 'albert-base-v2'  # 'prajjwal1/bert-tiny'  # 'microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext'
 
 
 class NSPDataset(Dataset):
