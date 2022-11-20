@@ -4,6 +4,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 import torch
 import json
 from sklearn.model_selection import train_test_split
+import pandas as pd
 
 
 def save_checkpoint(dir, epoch, name='checkpoint', **kwargs):
@@ -120,9 +121,7 @@ def load_json_file(data_path):
     return data
 
 
-def stratified_multi_label_split(orig_dataset, y_hot):
-    seed = 23490
-
+def stratified_multi_label_split(orig_dataset, y_hot, seed=23490, test_size=0.2):
     class_sizes = np.sum(y_hot, 0)
     class_idxs = np.argsort(class_sizes)  # iterate over the classes from smallest to largest
 
@@ -132,21 +131,25 @@ def stratified_multi_label_split(orig_dataset, y_hot):
     y_hot_tmp = np.copy(y_hot)  # copy the labels. To handle multi-label cases, we will deal with
     # each example according to its rarest class. Once it has been dealt with, the other labels must be zeroed out
     # so it is included only once.
+    dev_data = None
 
     for cidx, c in enumerate(class_idxs):  # iterate over classes
-        c_examples = y_hot_tmp[:, c] == 1  # find the members of each class
-        y_hot_tmp[c_examples, :] = 0  # zero out the examples so they can't be chosen again
+        c_examples = np.argwhere(y_hot_tmp[:, c] == 1).flatten()  # find the members of each class
+        y_hot_tmp[c_examples, c] = 0  # zero out the examples so they can't be chosen again
 
+        if len(c_examples) < 2:  # can't split, too few instances. Merge with another small class
+            y_hot_tmp[c_examples, class_idxs[cidx+1]] = 1
+            continue
         Xc_dev, Xc_test, yc_dev, yc_test = train_test_split(
-            orig_dataset[c_examples],
+            orig_dataset.iloc[c_examples] if isinstance(orig_dataset, pd.DataFrame) else np.array([orig_dataset[i] for i in c_examples]),
             y_hot[c_examples],
-            test_size=0.2,
-            train_size=0.8,
+            test_size=test_size,
+            train_size=1-test_size,
             random_state=random_states[cidx]
         )  # split the examples from this dataset
-        if cidx > 0:
-            dev_data = dev_data.append(Xc_dev)
-            test_data = test_data.append(Xc_test)
+        if dev_data is not None:
+            dev_data = dev_data.append(Xc_dev) if isinstance(dev_data, pd.DataFrame) else np.append(dev_data, Xc_dev, axis=0)
+            test_data = test_data.append(Xc_test) if isinstance(test_data, pd.DataFrame) else np.append(test_data, Xc_test, axis=0)
 
             y_hot_dev = np.append(y_hot_dev, yc_dev, axis=0)
             y_hot_test = np.append(y_hot_test, yc_test, axis=0)

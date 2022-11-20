@@ -14,8 +14,9 @@ def extract_icpc_categories(codes: Any, remove_admin=True) -> List[str]:
 
 def segment_without_overlapping(tokenizer, sents, maximum_length):
     '''
-    used to segment descriptions or transcripts into chunks
+    Used to segment descriptions or transcripts into chunks
     '''
+
     chunks = ['']
     prev =[]
     
@@ -88,8 +89,10 @@ def masking(examples, labels, label2name, tokenizer, prompt, max_length=512):
         all_targets.append(target)
 
     return {'input_ids': all_input_ids, 
-            'attention_mask': attention_mask, 'token_type_ids': token_type_ids,
-            'targets': all_targets}
+            'attention_mask': attention_mask,
+            'token_type_ids': token_type_ids,
+            'targets': all_targets
+            }
 
 def NSP(examples, labels, polarity, label2name, tokenizer, prompt, max_length=512, fine_grained=False):
     '''

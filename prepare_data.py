@@ -21,7 +21,6 @@ import random
 import logging
 
 
-
 def prepare_original_data():
     # alternatively, you may override the variables in oneinamillion.resources.py
     os.environ['PCC_BASE_DIR'] = "Z:/"
@@ -186,6 +185,7 @@ def generate_binary_descriptions(tokenizer, chunk_size, test_size, selected_mode
 
     write_path(os.path.join(save_path, 'train.json'), train_data)
     write_path(os.path.join(save_path, 'test.json'), test_data)
+
 
 def generate_binary_per_class(raw_data, class2class):
     '''

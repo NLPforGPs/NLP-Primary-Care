@@ -25,7 +25,6 @@ if __name__ == '__main__':
     parser.add_argument('--learning_rate', type=float, default=1e-4)
     parser.add_argument('--weight_decay', type=float, default=1e-4)
 
-
     parser.add_argument('--train_data_dir', type=str, default='desc', help='directory for train data')
     parser.add_argument('--multi_data_path', type=str, default='multiclass/coarse_grained', help='directory for processed data in multiclass methods')
     parser.add_argument('--binary_data_path', type=str, default='binary/coarse_grained', help='directory for processed data in the binary method')

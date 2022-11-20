@@ -23,16 +23,16 @@ class DescClassifier(nn.Module):
         if use_schduler:
             scheduler = get_linear_schedule_with_warmup(self.optimizer, len(train_loader)*self.epochs*0.1, num_training_steps = self.epochs*len(train_loader))
         if load_checkpoint:
-            logging.info('loding checkpoint....')
+            logging.info('loading checkpoint....')
             checkpoint = torch.load(os.path.join(
-                save_dir, ckpt_name+'best-val-acc-model.pt'))
+                save_dir, ckpt_name+'_best-val-acc-model.pt'))
 
             scheduler.load_state_dict(checkpoint['scheduler'])
             self.load_state_dict(checkpoint['state_dict'])
             self.optimizer.load_state_dict(checkpoint['optimizer'])
             start_epoch = checkpoint['epoch']+1
-            
 
+        save_epoch = -1
         for epoch in trange(start_epoch, self.epochs):
             total_loss, total_acc = 0, 0
             self.model.train()
@@ -42,7 +42,7 @@ class DescClassifier(nn.Module):
                 token_type_ids = batch['token_type_ids'].to(device)
                 targets = batch['targets'].to(device)
     
-                output = self.model(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids, labels = targets)
+                output = self.model(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids, labels=targets)
                 loss, logits = output[0], output[1]
                 self.optimizer.zero_grad()
                 loss.backward()
@@ -68,8 +68,9 @@ class DescClassifier(nn.Module):
             if dev_acc > best_acc:
                 best_acc = dev_acc
                 save_epoch = epoch
-                save_checkpoint(save_dir, epoch=epoch, name=save_name+'best-val-acc-model', state_dict=self.state_dict(
-                ), optimizer=self.optimizer.state_dict(), scheduler=scheduler.state_dict(), prompt=prompt)
+                save_checkpoint(save_dir, epoch=epoch, name=save_name+'_best-val-acc-model',
+                                state_dict=self.state_dict(), optimizer=self.optimizer.state_dict(),
+                                scheduler=scheduler.state_dict(), prompt=prompt)
                 logging.info(
                     f'the dev_acc is {dev_acc}, the dev_loss is {dev_loss}, save best model to {os.path.join(save_dir, save_name+"best-val-acc-model")}')
             if epoch - save_epoch > stop_epochs:
@@ -100,7 +101,7 @@ class DescClassifier(nn.Module):
 
         return total_loss/len(dev_loader), total_acc/len(dev_loader)
 
-    def predict(self, predict_loader, device, tokenizer, class_names, use_mlm=True, use_nsp=True, load_checkpoint=False, id2class=None):
+    def predict(self, predict_loader, device, tokenizer, class_names, use_mlm=True, use_nsp=True, id2class=None):
         
         predictions, all_logits, labels = [], [], []
         self.model.eval()
@@ -116,7 +117,7 @@ class DescClassifier(nn.Module):
                 attention_mask = attention_mask.view(-1, 512)
                 token_type_ids = token_type_ids.view(-1, 512)
                 
-                if use_mlm: # for prompt targets is natural languages ranther than labels
+                if use_mlm:  # for prompt targets is natural languages ranther than labels
                     targets = targets.view(-1, 512)
 
                 output = self.model(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids, labels = targets)
@@ -134,7 +135,6 @@ class DescClassifier(nn.Module):
 
                 all_logits.extend(logits.tolist())
 
-                    
             if use_mlm:
                 labels, class_probs = self.obtain_max_class(tokenizer, class_names, all_logits)
 
@@ -149,11 +149,14 @@ class DescClassifier(nn.Module):
                     labels.append(class_names[indices].tolist())
                     class_probs.append(all_logits[i:i+len(class_names), 1])
                 class_probs = np.array(class_probs).reshape(-1, len(class_names))
-                calss_probs = softmax(class_probs)
+                class_probs = softmax(class_probs)
 
             else:
                 pred_ids = np.argmax(all_logits, axis=-1)
-                labels = [[id2class[item]] for item in pred_ids]
+                if id2class is not None:
+                    labels = [[id2class[item]] for item in pred_ids]
+                else:
+                    labels = pred_ids
                 class_probs = softmax(np.array(all_logits))
                 # print('labels', labels)
             return labels, class_probs
