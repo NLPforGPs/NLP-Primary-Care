@@ -19,7 +19,7 @@ module add lang/python/anaconda/pytorch
 
 #conda env create --file nlp_gp.yml
 #eval "$(conda shell.bash hook)"
-conda activate NLP_GP
+#conda activate NLP_GP
 
 echo Start Time: $(date)
 conda run -n NLP_GP --no-capture-output python -u ./run_distant_supervision.py
