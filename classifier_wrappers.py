@@ -299,7 +299,7 @@ def run_bert_classifier(text_train, y_train, id2label, text_test, training_mode,
 
     nclasses = y_train.shape[1]
 
-    tokenizer = AutoTokenizer.from_pretrained(pretrained_model, local_files_only=True)
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model)  # , local_files_only=True)
 
     if trained_classifier is not None:
         classifier = trained_classifier  # just reuse it without training again
