@@ -20,7 +20,8 @@ from nltk import tokenize
 from utils.utils import merge_predictions, stratified_multi_label_split
 
 
-pretrained_model = 'albert-base-v2'  # 'prajjwal1/bert-tiny'  # 'microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext'
+# pretrained_model = 'prajjwal1/bert-tiny'  # 'albert-base-v2'
+pretrained_model = 'microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext'
 
 
 class NSPDataset(Dataset):
@@ -288,9 +289,9 @@ def run_bert_classifier(text_train, y_train, id2label, text_test, training_mode,
     device = (torch.device('cuda') if torch.cuda.is_available()
                 else torch.device('cpu'))
     if training_mode == 'ICPC only':
-        epochs = 1  # 5  # we cannot create a dev split for early stopping, so lower number of epochs to avoid overfitting.
+        epochs = 5  # we cannot create a dev split for early stopping, so lower number of epochs to avoid overfitting.
     else:
-        epochs = 1  # 10
+        epochs = 10
     weight_decay = 1e-4
     batch_size = 8
     stop_epochs = 3

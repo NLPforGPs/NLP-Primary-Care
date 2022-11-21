@@ -179,12 +179,12 @@ if __name__ == '__main__':
         'mce'
     ])
     methods = [
-        # 'binary NB',
-        # 'multiclass NB',
-        # 'binary SVM',
-        # 'multiclass SVM',
-        # 'nearest centroid'
-        # 'BERT MLM',
+        'binary NB',
+        'multiclass NB',
+        'binary SVM',
+        'multiclass SVM',
+        'nearest centroid'
+        'BERT MLM',
         'BERT NSP',
         'BERT conventional',
     ]
@@ -192,7 +192,7 @@ if __name__ == '__main__':
     X = np.arange(orig_dataset['index'].shape[0]).reshape((-1, 1))
 
     stopwords_file = 'results/supervised_stopwords.csv'
-    # best_stopword_settings = run_stopword_experiment(methods, stopword_settings, dev_data, y_hot_dev)
+    best_stopword_settings = run_stopword_experiment(methods, stopword_settings, dev_data, y_hot_dev)
     best_stopword_settings = {}
 
     # EXPERIMENT 2 -- run all methods with chosen descriptions and stopword setting -----------------------
@@ -218,9 +218,8 @@ if __name__ == '__main__':
             method, best_stopword_settings[method], dev_data, y_hot_dev, test_data, y_hot_test)
         print(f'Results for {method} on test set. F1 = {results[m, 3]}')
 
-    test_file = './results/supervised_test.csv'
-
-    test_results = pd.DataFrame(np.around(results, 3), columns=csv_header.split(', '), index=methods)
-    test_results['stopwords'] = stopwords_for_method
-    test_results.to_csv(test_file, sep=',')
+        test_file = './results/supervised_test.csv'
+        test_results = pd.DataFrame(np.around(results, 3), columns=csv_header.split(', '), index=methods)
+        test_results['stopwords'] = stopwords_for_method
+        test_results.to_csv(test_file, sep=',')
 
