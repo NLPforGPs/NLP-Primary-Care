@@ -184,9 +184,6 @@ if __name__ == '__main__':
         'binary SVM',
         'multiclass SVM',
         'nearest centroid'
-        'BERT MLM',
-        'BERT NSP',
-        'BERT conventional',
     ]
 
     X = np.arange(orig_dataset['index'].shape[0]).reshape((-1, 1))
@@ -197,6 +194,16 @@ if __name__ == '__main__':
 
     # EXPERIMENT 2 -- run all methods with chosen descriptions and stopword setting -----------------------
 
+    methods = [
+        'binary NB',
+        'multiclass NB',
+        'binary SVM',
+        'multiclass SVM',
+        'nearest centroid',
+        'BERT MLM',
+        'BERT NSP',
+        'BERT conventional',
+    ]
     # run a larger list of methods with ICPC codes only, with both sets of speech -- the best setup overall
     csv_header = 'F1 (dev), prec (dev), rec (dev), F1 (test), prec (test), rec (test)'
     results = np.zeros((len(methods), 6))

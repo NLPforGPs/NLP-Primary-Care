@@ -187,8 +187,9 @@ if __name__ == '__main__':
 
     csv_header = []
     for mode in selected_modes:
-        csv_header += [f'{mode}', f'{mode} without A, ']
-    csv_header = csv_header[0:2] + 'ICPC only, GP speech only, ' + csv_header[2:]
+        csv_header += [f'{mode}', f'{mode} without A']
+        if mode == 'ICPC only':
+            csv_header.append('ICPC only, GP speech only')
 
     # cache some predictions and models for later
     preds_dev = {}  # first key is description, second is method
