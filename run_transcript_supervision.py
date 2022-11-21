@@ -215,6 +215,7 @@ if __name__ == '__main__':
             best_stopword_settings[method] = []
             stopwords_for_method.append([])
 
+    for m, method in enumerate(methods):
         # test on dev set with cross validation
         results[m, 0], results[m, 1], results[m, 2], _, _, _ = run_transcript_supervision(
             method, best_stopword_settings[method], dev_data, y_hot_dev, seed=3)
