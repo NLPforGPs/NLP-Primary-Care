@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
-#SBATCH --time=6:00:00
-#SBATCH --partition=gpu_short
+#SBATCH --time=72:00:00
+#SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
