@@ -127,6 +127,12 @@ class DescClassifier(nn.Module):
                 if use_mlm:
                     # index of [MASK] [[1,20],[2,32],[3,20],..]
                     index = np.argwhere(targets.detach().cpu().numpy() != -100)
+
+                    print(index)
+                    print(index.shape)
+                    print('Unique batch indexes: ')
+                    print(np.unique(index[0]))
+
                     # format it into [x_aixs,y_axis]
                     index = tuple(zip(*index))
 
