@@ -128,7 +128,7 @@ class DescClassifier(nn.Module):
                     # index of [MASK] [[1,20],[2,32],[3,20],..]
                     index = np.argwhere(targets.detach().cpu().numpy() != -100)
                     # format it into [x_aixs,y_axis]
-                    index = list(zip(*index))
+                    index = tuple(zip(*index))
 
                     # [batch_size, vocab_size]
                     logits = logits[index]

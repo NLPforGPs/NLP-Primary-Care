@@ -289,9 +289,9 @@ def run_bert_classifier(text_train, y_train, id2label, text_test, training_mode,
     device = (torch.device('cuda') if torch.cuda.is_available()
                 else torch.device('cpu'))
     if training_mode == 'ICPC only':
-        epochs = 5  # we cannot create a dev split for early stopping, so lower number of epochs to avoid overfitting.
+        epochs = 1 # 5  # we cannot create a dev split for early stopping, so lower number of epochs to avoid overfitting.
     else:
-        epochs = 10
+        epochs = 1 # 10
     weight_decay = 1e-4
     batch_size = 8
     stop_epochs = 3
