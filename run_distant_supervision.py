@@ -109,7 +109,9 @@ def run_stopword_experiment(methods, description_settings, stopword_settings, de
             row_labels.append(f'{method}, {selected_mode}')
 
             for i, s in enumerate(stopword_settings):
-                f1_dev[m + (j * len(methods)), i], _, _, _, _ = run_distant_supervision(method, description_corpus,
+                f1_dev[m + (j * len(methods)), i], _, _, _, _ = run_distant_supervision(method,
+                                                                                        selected_mode + '_stopwords',
+                                                                                        description_corpus,
                                                                                         y_desc, s, dev_data, y_dev)
 
     df = pd.DataFrame(np.around(f1_dev, 3), index=row_labels, columns=stopword_settings, )
