@@ -18,10 +18,12 @@ class DescClassifier(nn.Module):
         self.lr = learning_rate
         self.optimizer = AdamW(self.model.parameters(), self.lr, weight_decay=weight_decay)
         
-    def train(self, train_loader, dev_loader, save_dir, save_name, stop_epochs, device, prompt = None, use_schduler=True, load_checkpoint=False, ckpt_name=None):
+    def train(self, train_loader, dev_loader, save_dir, save_name, stop_epochs, device, prompt = None,
+              use_scheduler=True, load_checkpoint=False, ckpt_name=None):
         start_epoch, best_acc = 0, 0
-        if use_schduler:
-            scheduler = get_linear_schedule_with_warmup(self.optimizer, len(train_loader)*self.epochs*0.1, num_training_steps = self.epochs*len(train_loader))
+        if use_scheduler:
+            scheduler = get_linear_schedule_with_warmup(self.optimizer, len(train_loader)*self.epochs*0.1,
+                                                        num_training_steps=self.epochs*len(train_loader))
         if load_checkpoint:
             logging.info('loading checkpoint....')
             checkpoint = torch.load(os.path.join(
@@ -48,7 +50,7 @@ class DescClassifier(nn.Module):
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
                 self.optimizer.step()
-                if use_schduler:
+                if use_scheduler:
                     scheduler.step()
                 total_loss += loss.item()
                 # accuracy
@@ -72,7 +74,7 @@ class DescClassifier(nn.Module):
                                 state_dict=self.state_dict(), optimizer=self.optimizer.state_dict(),
                                 scheduler=scheduler.state_dict(), prompt=prompt)
                 logging.info(
-                    f'the dev_acc is {dev_acc}, the dev_loss is {dev_loss}, save best model to {os.path.join(save_dir, save_name+"best-val-acc-model")}')
+                    f'the dev_acc is {dev_acc}, the dev_loss is {dev_loss}, save best model to {os.path.join(save_dir, save_name+"_best-val-acc-model")}')
             if epoch - save_epoch > stop_epochs:
                 logging.info(
                     f'stopping without any improvement after {stop_epochs}')
@@ -149,8 +151,8 @@ class DescClassifier(nn.Module):
                 pred_ids = np.argmax(all_logits, axis=-1)
                 class_probs = []
                 labels = []
-                for i in range(0,len(pred_ids), len(class_names)):
-                    indices = np.argwhere(pred_ids[i:i+len(class_names)]==1).flatten()
+                for i in range(0, len(pred_ids), len(class_names)):
+                    indices = np.argwhere(pred_ids[i:i+len(class_names)] == 1).flatten()
                     # x,y = list(zip(*indices))
                     labels.append(class_names[indices].tolist())
                     class_probs.append(all_logits[i:i+len(class_names), 1])

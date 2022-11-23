@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # key = 'transcript__conversation_patient'
 
     # Specify which descriptions we will test
-    selected_modes = ['ICPC only', 'CKS only']
+    selected_modes = ['CKS only']  # 'ICPC only', 'CKS only']
 
     stopword_settings = [
         [],
@@ -167,7 +167,7 @@ if __name__ == '__main__':
     ]
 
     stopwords_file = 'results/distant_stopwords.csv'
-    # run_stopword_experiment(methods, selected_modes, stopword_settings, dev_data, y_hot_dev)
+    run_stopword_experiment(methods, selected_modes, stopword_settings, dev_data, y_hot_dev)
 
     # EXPERIMENT 2  -- Comparing key methods with ICPC versus CKS -------------------
     # from the experiment one, the optimal setting is: ce for ICPC-2 and mce for CKS
@@ -177,19 +177,20 @@ if __name__ == '__main__':
         'multiclass NB',
         'nearest centroid',
         'BERT MLM',
-        'BERT conventional',  # just for debugging... don't need this in final results, I think
+        'BERT conventional',  # jdo we need this in final results?
         'BERT NSP',
     ]
-
-    f1 = np.zeros((len(methods_for_description_test), len(selected_modes)*2 + 1))
-    prec = np.zeros((len(methods_for_description_test), len(selected_modes)*2 + 1))
-    rec = np.zeros((len(methods_for_description_test), len(selected_modes)*2 + 1))
 
     csv_header = []
     for mode in selected_modes:
         csv_header += [f'{mode}', f'{mode} without A']
         if mode == 'ICPC only':
             csv_header.append('ICPC only, GP speech only')
+
+    ncols = len(csv_header)
+    f1 = np.zeros((len(methods_for_description_test), ncols))
+    prec = np.zeros((len(methods_for_description_test), ncols))
+    rec = np.zeros((len(methods_for_description_test), ncols))
 
     # cache some predictions and models for later
     preds_dev = {}  # first key is description, second is method
@@ -205,7 +206,7 @@ if __name__ == '__main__':
         description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
         stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
         for m, method in enumerate(methods_for_description_test):
-            f1[m, d*2 + (d > 0)], _, _, f1[m, d*2 + 1 + (d > 0)], _, _, preds_dev[mode][method], models[mode][method] = \
+            f1[m, d*2 + ((d > 0) & (selected_modes[0] == 'ICPC only'))], _, _, f1[m, d*2 + 1 + ((d > 0) & (selected_modes[0] == 'ICPC only'))], _, _, preds_dev[mode][method], models[mode][method] = \
                 run_distant_supervision(method, mode, description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
                                         without_A_class=True)
             descriptions_file = './results/distant_descriptions.csv'
@@ -232,7 +233,8 @@ if __name__ == '__main__':
         'multiclass NB',
         'nearest centroid',
         'BERT MLM',
-        'BERT conventional'
+        'BERT conventional',
+        'BERT NSP',
     ]
 
     # run a larger list of methods with ICPC codes only, with both sets of speech -- the best setup overall

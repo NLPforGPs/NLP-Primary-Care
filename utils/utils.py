@@ -121,7 +121,7 @@ def load_json_file(data_path):
     return data
 
 
-def stratified_multi_label_split(orig_dataset, y_hot, seed=23490, test_size=0.2):
+def stratified_multi_label_split(orig_dataset, y_hot, seed=23490, test_size=0.2, drop_undersize_classes=False):
     class_sizes = np.sum(y_hot, 0)
     class_idxs = np.argsort(class_sizes)  # iterate over the classes from smallest to largest
 
@@ -138,6 +138,8 @@ def stratified_multi_label_split(orig_dataset, y_hot, seed=23490, test_size=0.2)
         y_hot_tmp[c_examples, c] = 0  # zero out the examples so they can't be chosen again
 
         if len(c_examples) < 2:  # can't split, too few instances. Merge with another small class
+            if drop_undersize_classes:
+                continue
             y_hot_tmp[c_examples, class_idxs[cidx+1]] = 1
             continue
         Xc_dev, Xc_test, yc_dev, yc_test = train_test_split(

@@ -1,3 +1,6 @@
+import logging
+logging.getLogger().setLevel(logging.INFO)
+
 from datasets import Dataset
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import SVC
@@ -20,9 +23,8 @@ from nltk import tokenize
 from utils.utils import merge_predictions, stratified_multi_label_split
 
 
-# pretrained_model = 'prajjwal1/bert-tiny'  # 'albert-base-v2'
-pretrained_model = 'microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext'
-
+debug = False  # choose debug settings for quicker running of the script at lower performance
+all_models_dir = 'models_2'
 
 class NSPDataset(Dataset):
     def __init__(self, text_and_polarities, labels, split_nums, pretrained_model, prompt, id2label):
@@ -196,7 +198,8 @@ def prepare_multiclass_training_set(chunks, chunk_labels, nclasses, dataset_cons
         y_hot = np.zeros((len(chunks), nclasses))
         y_hot[range(len(chunks)), chunk_labels] = 1
         chunks_train, chunks_dev, labels_train, labels_dev = stratified_multi_label_split(chunks, y_hot, seed=20211125,
-                                                                                          test_size=0.2)
+                                                                                          test_size=0.2,
+                                                                                          drop_undersize_classes=False)
         labels_train = np.argmax(labels_train, 1)
         labels_dev = np.argmax(labels_dev, 1)
 
@@ -239,64 +242,82 @@ def prepare_binary_test_set(chunks, chunk_labels, split_nums, nclasses, dataset_
 
 
 def run_bert_conventional(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
-    model_dir = os.path.join(PCC_BASE_DIR, 'models_edwin/conventional')
+    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/conventional')
     model_name = 'full-text-conventional_' + run_name
 
     print('using traditional bert classifier...')
 
     nclasses = y_train.shape[1]
 
+    if debug:
+        pretrained_model = 'prajjwal1/bert-tiny'  # 'albert-base-v2'
+    else:
+        pretrained_model = 'microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext'
+
     config = BertConfig.from_pretrained(pretrained_model, num_labels=nclasses)
     model = BertForSequenceClassification.from_pretrained(pretrained_model, config=config)
 
-    return run_bert_classifier(text_train, y_train, id2label, text_test, training_mode, trained_classifier, model_dir,
+    return run_bert_classifier(pretrained_model, text_train, y_train, id2label, text_test, training_mode, trained_classifier, model_dir,
                                model_name, model, prepare_multiclass_training_set, prepare_multiclass_test_set, False,
                                False, StandardClassificationDataset)
 
 
 def run_nsp_classifier(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
-    model_dir = os.path.join(PCC_BASE_DIR, 'models_edwin/mlm')
+    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/mlm')
     model_name = 'mlm-abstract-5e-5_' + run_name
 
     print('using next sentence prediction bert classifier...')
 
+    if debug:
+        pretrained_model = 'prajjwal1/bert-tiny'  # 'albert-base-v2'
+    else:
+        pretrained_model = 'microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract'
     model = BertForNextSentencePrediction.from_pretrained(pretrained_model)
 
     prompt = "This is a problem of {}."
 
-    return run_bert_classifier(text_train, y_train, id2label, text_test, training_mode, trained_classifier, model_dir,
+    return run_bert_classifier(pretrained_model, text_train, y_train, id2label, text_test, training_mode, trained_classifier, model_dir,
                                model_name, model, prepare_binary_training_set, prepare_binary_test_set,
                                False, True, NSPDataset, prompt)
 
 
 def run_mlm_classifier(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
-    model_dir = os.path.join(PCC_BASE_DIR, 'models_edwin/mlm')
+    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/mlm')
     model_name = 'mlm-abstract-5e-5_' + run_name
 
     print('using masked language model bert classifier...')
 
+    if debug:
+        pretrained_model = 'prajjwal1/bert-tiny'  # 'albert-base-v2'
+    else:
+        pretrained_model = 'microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract'
     model = AutoModelForMaskedLM.from_pretrained(pretrained_model)
     prompt = "This is a problem of {}."
 
-    return run_bert_classifier(text_train, y_train, id2label, text_test, training_mode, trained_classifier, model_dir,
+    return run_bert_classifier(pretrained_model, text_train, y_train, id2label, text_test, training_mode, trained_classifier, model_dir,
                                model_name, model, prepare_multiclass_training_set, prepare_multiclass_test_set, True,
                                False, MLMClassifierDataset, prompt)
 
 
-def run_bert_classifier(text_train, y_train, id2label, text_test, training_mode, trained_classifier, model_dir, model_name, model,
+def run_bert_classifier(pretrained_model, text_train, y_train, id2label, text_test, training_mode, trained_classifier, model_dir, model_name, model,
                         prepare_training_set, prepare_test_set, use_mlm, use_nsp, dataset_constructor, prompt=None):
 
     device = (torch.device('cuda') if torch.cuda.is_available()
                 else torch.device('cpu'))
-    if training_mode == 'ICPC only':
-        epochs = 5  # we cannot create a dev split for early stopping, so lower number of epochs to avoid overfitting.
-    else:
-        epochs = 10
+    # if training_mode == 'ICPC only':
+    #     epochs = 5  # we cannot create a dev split for early stopping, so lower number of epochs to avoid overfitting.
+    # else:
+    epochs = 15
+    learning_rate = 5e-5
     weight_decay = 1e-4
     batch_size = 8
-    stop_epochs = 3
+    stop_epochs = 10
     chunk_size = 490
     load_checkpoint = False
+
+    # if debug:
+    #     epochs = 10
+    #     stop_epochs =
 
     nclasses = y_train.shape[1]
 
@@ -306,7 +327,7 @@ def run_bert_classifier(text_train, y_train, id2label, text_test, training_mode,
         classifier = trained_classifier  # just reuse it without training again
     else:
         model.to(device)
-        classifier = DescClassifier(model=model, epochs=epochs, learning_rate=1e-5, weight_decay=weight_decay)
+        classifier = DescClassifier(model=model, epochs=epochs, learning_rate=learning_rate, weight_decay=weight_decay)
 
         # create a dataset object from the data
         chunks, chunk_labels, split_nums = do_text_chunking(text_train, tokenizer, chunk_size, np.argmax(y_train, 1))
@@ -341,9 +362,15 @@ def run_bert_classifier(text_train, y_train, id2label, text_test, training_mode,
     # convert to one-hot encodings
     predictions = np.array(predictions).flatten()
     y_hot = np.zeros((len(chunks), nclasses))
-    if not np.issubdtype(predictions.dtype, np.number):
+    if not np.isscalar(predictions[0]):
+        # labels are actually lists of labels, where multiple labels can be assigned to a single transcript.
+        predictions = np.array([[i, np.argwhere(id2name == p)[0][0]] for i, plist in enumerate(predictions) for p in plist])
+        y_hot[predictions[:, 0], predictions[:, 1]] = 1
+    elif not np.issubdtype(predictions.dtype, np.number):
         predictions = [np.argwhere(id2name == p)[0][0] for p in predictions]
-    y_hot[range(len(chunks)), predictions] = 1
+        y_hot[range(len(chunks)), predictions] = 1
+    else:
+        y_hot[range(len(chunks)), predictions] = 1
 
     # merge labels for each transcript
     final_predictions = merge_predictions(dataset_test.split_nums, np.array(y_hot))
