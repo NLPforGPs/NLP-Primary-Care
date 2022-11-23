@@ -193,7 +193,7 @@ label2name = {'A':'general', 'B':'blood', 'D':'digestive', 'F':'eye', 'H':'ear',
               'T':'endocrine', 'U':'urological', 'W':'pregnancy', 'X':'female', 'Y':'male'}
 
 
-def prepare_multiclass_training_set(chunks, chunk_labels, nclasses, dataset_constructor, training_mode, prompt, id2label):
+def prepare_multiclass_training_set(pretrained_model, chunks, chunk_labels, nclasses, dataset_constructor, training_mode, prompt, id2label):
     if training_mode != 'ICPC only':  # not enough data in ICPC to do this
         y_hot = np.zeros((len(chunks), nclasses))
         y_hot[range(len(chunks)), chunk_labels] = 1
@@ -212,7 +212,7 @@ def prepare_multiclass_training_set(chunks, chunk_labels, nclasses, dataset_cons
     return dataset_train, dataset_dev
 
 
-def prepare_binary_training_set(chunks, chunk_labels, nclasses, dataset_constructor, training_mode, prompt, id2label):
+def prepare_binary_training_set(pretrained_model, chunks, chunk_labels, nclasses, dataset_constructor, training_mode, prompt, id2label):
     # if we are doing NSP, we need to create binary labels from the chunks next
     # raw_data is a list of pairs of [chunk, chunk_label]
     # processed_data has the same format plus the polarity label, [chunk, chunk_label, polarity]
@@ -221,15 +221,15 @@ def prepare_binary_training_set(chunks, chunk_labels, nclasses, dataset_construc
     chunks = list(zip(chunks, polarities))
 
     # now we can handle the data points as with the multiclass setup...
-    return prepare_multiclass_training_set(chunks, chunk_labels, nclasses, dataset_constructor, training_mode, prompt, id2label)
+    return prepare_multiclass_training_set(pretrained_model, chunks, chunk_labels, nclasses, dataset_constructor, training_mode, prompt, id2label)
 
 
-def prepare_multiclass_test_set(chunks, chunk_labels, split_nums, nclasses, dataset_constructor, prompt, id2label):
+def prepare_multiclass_test_set(pretrained_model, chunks, chunk_labels, split_nums, nclasses, dataset_constructor, prompt, id2label):
     dataset_test = dataset_constructor(chunks, chunk_labels, split_nums, pretrained_model, prompt, id2label)
     return dataset_test
 
 
-def prepare_binary_test_set(chunks, chunk_labels, split_nums, nclasses, dataset_constructor, prompt, id2label):
+def prepare_binary_test_set(pretrained_model, chunks, chunk_labels, split_nums, nclasses, dataset_constructor, prompt, id2label):
 
     output_chunks, output_labels, output_polarities = [], [], []
     for chunk in chunks:
@@ -238,7 +238,7 @@ def prepare_binary_test_set(chunks, chunk_labels, split_nums, nclasses, dataset_
             output_labels.append(l)
             output_polarities.append(0)
     output_chunks = list(zip(output_chunks, output_polarities))
-    return prepare_multiclass_test_set(output_chunks, output_labels, split_nums, nclasses, dataset_constructor, prompt, id2label)
+    return prepare_multiclass_test_set(pretrained_model, output_chunks, output_labels, split_nums, nclasses, dataset_constructor, prompt, id2label)
 
 
 def run_bert_conventional(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
@@ -331,7 +331,7 @@ def run_bert_classifier(pretrained_model, text_train, y_train, id2label, text_te
 
         # create a dataset object from the data
         chunks, chunk_labels, split_nums = do_text_chunking(text_train, tokenizer, chunk_size, np.argmax(y_train, 1))
-        dataset_train, dataset_dev = prepare_training_set(chunks, chunk_labels, nclasses, dataset_constructor, training_mode, prompt, id2label)
+        dataset_train, dataset_dev = prepare_training_set(pretrained_model, chunks, chunk_labels, nclasses, dataset_constructor, training_mode, prompt, id2label)
 
         train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True)
         dev_dataloader = DataLoader(dataset_dev, batch_size=batch_size, shuffle=False)
@@ -344,7 +344,7 @@ def run_bert_classifier(pretrained_model, text_train, y_train, id2label, text_te
     # format test data
     chunks, chunk_labels, split_nums = do_text_chunking(text_test, tokenizer, chunk_size, len(text_test) * [0])
     # don't pass in the labels to the prediction dataset...
-    dataset_test = prepare_test_set(chunks, None, split_nums, nclasses, dataset_constructor, prompt, id2label)
+    dataset_test = prepare_test_set(pretrained_model, chunks, None, split_nums, nclasses, dataset_constructor, prompt, id2label)
 
     predict_dataloader = DataLoader(dataset_test, batch_size=batch_size, shuffle=False)
 
