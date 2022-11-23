@@ -52,7 +52,7 @@ def get_description_vectors(description_corpus, stopwords):
 
 
 def run_distant_supervision(method, run_name_template, description_corpus, y_desc, stopword_setting, dev_data, y_dev,
-                            without_A_class=False, model=None):
+                            classes, model=None):
 
     if 'BERT' in method:
         run_name = f"{run_name_template.lower().replace(' ', '_')}"
@@ -87,15 +87,9 @@ def run_distant_supervision(method, run_name_template, description_corpus, y_des
         y_pred_mat_dev, _ = clf(description_vec, y_desc, X_dev)
         model = None
 
-    results = evaluate_classifications(y_dev, y_pred_mat_dev, mult_lbl_enc.classes_, show_report=False)
+    results = evaluate_classifications(y_dev, y_pred_mat_dev, classes, show_report=False)
 
-    if without_A_class:
-        # get the data without the A class examples:
-        # A_class_idx = np.argwhere(mult_lbl_enc.classes_ == 'A')[0][0]  # A class is index 0
-        results_without_A = evaluate_classifications(y_dev[:, 1:], y_pred_mat_dev[:, 1:], mult_lbl_enc.classes_[1:], show_report=False)
-        return results[0], results[1], results[2], results_without_A[0], results_without_A[1], results_without_A[2], y_pred_mat_dev, model
-    else:
-        return results[0], results[1], results[2], y_pred_mat_dev, model
+    return results[0], results[1], results[2], y_pred_mat_dev, model
 
 
 def run_stopword_experiment(methods, description_settings, stopword_settings, dev_data, y_dev):
@@ -112,7 +106,8 @@ def run_stopword_experiment(methods, description_settings, stopword_settings, de
                 f1_dev[m + (j * len(methods)), i], _, _, _, _ = run_distant_supervision(method,
                                                                                         selected_mode + '_stopwords',
                                                                                         description_corpus,
-                                                                                        y_desc, s, dev_data, y_dev)
+                                                                                        y_desc, s, dev_data, y_dev,
+                                                                                        mult_lbl_enc.classes_)
 
     df = pd.DataFrame(np.around(f1_dev, 3), index=row_labels, columns=stopword_settings, )
     df.to_csv(stopwords_file, sep=',')
@@ -153,7 +148,7 @@ if __name__ == '__main__':
     # key = 'transcript__conversation_patient'
 
     # Specify which descriptions we will test
-    selected_modes = ['CKS only']  # 'ICPC only', 'CKS only']
+    selected_modes = ['ICPC only', 'CKS only']
 
     stopword_settings = [
         [],
@@ -185,11 +180,9 @@ if __name__ == '__main__':
 
     csv_header = []
     for mode in selected_modes:
-        csv_header += [f'{mode}', f'{mode} without A']
-        if mode == 'ICPC only':
-            csv_header.append('ICPC only, GP speech only')
-
+        csv_header += [f'{mode}', f'{mode} without A', f'{mode} GP speech only']
     ncols = len(csv_header)
+
     f1 = np.zeros((len(methods_for_description_test), ncols))
     prec = np.zeros((len(methods_for_description_test), ncols))
     rec = np.zeros((len(methods_for_description_test), ncols))
@@ -208,9 +201,18 @@ if __name__ == '__main__':
         description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
         stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
         for m, method in enumerate(methods_for_description_test):
-            f1[m, d*2 + ((d > 0) & (selected_modes[0] == 'ICPC only'))], _, _, f1[m, d*2 + 1 + ((d > 0) & (selected_modes[0] == 'ICPC only'))], _, _, preds_dev[mode][method], models[mode][method] = \
+            f1[m, d*3], _, _, preds_dev[mode][method], models[mode][method] = \
                 run_distant_supervision(method, mode, description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
-                                        without_A_class=True)
+                                        mult_lbl_enc.classes_)
+            descriptions_file = './results/distant_descriptions.csv'
+            f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
+            f1_df.to_csv(descriptions_file, sep=',')
+
+            # run without the A class
+            f1[m, d * 3 + 1], _, _, preds_dev[mode][method], _ = \
+                run_distant_supervision(method, mode, description_corpus, y_desc[:, 1:], stopword_setting, dev_data, y_hot_dev[:, 1:],
+                                        mult_lbl_enc.classes_[1:])
+
             descriptions_file = './results/distant_descriptions.csv'
             f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
             f1_df.to_csv(descriptions_file, sep=',')
@@ -218,15 +220,16 @@ if __name__ == '__main__':
     # EXPERIMENT 3 -- without patient's speech ---------------------------
     # run selected methods with ICPC codes only, without patients' speech
     key = 'transcript__conversation_gp'
-    description_corpus = load_descriptions('ICPC only', mult_lbl_enc.classes_)
-
-    for m, method in enumerate(methods_for_description_test):
-        f1[m, 2], _, _, _, _ = run_distant_supervision(method, mode + '_gponly', description_corpus, y_desc, 'ce', dev_data, y_hot_dev)
+    for d, mode in enumerate(selected_modes):
+        description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
+        stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
+        for m, method in enumerate(methods_for_description_test):
+            f1[m, d*3 + 2], _, _, _, _ = run_distant_supervision(method, mode + '_gponly', description_corpus, y_desc, 'ce',
+                                                           dev_data, y_hot_dev, mult_lbl_enc.classes_)
 
         descriptions_file = './results/distant_descriptions.csv'
         f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header.split(','))
         f1_df.to_csv(descriptions_file, sep=',')
-    # np.savetxt(descriptions_file, f1, delimiter=',', fmt='%.3f', header=csv_header)
 
     # EXPERIMENT 4 -- run all methods with chosen descriptions and stopword setting -----------------------
 
@@ -243,12 +246,12 @@ if __name__ == '__main__':
     key = 'transcript__conversation_both'
     csv_header = 'F1 (dev), prec (dev), rec (dev), F1 (test), prec (test), rec (test)'
     results = np.zeros((len(methods_for_best_descriptions), 6))
-    mode = 'ICPC only'
-    description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
     for m, method in enumerate(methods_for_best_descriptions):
+        mode = 'ICPC only' if 'BERT' not in method else 'CKS only'
+        description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
         if method not in preds_dev[mode]:
             results[m, 0], results[m, 1], results[m, 2], preds_dev[mode][method], models[mode][method] = \
-                run_distant_supervision(method, mode, description_corpus, y_desc, 'ce', dev_data, y_hot_dev)
+                run_distant_supervision(method, mode, description_corpus, y_desc, 'ce', dev_data, y_hot_dev, mult_lbl_enc.classes_)
         else:  # don't rerun the model, just load the predictions and compute results
             results[m, 0], results[m, 1], results[m, 2] = evaluate_classifications(y_hot_dev, preds_dev[mode][method],
                                                                                    mult_lbl_enc.classes_,
@@ -256,7 +259,8 @@ if __name__ == '__main__':
 
         # repeat on test set
         results[m, 3], results[m, 4], results[m, 5], preds_test[mode][method], _ = run_distant_supervision(
-            method, mode, description_corpus, y_desc, 'ce', test_data, y_hot_test, model=models[mode][method])
+            method, mode, description_corpus, y_desc, 'ce', test_data, y_hot_test, mult_lbl_enc.classes_,
+            model=models[mode][method])
 
         test_file = './results/distant_test.csv'
         results_df = pd.DataFrame(results, index=methods_for_best_descriptions, columns=csv_header.split(','))
