@@ -8,20 +8,29 @@ It saves the results for each class to supervised_test.csv.
 """
 import numpy as np
 import pandas as pd
-from utils.metrics.metric import evaluate_classifications, evaluate_per_class
+from utils.metrics.metric import evaluate_classifications
 from classifier_wrappers import run_binary_naive_bayes, run_multiclass_naive_bayes, run_binary_svm, \
     run_multiclass_svm, run_nearest_centroid, run_nearest_neighbors, run_bert_conventional, run_mlm_classifier, \
     run_nsp_classifier
 from prepare_data import prepare_original_data
 from utils.utils import stratified_multi_label_split
-from prepare_data import load_descriptions
 from utils.stopwords import get_medical_stopwords, get_custom_stopwords, get_english_stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import StratifiedKFold
 
 
+key = 'transcript__conversation_both'
+id2label = None
+
+
 def set_stopwords(use_med, use_cus, use_eng):
     stopwords = []
+
+    # Load our stopword lists for the shallow classifiers
+    medical_stopwords = get_medical_stopwords()
+    custom_stopwords = get_custom_stopwords()
+    english_stopwords = get_english_stopwords()
+
     if use_med:
         stopwords += medical_stopwords
     if use_cus:
@@ -32,7 +41,7 @@ def set_stopwords(use_med, use_cus, use_eng):
     return stopwords
 
 
-def test_single_split(train_set, y_train, test_set, y_test, stopwords, clf, preprocess):
+def test_single_split(train_set, y_train, test_set, y_test, stopwords, clf, preprocess, classes):
     if preprocess:
         max_features = 5000
         text_vectorizer = TfidfVectorizer(ngram_range=(1, 2), stop_words=stopwords, max_features=max_features)
@@ -44,8 +53,8 @@ def test_single_split(train_set, y_train, test_set, y_test, stopwords, clf, prep
 
     y_pred_mat, _ = clf(X_train, y_train, X_test)  # performance on training set
 
-    f1_k, p1_k, r1_k = evaluate_classifications(y_test, y_pred_mat, mult_lbl_enc.classes_, show_report=False)
-    f1_k_noA, p1_k_noA, r1_k_noA = evaluate_classifications(y_test[:, 1:], y_pred_mat[:, 1:], mult_lbl_enc.classes_[1:],
+    f1_k, p1_k, r1_k = evaluate_classifications(y_test, y_pred_mat, classes, show_report=False)
+    f1_k_noA, p1_k_noA, r1_k_noA = evaluate_classifications(y_test[:, 1:], y_pred_mat[:, 1:], classes[1:],
                                                 show_report=False)
     return f1_k, p1_k, r1_k, f1_k_noA, p1_k_noA, r1_k_noA
 
@@ -65,7 +74,8 @@ def cross_validate(clf, dev_data, y_dev, stopwords, seed, preprocess):
         y_test = y_dev[test_idxs]
 
         f1_k, p1_k, r1_k, f1_k_noA, p1_k_noA, r1_k_noA = test_single_split(train_set, y_train, test_set, y_test,
-                                                                           stopwords, clf, preprocess)
+                                                                           stopwords, clf, preprocess,
+                                                                           mult_lbl_enc.classes_)
         f1s.append(f1_k)
         p1s.append(p1_k)
         r1s.append(r1_k)
@@ -83,7 +93,7 @@ def cross_validate(clf, dev_data, y_dev, stopwords, seed, preprocess):
     return f1, prec, rec, f1_noA, prec_noA, rec_noA
 
 
-def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, test_data=None, y_test=None, seed=3):
+def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, classes, test_data=None, y_test=None, seed=3):
 
     stopwords = set_stopwords('m' in stopword_setting, 'c' in stopword_setting, 'e' in stopword_setting)
 
@@ -102,6 +112,10 @@ def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, test_d
                 run_name = 'test'
             y_pred_mat, _, model = clf_unwrapped(X_train, y_train, id2label, X_test, run_name, 'supervised')
             return y_pred_mat, None
+
+        global id2label
+        if id2label is None:
+            id2label = classes
 
         clf = bert_clf
     else:
@@ -124,7 +138,7 @@ def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, test_d
     else:
         f1, prec, rec, f1_noA, prec_noA, rec_noA = test_single_split(dev_data[key].values, y_dev,
                                                                      test_data[key].values, y_test, stopwords, clf,
-                                                                     'BERT' not in method)
+                                                                     'BERT' not in method, classes)
 
     return f1, prec, rec, f1_noA, prec_noA, rec_noA
 
@@ -135,7 +149,8 @@ def run_stopword_experiment(methods, stopword_settings, dev_data, y_dev):
 
     for m, method in enumerate(methods):
         for i, s in enumerate(stopword_settings):
-            f1_dev[m, i], _, _, _, _, _ = run_transcript_supervision(method, s, dev_data, y_dev, seed=3)
+            f1_dev[m, i], _, _, _, _, _ = run_transcript_supervision(method, s, dev_data, y_dev, mult_lbl_enc.classes_,
+                                                                     seed=3)
             print(f'Results for {method} with {s} stopwords. F1 = {f1_dev[m, i]}')
 
     # find best setting for each method:
@@ -156,11 +171,6 @@ if __name__ == '__main__':
 
     # Load our standard dev/test split
     dev_data, test_data, y_hot_dev, y_hot_test = stratified_multi_label_split(orig_dataset, y_hot)
-
-    # Load our stopword lists for the shallow classifiers
-    medical_stopwords = get_medical_stopwords()
-    custom_stopwords = get_custom_stopwords()
-    english_stopwords = get_english_stopwords()
 
     # EXPERIMENT 1 -- Stopwords. ----------------------------
 
@@ -200,9 +210,9 @@ if __name__ == '__main__':
         'binary SVM',
         'multiclass SVM',
         'nearest centroid',
-        'BERT MLM',
-        'BERT NSP',
-        'BERT conventional',
+        # 'BERT MLM',
+        # 'BERT NSP',
+        # 'BERT conventional',
     ]
     # run a larger list of methods with ICPC codes only, with both sets of speech -- the best setup overall
     csv_header = 'F1 (dev), prec (dev), rec (dev), F1 (test), prec (test), rec (test)'
@@ -218,12 +228,12 @@ if __name__ == '__main__':
     for m, method in enumerate(methods):
         # test on dev set with cross validation
         results[m, 0], results[m, 1], results[m, 2], _, _, _ = run_transcript_supervision(
-            method, best_stopword_settings[method], dev_data, y_hot_dev, seed=3)
+            method, best_stopword_settings[method], dev_data, y_hot_dev, mult_lbl_enc.classes_, seed=3)
         print(f'Results for {method} on dev set. F1 = {results[m, 0]}')
 
         # repeat on test set -- train on the whole dev set
         results[m, 3], results[m, 4], results[m, 5], _, _, _ = run_transcript_supervision(
-            method, best_stopword_settings[method], dev_data, y_hot_dev, test_data, y_hot_test)
+            method, best_stopword_settings[method], dev_data, y_hot_dev, mult_lbl_enc.classes_, test_data, y_hot_test)
         print(f'Results for {method} on test set. F1 = {results[m, 3]}')
 
         test_file = './results/supervised_test.csv'
