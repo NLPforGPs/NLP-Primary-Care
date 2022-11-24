@@ -135,7 +135,7 @@ def stratified_multi_label_split(orig_dataset, y_hot, seed=23490, test_size=0.2,
 
     for cidx, c in enumerate(class_idxs):  # iterate over classes
         c_examples = np.argwhere(y_hot_tmp[:, c] == 1).flatten()  # find the members of each class
-        y_hot_tmp[c_examples, c] = 0  # zero out the examples so they can't be chosen again
+        y_hot_tmp[c_examples, :] = 0  # zero out the examples so they can't be chosen again
 
         if len(c_examples) < 2:  # can't split, too few instances. Merge with another small class
             if drop_undersize_classes:
@@ -149,6 +149,7 @@ def stratified_multi_label_split(orig_dataset, y_hot, seed=23490, test_size=0.2,
             train_size=1-test_size,
             random_state=random_states[cidx]
         )  # split the examples from this dataset
+
         if dev_data is not None:
             dev_data = dev_data.append(Xc_dev) if isinstance(dev_data, pd.DataFrame) else np.append(dev_data, Xc_dev, axis=0)
             test_data = test_data.append(Xc_test) if isinstance(test_data, pd.DataFrame) else np.append(test_data, Xc_test, axis=0)
@@ -163,3 +164,19 @@ def stratified_multi_label_split(orig_dataset, y_hot, seed=23490, test_size=0.2,
             y_hot_test = yc_test
 
     return dev_data, test_data, y_hot_dev, y_hot_test
+
+
+def convert_durations_to_count(durations):
+    """
+    Convert a list of duration strings to a list of counts of total seconds.
+    :return: list of counts of total seconds
+    """
+    total_secs = []
+    for duration in durations:
+        toks = duration.split(':')
+        secs = int(toks[0])*60*60 + int(toks[1])*60 + int(toks[2])
+        total_secs.append(secs)
+    print(total_secs)
+    hist = np.histogram(total_secs)
+
+    return total_secs, hist
