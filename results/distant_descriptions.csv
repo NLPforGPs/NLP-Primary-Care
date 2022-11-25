@@ -1,5 +1,7 @@
-,CKS only,CKS only without A,CKS only GP speech only,ICPC only,ICPC only without A,ICPC only GP speech only
-multiclass NB,0.37473277789626813,0.3906985124276803,0.0,0.0,0.0,0.0
-BERT MLM,0.48384964615261533,0.0,0.0,0.0,0.0,0.0
-BERT conventional,0.0,0.0,0.0,0.0,0.0,0.0
-BERT NSP,0.0,0.0,0.0,0.0,0.0,0.0
+,both,both without A,both GP speech only,ICPC only,ICPC only without A,ICPC only GP speech only,CKS only,CKS only without A,CKS only GP speech only,both,both without A,both GP speech only
+binary NB,0.2544471145541132,0.2714102555243874,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+multiclass NB,0.3784874971009425,0.3851762744931857,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+nearest centroid,0.3665291751261394,0.0904382055852644,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+BERT MLM,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+BERT conventional,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+BERT NSP,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0

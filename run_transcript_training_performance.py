@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     for m, method in enumerate(methods):
         # test on dev set with cross validation
-        results[m, 0], results[m, 1], results[m, 2], _, _, _ = run_transcript_supervision(
+        results[m, 0], results[m, 1], results[m, 2], _, _, _, _ = run_transcript_supervision(
             method, best_stopword_setting, dev_data, y_hot_dev, mult_lbl_enc.classes_, dev_data, y_hot_dev, seed=3)
         print(f'Results for {method} on train set. F1 = {results[m, 0]}')
 

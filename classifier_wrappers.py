@@ -24,7 +24,7 @@ from utils.utils import merge_predictions, stratified_multi_label_split
 
 
 debug = False  # choose debug settings for quicker running of the script at lower performance
-all_models_dir = 'models_2'
+all_models_dir = 'models_22'
 
 class NSPDataset(Dataset):
     def __init__(self, text_and_polarities, labels, split_nums, pretrained_model, prompt, id2label):
@@ -197,9 +197,15 @@ def prepare_multiclass_training_set(pretrained_model, chunks, chunk_labels, ncla
     if training_mode != 'ICPC only':  # not enough data in ICPC to do this
         y_hot = np.zeros((len(chunks), nclasses))
         y_hot[range(len(chunks)), chunk_labels] = 1
-        chunks_train, chunks_dev, labels_train, labels_dev = stratified_multi_label_split(chunks, y_hot, seed=20211125,
-                                                                                          test_size=0.2,
-                                                                                          drop_undersize_classes=False)
+        # chunks_train, chunks_dev, labels_train, labels_dev = stratified_multi_label_split(chunks, y_hot, seed=20211125,
+        #                                                                                   test_size=0.2,
+        #                                                                                   drop_undersize_classes=False)
+        # As the dataset is too small, let's not use a separate dev set at all. Instead, we use all data with no early stopping.
+        chunks_train = chunks
+        chunks_dev = chunks
+        labels_train = y_hot
+        labels_dev = y_hot
+
         labels_train = np.argmax(labels_train, 1)
         labels_dev = np.argmax(labels_dev, 1)
 

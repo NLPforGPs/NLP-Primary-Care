@@ -229,9 +229,9 @@ if __name__ == '__main__':
             f1[m, d*3 + 2], _, _, _, _ = run_distant_supervision(method, mode + '_gponly', description_corpus, y_desc, 'ce',
                                                            dev_data, y_hot_dev, mult_lbl_enc.classes_)
 
-        descriptions_file = './results/distant_descriptions_gponly.csv'
-        f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
-        f1_df.to_csv(descriptions_file, sep=',')
+            descriptions_file = './results/distant_descriptions_gponly.csv'
+            f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
+            f1_df.to_csv(descriptions_file, sep=',')
 
     # EXPERIMENT 4 -- run all methods with chosen descriptions and stopword setting -----------------------
 
