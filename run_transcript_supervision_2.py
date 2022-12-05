@@ -252,7 +252,7 @@ if __name__ == '__main__':
             method, best_stopword_settings[method], dev_data, y_hot_dev, mult_lbl_enc.classes_, test_data, y_hot_test)
         print(f'Results for {method} on test set. F1 = {results[m, 3]}')
 
-        test_file = './results2/supervised_test.csv'
+        test_file = './results2/supervised_test2.csv'
         test_results = pd.DataFrame(np.around(results, 3), columns=csv_header.split(', '), index=methods)
         test_results['stopwords'] = stopwords_for_method
         test_results.to_csv(test_file, sep=',')
@@ -263,6 +263,6 @@ if __name__ == '__main__':
             seed=3, model=model)
         print(f'Results for {method} on train set. F1 = {results[m, 0]}')
 
-        test_file = './results2/supervised_train.csv'
+        test_file = './results2/supervised_train2.csv'
         test_results = pd.DataFrame(np.around(trresults, 3), columns=trcsv_header.split(', '), index=methods)
         test_results.to_csv(test_file, sep=',')
