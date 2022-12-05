@@ -119,7 +119,7 @@ def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, classe
 
         trained_classifier = model
 
-        def bert_clf(X_train, y_train, X_test, k, model):
+        def bert_clf(X_train, y_train, X_test, k):
             if test_data is None:
                 run_name = 'cross_val_' + k
             else:
