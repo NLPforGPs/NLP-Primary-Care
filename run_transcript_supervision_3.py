@@ -104,7 +104,7 @@ def cross_validate(clf, dev_data, y_dev, stopwords, seed, preprocess):
     return f1, prec, rec, f1_noA, prec_noA, rec_noA
 
 
-def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, classes, test_data=None, y_test=None, seed=3, k=0):
+def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, classes, test_data=None, y_test=None, seed=3, model=None):
 
     stopwords = set_stopwords('m' in stopword_setting, 'c' in stopword_setting, 'e' in stopword_setting)
 
@@ -116,12 +116,14 @@ def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, classe
         elif method == 'BERT NSP':
             clf_unwrapped = run_nsp_classifier
 
+        trained_classifier = model
+
         def bert_clf(X_train, y_train, X_test, k):
             if test_data is None:
                 run_name = 'cross_val_' + k
             else:
                 run_name = 'test'
-            y_pred_mat, _, model = clf_unwrapped(X_train, y_train, id2label, X_test, run_name, 'supervised')
+            y_pred_mat, _, model = clf_unwrapped(X_train, y_train, id2label, X_test, run_name, 'supervised', trained_classifier=trained_classifier)
             return y_pred_mat, None
 
         global id2label
