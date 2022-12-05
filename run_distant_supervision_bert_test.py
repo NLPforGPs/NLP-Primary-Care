@@ -264,7 +264,7 @@ if __name__ == '__main__':
             method, mode, description_corpus, y_desc, 'ce', test_data, y_hot_test, mult_lbl_enc.classes_,
             model=models[mode][method])
 
-        test_file = './results/distant_test.csv'
+        test_file = './results2/distant_test.csv'
         results_df = pd.DataFrame(results, index=methods_for_best_descriptions, columns=csv_header.split(','))
         results_df.to_csv(test_file, sep=',')
         # np.savetxt(test_file, results, delimiter=',', fmt='%.3f', header=csv_header)
@@ -287,7 +287,7 @@ if __name__ == '__main__':
     #
     # table.to_csv(perclass_file, sep=',')
 
-    perclass_file = './results/distant_per_class_mlm.csv'
+    perclass_file = './results2/distant_per_class_mlm.csv'
     selected_method = 'BERT mlm'
 
     dev_f1, dev_prec, dev_rec = evaluate_per_class(y_hot_dev, preds_dev[mode][selected_method])

@@ -212,10 +212,9 @@ if __name__ == '__main__':
 
             # run without the A class
             f1[m, d * 3 + 1], _, _, preds_dev[mode][method], _ = \
-                run_distant_supervision(method, mode, description_corpus, y_desc[:, 1:], stopword_setting, dev_data, y_hot_dev[:, 1:],
+                run_distant_supervision(method, mode + '_withoutA', description_corpus, y_desc[:, 1:], stopword_setting, dev_data, y_hot_dev[:, 1:],
                                         mult_lbl_enc.classes_[1:])
 
-            descriptions_file = './results2/distant_descriptions.csv'
             f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
             f1_df.to_csv(descriptions_file, sep=',')
 

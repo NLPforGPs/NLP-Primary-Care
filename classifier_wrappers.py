@@ -24,7 +24,8 @@ from utils.utils import merge_predictions, stratified_multi_label_split
 
 
 debug = False  # choose debug settings for quicker running of the script at lower performance
-all_models_dir = 'models_22'
+all_models_dir = 'models_3'
+
 
 class NSPDataset(Dataset):
     def __init__(self, text_and_polarities, labels, split_nums, pretrained_model, prompt, id2label):
@@ -269,7 +270,7 @@ def run_bert_conventional(text_train, y_train, id2label, text_test, run_name, tr
 
 
 def run_nsp_classifier(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
-    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/mlm')
+    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/nsp')
     model_name = 'mlm-abstract-5e-5_' + run_name
 
     print('using next sentence prediction bert classifier...')

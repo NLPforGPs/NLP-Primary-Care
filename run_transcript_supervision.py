@@ -41,7 +41,7 @@ def set_stopwords(use_med, use_cus, use_eng):
     return stopwords
 
 
-def test_single_split(train_set, y_train, test_set, y_test, stopwords, clf, preprocess, classes):
+def test_single_split(train_set, y_train, test_set, y_test, stopwords, clf, preprocess, classes, k=0):
     if preprocess:
         max_features = 5000
         text_vectorizer = TfidfVectorizer(ngram_range=(1, 2), stop_words=stopwords, max_features=max_features)
@@ -51,7 +51,10 @@ def test_single_split(train_set, y_train, test_set, y_test, stopwords, clf, prep
         X_train = train_set
         X_test = test_set
 
-    results = clf(X_train, y_train, X_test)  # performance on training set
+    if not preprocess:
+        results = clf(X_train, y_train, X_test)  # performance on training set
+    else:
+        results = clf(X_train, y_train, X_test, k)  # performance on training set
     y_pred_mat = results[0]
     if len(results) == 3:
         model = results[2]
@@ -71,6 +74,7 @@ def cross_validate(clf, dev_data, y_dev, stopwords, seed, preprocess):
     kfolds = StratifiedKFold(n_splits=5, random_state=seed, shuffle=True)
     X_dev = dev_data[key].values
 
+    k = 0
     for train_idxs, test_idxs in kfolds.split(X_dev, np.argmax(y_dev, 1)):
         train_set = X_dev[train_idxs]
         y_train = y_dev[train_idxs]
@@ -80,13 +84,15 @@ def cross_validate(clf, dev_data, y_dev, stopwords, seed, preprocess):
 
         f1_k, p1_k, r1_k, f1_k_noA, p1_k_noA, r1_k_noA, _ = test_single_split(train_set, y_train, test_set, y_test,
                                                                            stopwords, clf, preprocess,
-                                                                           mult_lbl_enc.classes_)
+                                                                           mult_lbl_enc.classes_, k)
         f1s.append(f1_k)
         p1s.append(p1_k)
         r1s.append(r1_k)
         f1s_noA.append(f1_k)
         p1s_noA.append(p1_k)
         r1s_noA.append(r1_k)
+
+        k += 1
 
     f1 = np.mean(f1s)
     prec = np.mean(p1s)
@@ -98,7 +104,7 @@ def cross_validate(clf, dev_data, y_dev, stopwords, seed, preprocess):
     return f1, prec, rec, f1_noA, prec_noA, rec_noA
 
 
-def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, classes, test_data=None, y_test=None, seed=3):
+def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, classes, test_data=None, y_test=None, seed=3, k=0):
 
     stopwords = set_stopwords('m' in stopword_setting, 'c' in stopword_setting, 'e' in stopword_setting)
 
@@ -110,9 +116,9 @@ def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, classe
         elif method == 'BERT NSP':
             clf_unwrapped = run_nsp_classifier
 
-        def bert_clf(X_train, y_train, X_test):
+        def bert_clf(X_train, y_train, X_test, k):
             if test_data is None:
-                run_name = 'cross_val'
+                run_name = 'cross_val_' + k
             else:
                 run_name = 'test'
             y_pred_mat, _, model = clf_unwrapped(X_train, y_train, id2label, X_test, run_name, 'supervised')
