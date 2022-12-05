@@ -211,19 +211,19 @@ if __name__ == '__main__':
     X = np.arange(orig_dataset['index'].shape[0]).reshape((-1, 1))
 
     stopwords_file = 'results2/supervised_stopwords.csv'
-    best_stopword_settings = run_stopword_experiment(methods, stopword_settings, dev_data, y_hot_dev)
+    # best_stopword_settings = run_stopword_experiment(methods, stopword_settings, dev_data, y_hot_dev)
     best_stopword_settings = {}
 
     # EXPERIMENT 2 -- run all methods with chosen descriptions and stopword setting -----------------------
 
     methods = [
         'binary NB',
-        'multiclass NB',
-        'binary SVM',
-        'multiclass SVM',
-        'nearest centroid',
-        'BERT MLM',
-        # 'BERT NSP',
+        # 'multiclass NB',
+        # 'binary SVM',
+        # 'multiclass SVM',
+        # 'nearest centroid',
+        # 'BERT MLM',
+        'BERT NSP',
         # 'BERT conventional',
     ]
     # run a larger list of methods with ICPC codes only, with both sets of speech -- the best setup overall
