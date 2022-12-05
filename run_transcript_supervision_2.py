@@ -121,7 +121,7 @@ def run_transcript_supervision(method, stopword_setting, dev_data, y_dev, classe
 
         def bert_clf(X_train, y_train, X_test, k):
             if test_data is None:
-                run_name = 'cross_val_' + k
+                run_name = 'cross_val_' + str(k)
             else:
                 run_name = 'test'
             y_pred_mat, _, model = clf_unwrapped(X_train, y_train, id2label, X_test, run_name, 'supervised', trained_classifier=trained_classifier)

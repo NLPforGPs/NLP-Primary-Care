@@ -148,7 +148,7 @@ if __name__ == '__main__':
     # key = 'transcript__conversation_patient'
 
     # Specify which descriptions we will test
-    selected_modes = ['both', 'ICPC only', 'CKS only', 'both']
+    selected_modes = ['both', 'ICPC only', 'CKS only']
 
     stopword_settings = [
         [],
