@@ -204,7 +204,7 @@ if __name__ == '__main__':
         stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
         for m, method in enumerate(methods_for_description_test):
             f1[m, d*3], _, _, preds_dev[mode][method], models[mode][method] = \
-                run_distant_supervision(method, mode, description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
+                run_distant_supervision(method, mode + '_rerun', description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
                                         mult_lbl_enc.classes_)
             descriptions_file = './results/distant_descriptions_nsp.csv'
             f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
@@ -226,7 +226,7 @@ if __name__ == '__main__':
         description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
         stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
         for m, method in enumerate(methods_for_description_test):
-            f1[m, d*3 + 2], _, _, _, _ = run_distant_supervision(method, mode + '_gponly', description_corpus, y_desc, 'ce',
+            f1[m, d*3 + 2], _, _, _, _ = run_distant_supervision(method, mode + '_gponly_rerun', description_corpus, y_desc, 'ce',
                                                            dev_data, y_hot_dev, mult_lbl_enc.classes_)
 
             descriptions_file = './results2/distant_descriptions_gponly_nsp.csv'
