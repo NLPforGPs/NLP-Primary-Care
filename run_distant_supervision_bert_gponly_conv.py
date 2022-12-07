@@ -206,18 +206,18 @@ if __name__ == '__main__':
             f1[m, d*3], _, _, preds_dev[mode][method], models[mode][method] = \
                 run_distant_supervision(method, mode, description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
                                         mult_lbl_enc.classes_)
-            descriptions_file = './results/distant_descriptions.csv'
+            descriptions_file = './results/distant_descriptions_conv.csv'
             f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
             f1_df.to_csv(descriptions_file, sep=',')
 
-            # run without the A class
-            f1[m, d * 3 + 1], _, _, preds_dev[mode][method], _ = \
-                run_distant_supervision(method, mode, description_corpus, y_desc[:, 1:], stopword_setting, dev_data, y_hot_dev[:, 1:],
-                                        mult_lbl_enc.classes_[1:])
-
-            descriptions_file = './results/distant_descriptions.csv'
-            f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
-            f1_df.to_csv(descriptions_file, sep=',')
+            # # run without the A class
+            # f1[m, d * 3 + 1], _, _, preds_dev[mode][method], _ = \
+            #     run_distant_supervision(method, mode, description_corpus, y_desc[:, 1:], stopword_setting, dev_data, y_hot_dev[:, 1:],
+            #                             mult_lbl_enc.classes_[1:])
+            #
+            # descriptions_file = './results/distant_descriptions.csv'
+            # f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
+            # f1_df.to_csv(descriptions_file, sep=',')
 
     # EXPERIMENT 3 -- without patient's speech ---------------------------
     # run selected methods with ICPC codes only, without patients' speech
@@ -229,7 +229,7 @@ if __name__ == '__main__':
             f1[m, d*3 + 2], _, _, _, _ = run_distant_supervision(method, mode + '_gponly', description_corpus, y_desc, 'ce',
                                                            dev_data, y_hot_dev, mult_lbl_enc.classes_)
 
-            descriptions_file = './results2/distant_descriptions_gponly.csv'
+            descriptions_file = './results2/distant_descriptions_gponly_conv.csv'
             f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
             f1_df.to_csv(descriptions_file, sep=',')
 
