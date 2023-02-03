@@ -1,0 +1,3 @@
+,F1 (dev),prec (dev),rec (dev),F1 (test),prec (test),rec (test),stopwords
+binary NB,0.157,0.254,0.127,0.13,0.201,0.111,[]
+BERT conventional,0.48,0.467,0.577,0.452,0.484,0.509,[]

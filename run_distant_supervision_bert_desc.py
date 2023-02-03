@@ -175,9 +175,9 @@ if __name__ == '__main__':
         # 'binary NB',
         'multiclass NB',
         # 'nearest centroid',
-        'BERT MLM',
+        #'BERT MLM',
         'BERT conventional',  # jdo we need this in final results?
-        'BERT NSP',
+        #'BERT NSP',
     ]
 
     csv_header = []
@@ -206,7 +206,7 @@ if __name__ == '__main__':
             f1[m, d*3], _, _, preds_dev[mode][method], models[mode][method] = \
                 run_distant_supervision(method, mode, description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
                                         mult_lbl_enc.classes_)
-            descriptions_file = './results/distant_descriptions.csv'
+            descriptions_file = './results/distant_descriptions_conv.csv'
             f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
             f1_df.to_csv(descriptions_file, sep=',')
 
