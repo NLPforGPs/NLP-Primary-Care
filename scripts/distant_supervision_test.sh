@@ -7,8 +7,8 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=16G
-#SBATCH --output=/user/work/es1595/oiam_distant.out.%j
-#SBATCH --error=/user/work/es1595/oiam_distant.err.%j
+#SBATCH --output=/user/work/es1595/oiam_distant_gp.out.%j
+#SBATCH --error=/user/work/es1595/oiam_distant_gp.err.%j
 #SBATCH --account=COSC022122
 
 cd "${SLURM_SUBMIT_DIR}"
