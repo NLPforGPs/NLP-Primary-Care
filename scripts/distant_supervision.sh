@@ -24,5 +24,5 @@ module add lang/python/anaconda/pytorch
 #conda install datasets --yes
 
 echo Start Time: $(date)
-conda run -n NLP_GP --no-capture-output python -u ./run_distant_supervision.py
+conda run -n NLP_GP --no-capture-output python -u ./run_distant_supervision.py --experiments_to_run=1234
 echo End Time: $(date)
