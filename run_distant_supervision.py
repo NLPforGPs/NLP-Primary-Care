@@ -181,7 +181,7 @@ if __name__ == '__main__':
     ]
 
     stopwords_file = 'results2/distant_stopwords.csv'
-    if 1 in args.experiment_to_run:
+    if '1' in args.experiment_to_run:
         run_stopword_experiment(methods, selected_modes, stopword_settings, dev_data, y_hot_dev)
 
     # EXPERIMENT 2  -- Comparing key methods with ICPC versus CKS -------------------
@@ -215,7 +215,7 @@ if __name__ == '__main__':
         models[mode] = {}
 
     # run selected methods with complete transcripts, including A class and without it, with both sets of descriptions
-    if 2 in args.experiment_to_run:
+    if '2' in args.experiment_to_run:
         for d, mode in enumerate(selected_modes):
             description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
             stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
@@ -237,7 +237,7 @@ if __name__ == '__main__':
 
     # EXPERIMENT 3 -- without patient's speech ---------------------------
     # run selected methods with ICPC codes only, without patients' speech
-    if 3 in args.experiment_to_run:
+    if '3' in args.experiment_to_run:
         key = 'transcript__conversation_gp'
         for d, mode in enumerate(selected_modes):
             description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
@@ -251,7 +251,7 @@ if __name__ == '__main__':
                 f1_df.to_csv(descriptions_file, sep=',')
 
     # EXPERIMENT 4 -- run all methods with chosen descriptions and stopword setting -----------------------
-    if 4 in args.experiment_to_run:
+    if '4' in args.experiment_to_run:
         methods_for_best_descriptions = [
             'binary NB',
             # 'multiclass NB',
