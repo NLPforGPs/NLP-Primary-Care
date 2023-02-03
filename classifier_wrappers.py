@@ -25,6 +25,7 @@ from utils.utils import merge_predictions, stratified_multi_label_split
 
 debug = False  # choose debug settings for quicker running of the script at lower performance
 all_models_dir = 'models_3'
+do_training = False
 
 
 class NSPDataset(Dataset):
@@ -271,7 +272,7 @@ def run_bert_conventional(text_train, y_train, id2label, text_test, run_name, tr
 
 def run_nsp_classifier(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
     model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/nsp')
-    model_name = 'mlm-abstract-5e-5_' + run_name
+    model_name = 'nsp-abstract-5e-5_' + run_name
 
     print('using next sentence prediction bert classifier...')
 
@@ -320,7 +321,7 @@ def run_bert_classifier(pretrained_model, text_train, y_train, id2label, text_te
     batch_size = 8
     stop_epochs = 10
     chunk_size = 490
-    load_checkpoint = False
+    load_checkpoint = True
 
     # if debug:
     #     epochs = 10
@@ -330,23 +331,29 @@ def run_bert_classifier(pretrained_model, text_train, y_train, id2label, text_te
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model)  # , local_files_only=True)
 
+    model_filename = os.path.join(model_dir, model_name + '_best-val-acc-model.pt')
+
     if trained_classifier is not None:
         classifier = trained_classifier  # just reuse it without training again
     else:
         model.to(device)
         classifier = DescClassifier(model=model, epochs=epochs, learning_rate=learning_rate, weight_decay=weight_decay)
 
-        # create a dataset object from the data
-        chunks, chunk_labels, split_nums = do_text_chunking(text_train, tokenizer, chunk_size, np.argmax(y_train, 1))
-        dataset_train, dataset_dev = prepare_training_set(pretrained_model, chunks, chunk_labels, nclasses, dataset_constructor, training_mode, prompt, id2label)
+        # switch this off to just reload the model from a saved checkpoint
+        if do_training or not os.path.exists(model_filename):
+            # create a dataset object from the data
+            chunks, chunk_labels, split_nums = do_text_chunking(text_train, tokenizer, chunk_size, np.argmax(y_train, 1))
+            dataset_train, dataset_dev = prepare_training_set(pretrained_model, chunks, chunk_labels, nclasses, dataset_constructor, training_mode, prompt, id2label)
 
-        train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True)
-        dev_dataloader = DataLoader(dataset_dev, batch_size=batch_size, shuffle=False)
+            train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True)
+            dev_dataloader = DataLoader(dataset_dev, batch_size=batch_size, shuffle=False)
 
-        print('Training...')
-        classifier.train(train_loader=train_dataloader, dev_loader=dev_dataloader, save_dir=model_dir,
-                         save_name=model_name, stop_epochs=stop_epochs, device=device, prompt=prompt,
-                         load_checkpoint=load_checkpoint, ckpt_name=model_name)
+            print('Training...')
+            classifier.train(train_loader=train_dataloader, dev_loader=dev_dataloader, save_dir=model_dir,
+                             save_name=model_name, stop_epochs=stop_epochs, device=device, prompt=prompt,
+                             load_checkpoint=load_checkpoint, ckpt_name=model_name)
+        else:
+            print('Not training the model, will try to reload it from disk')
 
     # format test data
     chunks, chunk_labels, split_nums = do_text_chunking(text_test, tokenizer, chunk_size, len(text_test) * [0])
@@ -356,9 +363,9 @@ def run_bert_classifier(pretrained_model, text_train, y_train, id2label, text_te
     predict_dataloader = DataLoader(dataset_test, batch_size=batch_size, shuffle=False)
 
     if device == torch.device('cpu'):
-        checkpoint = torch.load(os.path.join(model_dir, model_name + '_best-val-acc-model.pt'), map_location=device)
+        checkpoint = torch.load(model_filename, map_location=device)
     else:
-        checkpoint = torch.load(os.path.join(model_dir, model_name + '_best-val-acc-model.pt'))
+        checkpoint = torch.load(model_filename)
     classifier.load_state_dict(checkpoint['state_dict'])
 
     print('Predicting...')

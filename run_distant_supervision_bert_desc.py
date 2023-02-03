@@ -148,7 +148,7 @@ if __name__ == '__main__':
     # key = 'transcript__conversation_patient'
 
     # Specify which descriptions we will test
-    selected_modes = ['CKS only', 'ICPC only']
+    selected_modes = ['both', 'CKS only', 'ICPC only']
 
     stopword_settings = [
         [],
@@ -206,7 +206,7 @@ if __name__ == '__main__':
             f1[m, d*3], _, _, preds_dev[mode][method], models[mode][method] = \
                 run_distant_supervision(method, mode, description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
                                         mult_lbl_enc.classes_)
-            descriptions_file = './results/distant_descriptions.csv'
+            descriptions_file = './results3/distant_descriptions_bert.csv'
             f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
             f1_df.to_csv(descriptions_file, sep=',')
 

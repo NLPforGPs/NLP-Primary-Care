@@ -2,6 +2,30 @@ import numpy as np
 from sklearn.metrics import f1_score, classification_report, roc_auc_score, precision_score, recall_score
 
 
+def test_random_baseline(X_test, y_test):
+    f = 0
+    p = 0
+    r = 0
+
+    N = X_test.shape[0]
+    nclasses = y_test.shape[1]
+
+    nsamples = 1000
+    for sample in range(nsamples):
+        # random_labels = np.random.rand(y_hot.shape[0], y_hot.shape[1])
+        # random_labels = random_labels > (counts / np.sum(counts))[None, :]
+        random_labels = np.random.randint(0, 2, (N, nclasses))
+        p += precision_score(random_labels, y_test, average='macro')
+        r += recall_score(random_labels, y_test, average='macro')
+        f += f1_score(random_labels, y_test, average='macro')
+
+    print(f'Precision = {p / nsamples}')
+    print(f'Recall = {r / nsamples}')
+    print(f'F1 score = {f / nsamples}')
+
+    return p, r, f
+
+
 def evaluate_per_class(targets,
                        predictions):
     """

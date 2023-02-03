@@ -12,6 +12,8 @@ All of these results are saved to distant_descriptions.csv and includes cross va
 Fourth, we run all methods with the best descriptions on dev and test sets. We save this to distant_test.csv.
 Fifth, we take the best overall method and save the results for each class to distant_per_class.csv.
 """
+import argparse
+
 import numpy as np
 import pandas as pd
 from utils.metrics.metric import evaluate_classifications, evaluate_per_class
@@ -19,10 +21,12 @@ from classifier_wrappers import run_binary_naive_bayes, run_multiclass_naive_bay
     run_multiclass_svm, run_nearest_centroid, run_nearest_neighbors, run_bert_classifier, run_bert_conventional, \
     run_mlm_classifier, run_nsp_classifier
 from prepare_data import prepare_original_data
-from utils.utils import stratified_multi_label_split
+from utils.utils import stratified_multi_label_split, save_predictions_to_file
 from prepare_data import load_descriptions
 from utils.stopwords import get_medical_stopwords, get_custom_stopwords, get_english_stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+save_predictions = True
 
 
 def set_stopwords(use_med, use_cus, use_eng):
@@ -52,10 +56,10 @@ def get_description_vectors(description_corpus, stopwords):
 
 
 def run_distant_supervision(method, run_name_template, description_corpus, y_desc, stopword_setting, dev_data, y_dev,
-                            classes, model=None):
+                            classes, existing_model=None):
+    run_name = f"{run_name_template.lower().replace(' ', '_')}"
 
     if 'BERT' in method:
-        run_name = f"{run_name_template.lower().replace(' ', '_')}"
 
         if method == 'BERT conventional':
             clf = run_bert_conventional
@@ -64,7 +68,7 @@ def run_distant_supervision(method, run_name_template, description_corpus, y_des
         elif method == 'BERT NSP':
             clf = run_nsp_classifier
 
-        y_pred_mat_dev, _, model = clf(description_corpus, y_desc, id2label, dev_data[key], run_name, run_name_template, model)
+        y_pred_mat_dev, _, model = clf(description_corpus, y_desc, id2label, dev_data[key], run_name, run_name_template, existing_model)
     else:
         stopwords = set_stopwords('m' in stopword_setting, 'c' in stopword_setting, 'e' in stopword_setting)
 
@@ -85,7 +89,14 @@ def run_distant_supervision(method, run_name_template, description_corpus, y_des
             clf = run_multiclass_svm
 
         y_pred_mat_dev, _ = clf(description_vec, y_desc, X_dev)
-        model = None
+        model = clf
+
+    if save_predictions:
+        if existing_model is not None:
+            run_name = run_name + '_test'
+        else:
+            run_name = run_name + '_dev'
+        save_predictions_to_file(y_dev, y_pred_mat_dev, f'distantsupervision_{run_name}_{method}')
 
     results = evaluate_classifications(y_dev, y_pred_mat_dev, classes, show_report=False)
 
@@ -115,6 +126,10 @@ def run_stopword_experiment(methods, description_settings, stopword_settings, de
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--experiment_to_run', type=str, default='1234')
+    args = parser.parse_args()
+
     # Load the data
     # YOU MAY NEED TO SET THE LOCATION OF THE DATASET IN oneinamillion/resources.py.
     orig_dataset, mult_lbl_enc, y_hot = prepare_original_data()
@@ -148,7 +163,7 @@ if __name__ == '__main__':
     # key = 'transcript__conversation_patient'
 
     # Specify which descriptions we will test
-    selected_modes = ['both', 'ICPC only', 'CKS only']
+    selected_modes = ['CKS only']  # 'both', 'ICPC only',
 
     stopword_settings = [
         [],
@@ -166,18 +181,19 @@ if __name__ == '__main__':
     ]
 
     stopwords_file = 'results2/distant_stopwords.csv'
-    # run_stopword_experiment(methods, selected_modes, stopword_settings, dev_data, y_hot_dev)
+    if 1 in args.experiment_to_run:
+        run_stopword_experiment(methods, selected_modes, stopword_settings, dev_data, y_hot_dev)
 
     # EXPERIMENT 2  -- Comparing key methods with ICPC versus CKS -------------------
     # from the experiment one, the optimal setting is: ce for ICPC-2 and mce for CKS
 
     methods_for_description_test = [
         'binary NB',
-        'multiclass NB',
-        'nearest centroid',
-        'BERT MLM',
-        'BERT conventional',  # jdo we need this in final results?
+        # 'multiclass NB',
+        # 'nearest centroid',
         'BERT NSP',
+        'BERT MLM',
+        'BERT conventional',
     ]
 
     csv_header = []
@@ -199,106 +215,108 @@ if __name__ == '__main__':
         models[mode] = {}
 
     # run selected methods with complete transcripts, including A class and without it, with both sets of descriptions
-    for d, mode in enumerate(selected_modes):
-        description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
-        stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
-        for m, method in enumerate(methods_for_description_test):
-            f1[m, d*3], _, _, preds_dev[mode][method], models[mode][method] = \
-                run_distant_supervision(method, mode, description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
-                                        mult_lbl_enc.classes_)
-            descriptions_file = './results2/distant_descriptions.csv'
-            f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
-            f1_df.to_csv(descriptions_file, sep=',')
+    if 2 in args.experiment_to_run:
+        for d, mode in enumerate(selected_modes):
+            description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
+            stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
+            for m, method in enumerate(methods_for_description_test):
+                f1[m, d*3], _, _, preds_dev[mode][method], models[mode][method] = \
+                    run_distant_supervision(method, mode, description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
+                                            mult_lbl_enc.classes_)
+                descriptions_file = './results3/distant_descriptions.csv'
+                f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
+                f1_df.to_csv(descriptions_file, sep=',')
 
-            # run without the A class
-            f1[m, d * 3 + 1], _, _, preds_dev[mode][method], _ = \
-                run_distant_supervision(method, mode + '_withoutA', description_corpus, y_desc[:, 1:], stopword_setting, dev_data, y_hot_dev[:, 1:],
-                                        mult_lbl_enc.classes_[1:])
+                # run without the A class
+                f1[m, d * 3 + 1], _, _, _, _ = \
+                    run_distant_supervision(method, mode + '_withoutA', description_corpus, y_desc[:, 1:], stopword_setting, dev_data, y_hot_dev[:, 1:],
+                                            mult_lbl_enc.classes_[1:])
 
-            f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
-            f1_df.to_csv(descriptions_file, sep=',')
+                f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
+                f1_df.to_csv(descriptions_file, sep=',')
 
     # EXPERIMENT 3 -- without patient's speech ---------------------------
     # run selected methods with ICPC codes only, without patients' speech
-    key = 'transcript__conversation_gp'
-    for d, mode in enumerate(selected_modes):
-        description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
-        stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
-        for m, method in enumerate(methods_for_description_test):
-            f1[m, d*3 + 2], _, _, _, _ = run_distant_supervision(method, mode + '_gponly', description_corpus, y_desc, 'ce',
-                                                           dev_data, y_hot_dev, mult_lbl_enc.classes_)
+    if 3 in args.experiment_to_run:
+        key = 'transcript__conversation_gp'
+        for d, mode in enumerate(selected_modes):
+            description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
+            stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
+            for m, method in enumerate(methods_for_description_test):
+                f1[m, d*3 + 2], _, _, _, _ = run_distant_supervision(method, mode + '_gponly', description_corpus, y_desc, 'ce',
+                                                               dev_data, y_hot_dev, mult_lbl_enc.classes_)
 
-            descriptions_file = './results2/distant_descriptions.csv'
-            f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
-            f1_df.to_csv(descriptions_file, sep=',')
+                descriptions_file = './results3/distant_descriptions_gponly.csv'
+                f1_df = pd.DataFrame(f1, index=methods_for_description_test, columns=csv_header)
+                f1_df.to_csv(descriptions_file, sep=',')
 
     # EXPERIMENT 4 -- run all methods with chosen descriptions and stopword setting -----------------------
+    if 4 in args.experiment_to_run:
+        methods_for_best_descriptions = [
+            'binary NB',
+            # 'multiclass NB',
+            # 'nearest centroid',
+            'BERT MLM',
+            'BERT conventional',
+            'BERT NSP',
+        ]
 
-    methods_for_best_descriptions = [
-        'binary NB',
-        'multiclass NB',
-        'nearest centroid',
-        'BERT MLM',
-        'BERT conventional',
-        'BERT NSP',
-    ]
+        # run a larger list of methods with ICPC codes only, with both sets of speech -- the best setup overall
+        key = 'transcript__conversation_both'
+        csv_header = 'F1 (dev), prec (dev), rec (dev), F1 (test), prec (test), rec (test)'
+        results = np.zeros((len(methods_for_best_descriptions), 6))
+        for m, method in enumerate(methods_for_best_descriptions):
+            mode = 'ICPC only' if 'BERT' not in method else 'CKS only'
+            description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
+            if method not in preds_dev[mode]:
+                results[m, 0], results[m, 1], results[m, 2], preds_dev[mode][method], models[mode][method] = \
+                    run_distant_supervision(method, mode, description_corpus, y_desc, 'ce', dev_data, y_hot_dev, mult_lbl_enc.classes_)
+            else:  # don't rerun the model, just load the predictions and compute results
+                results[m, 0], results[m, 1], results[m, 2] = evaluate_classifications(y_hot_dev, preds_dev[mode][method],
+                                                                                       mult_lbl_enc.classes_,
+                                                                                       show_report=False)
 
-    # run a larger list of methods with ICPC codes only, with both sets of speech -- the best setup overall
-    key = 'transcript__conversation_both'
-    csv_header = 'F1 (dev), prec (dev), rec (dev), F1 (test), prec (test), rec (test)'
-    results = np.zeros((len(methods_for_best_descriptions), 6))
-    for m, method in enumerate(methods_for_best_descriptions):
-        mode = 'ICPC only' if 'BERT' not in method else 'CKS only'
-        description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
-        if method not in preds_dev[mode]:
-            results[m, 0], results[m, 1], results[m, 2], preds_dev[mode][method], models[mode][method] = \
-                run_distant_supervision(method, mode, description_corpus, y_desc, 'ce', dev_data, y_hot_dev, mult_lbl_enc.classes_)
-        else:  # don't rerun the model, just load the predictions and compute results
-            results[m, 0], results[m, 1], results[m, 2] = evaluate_classifications(y_hot_dev, preds_dev[mode][method],
-                                                                                   mult_lbl_enc.classes_,
-                                                                                   show_report=False)
+            # repeat on test set
+            results[m, 3], results[m, 4], results[m, 5], preds_test[mode][method], _ = run_distant_supervision(
+                method, mode, description_corpus, y_desc, 'ce', test_data, y_hot_test, mult_lbl_enc.classes_,
+                existing_model=models[mode][method])
 
-        # repeat on test set
-        results[m, 3], results[m, 4], results[m, 5], preds_test[mode][method], _ = run_distant_supervision(
-            method, mode, description_corpus, y_desc, 'ce', test_data, y_hot_test, mult_lbl_enc.classes_,
-            model=models[mode][method])
-
-        test_file = './results2/distant_test.csv'
-        results_df = pd.DataFrame(results, index=methods_for_best_descriptions, columns=csv_header.split(','))
-        results_df.to_csv(test_file, sep=',')
+            test_file = './results3/distant_test.csv'
+            results_df = pd.DataFrame(results, index=methods_for_best_descriptions, columns=csv_header.split(','))
+            results_df.to_csv(test_file, sep=',')
         # np.savetxt(test_file, results, delimiter=',', fmt='%.3f', header=csv_header)
 
-    # EXPERIMENT 5 -- Save the per-class results for the best method -----------------------------------
-    perclass_file = './results2/distant_per_class_mnb.csv'
-    selected_method = 'multiclass NB'
-
-    dev_f1, dev_prec, dev_rec = evaluate_per_class(y_hot_dev, preds_dev[mode][selected_method])
-    test_f1, test_prec, test_rec = evaluate_per_class(y_hot_test, preds_test[mode][selected_method])
-
-    table = pd.DataFrame({
-        'F1 (dev)': np.around(dev_f1, 3),
-        'Prec (dev)': np.around(dev_prec, 3),
-        'Rec (dev)': np.around(dev_rec, 3),
-        'F1 (test)': np.around(test_f1, 3),
-        'Prec (test)': np.around(test_prec, 3),
-        'Rec (test)': np.around(test_rec, 3)
-    }, index=mult_lbl_enc.classes_)
-
-    table.to_csv(perclass_file, sep=',')
-
-    perclass_file = './results2/distant_per_class_mlm.csv'
-    selected_method = 'BERT mlm'
-
-    dev_f1, dev_prec, dev_rec = evaluate_per_class(y_hot_dev, preds_dev[mode][selected_method])
-    test_f1, test_prec, test_rec = evaluate_per_class(y_hot_test, preds_test[mode][selected_method])
-
-    table = pd.DataFrame({
-        'F1 (dev)': np.around(dev_f1, 3),
-        'Prec (dev)': np.around(dev_prec, 3),
-        'Rec (dev)': np.around(dev_rec, 3),
-        'F1 (test)': np.around(test_f1, 3),
-        'Prec (test)': np.around(test_prec, 3),
-        'Rec (test)': np.around(test_rec, 3)
-    }, index=mult_lbl_enc.classes_)
-
-    table.to_csv(perclass_file, sep=',')
+    # # EXPERIMENT 5 -- Save the per-class results for the best method -----------------------------------
+    # perclass_file = './results3/distant_per_class_mnb.csv'
+    # selected_method = 'multiclass NB'
+    #
+    # dev_f1, dev_prec, dev_rec = evaluate_per_class(y_hot_dev, preds_dev[mode][selected_method])
+    # test_f1, test_prec, test_rec = evaluate_per_class(y_hot_test, preds_test[mode][selected_method])
+    #
+    # table = pd.DataFrame({
+    #     'F1 (dev)': np.around(dev_f1, 3),
+    #     'Prec (dev)': np.around(dev_prec, 3),
+    #     'Rec (dev)': np.around(dev_rec, 3),
+    #     'F1 (test)': np.around(test_f1, 3),
+    #     'Prec (test)': np.around(test_prec, 3),
+    #     'Rec (test)': np.around(test_rec, 3)
+    # }, index=mult_lbl_enc.classes_)
+    #
+    # table.to_csv(perclass_file, sep=',')
+    #
+    # perclass_file = './results3/distant_per_class_mlm.csv'
+    # selected_method = 'BERT mlm'
+    #
+    # dev_f1, dev_prec, dev_rec = evaluate_per_class(y_hot_dev, preds_dev[mode][selected_method])
+    # test_f1, test_prec, test_rec = evaluate_per_class(y_hot_test, preds_test[mode][selected_method])
+    #
+    # table = pd.DataFrame({
+    #     'F1 (dev)': np.around(dev_f1, 3),
+    #     'Prec (dev)': np.around(dev_prec, 3),
+    #     'Rec (dev)': np.around(dev_rec, 3),
+    #     'F1 (test)': np.around(test_f1, 3),
+    #     'Prec (test)': np.around(test_prec, 3),
+    #     'Rec (test)': np.around(test_rec, 3)
+    # }, index=mult_lbl_enc.classes_)
+    #
+    # table.to_csv(perclass_file, sep=',')

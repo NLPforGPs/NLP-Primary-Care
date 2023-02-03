@@ -264,7 +264,7 @@ if __name__ == '__main__':
             method, mode, description_corpus, y_desc, 'ce', test_data, y_hot_test, mult_lbl_enc.classes_,
             model=models[mode][method])
 
-        test_file = './results2/distant_test.csv'
+        test_file = './results3/distant_test_bert.csv'
         results_df = pd.DataFrame(results, index=methods_for_best_descriptions, columns=csv_header.split(','))
         results_df.to_csv(test_file, sep=',')
         # np.savetxt(test_file, results, delimiter=',', fmt='%.3f', header=csv_header)
@@ -287,19 +287,19 @@ if __name__ == '__main__':
     #
     # table.to_csv(perclass_file, sep=',')
 
-    perclass_file = './results2/distant_per_class_mlm.csv'
-    selected_method = 'BERT mlm'
-
-    dev_f1, dev_prec, dev_rec = evaluate_per_class(y_hot_dev, preds_dev[mode][selected_method])
-    test_f1, test_prec, test_rec = evaluate_per_class(y_hot_test, preds_test[mode][selected_method])
-
-    table = pd.DataFrame({
-        'F1 (dev)': np.around(dev_f1, 3),
-        'Prec (dev)': np.around(dev_prec, 3),
-        'Rec (dev)': np.around(dev_rec, 3),
-        'F1 (test)': np.around(test_f1, 3),
-        'Prec (test)': np.around(test_prec, 3),
-        'Rec (test)': np.around(test_rec, 3)
-    }, index=mult_lbl_enc.classes_)
-
-    table.to_csv(perclass_file, sep=',')
+    # perclass_file = './results2/distant_per_class_mlm.csv'
+    # selected_method = 'BERT mlm'
+    #
+    # dev_f1, dev_prec, dev_rec = evaluate_per_class(y_hot_dev, preds_dev[mode][selected_method])
+    # test_f1, test_prec, test_rec = evaluate_per_class(y_hot_test, preds_test[mode][selected_method])
+    #
+    # table = pd.DataFrame({
+    #     'F1 (dev)': np.around(dev_f1, 3),
+    #     'Prec (dev)': np.around(dev_prec, 3),
+    #     'Rec (dev)': np.around(dev_rec, 3),
+    #     'F1 (test)': np.around(test_f1, 3),
+    #     'Prec (test)': np.around(test_prec, 3),
+    #     'Rec (test)': np.around(test_rec, 3)
+    # }, index=mult_lbl_enc.classes_)
+    #
+    # table.to_csv(perclass_file, sep=',')

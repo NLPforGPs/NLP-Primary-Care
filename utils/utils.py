@@ -7,6 +7,19 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 
 
+def save_predictions_to_file(y_test, y_pred_mat, filename):
+    names = []
+    data_dict = {}
+    for l in range(y_test.shape[1]):
+        names.append('gold_for_class_%i' % l)
+        data_dict['gold_for_class_%i' % l] = y_test[:, l]
+    for l in range(y_test.shape[1]):
+        names.append('predictions_for_class_%i' % l)
+        data_dict['predictions_for_class_%i' % l] = y_pred_mat[:, l]
+    pred_df = pd.DataFrame(data_dict, columns=names)
+    pred_df.to_csv('./output_predictions/%s' % filename)
+
+
 def save_checkpoint(dir, epoch, name='checkpoint', **kwargs):
     state = {
         'epoch': epoch,

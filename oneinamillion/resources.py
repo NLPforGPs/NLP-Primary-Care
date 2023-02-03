@@ -13,7 +13,7 @@ Alternatively, you may set PCC_CODES_DIR, PCC_PT_RECORD_RAW_DIR, PCC_TRANSCRIPT_
 and/or PCC_TRANSCRIPT_DIR (optional), PCC_PT_RECORD_DIR (optional)
 """
 
-PCC_BASE_DIR = environ.get('PCC_BASE_DIR') or r"/Volumes/NLP_One_In_A_Million"
+PCC_BASE_DIR = environ.get('PCC_BASE_DIR') or r"/Volumes/OIAM_to_delete"  # NLP_One_In_A_Million"
 
 ICPC_CKS_DESC = 'icpc_cks_description.csv'
 CKS_DESC = 'cks_description.csv'

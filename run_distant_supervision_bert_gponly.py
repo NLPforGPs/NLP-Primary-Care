@@ -175,9 +175,9 @@ if __name__ == '__main__':
         # 'binary NB',
         'multiclass NB',
         # 'nearest centroid',
-        # 'BERT MLM',
+        'BERT MLM',
         'BERT conventional',  # jdo we need this in final results?
-        # 'BERT NSP',
+        'BERT NSP',
     ]
 
     csv_header = []

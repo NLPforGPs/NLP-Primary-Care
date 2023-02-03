@@ -1,0 +1,6 @@
+,F1 (train),prec (train),rec (train)
+binary NB,0.999,0.998,1.0
+multiclass NB,0.696,0.938,0.588
+binary SVM,0.181,0.104,1.0
+multiclass SVM,0.696,0.938,0.588
+nearest centroid,0.694,0.927,0.588
