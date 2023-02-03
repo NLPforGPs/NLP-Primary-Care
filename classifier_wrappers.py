@@ -25,7 +25,7 @@ from utils.utils import merge_predictions, stratified_multi_label_split
 
 debug = False  # choose debug settings for quicker running of the script at lower performance
 all_models_dir = 'models_3'
-do_training = False
+do_training = True
 
 
 class NSPDataset(Dataset):
