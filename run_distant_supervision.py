@@ -238,6 +238,15 @@ if __name__ == '__main__':
     # EXPERIMENT 3 -- without patient's speech ---------------------------
     # run selected methods with ICPC codes only, without patients' speech
     if '3' in args.experiment_to_run:
+        methods_for_description_test = [
+            'binary NB',
+            # 'multiclass NB',
+            # 'nearest centroid',
+            # 'BERT NSP',
+            'BERT MLM',
+            'BERT conventional',
+        ]
+
         key = 'transcript__conversation_gp'
         for d, mode in enumerate(selected_modes):
             description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
