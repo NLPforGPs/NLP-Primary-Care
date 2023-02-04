@@ -24,15 +24,20 @@ class DescClassifier(nn.Module):
         if use_scheduler:
             scheduler = get_linear_schedule_with_warmup(self.optimizer, len(train_loader)*self.epochs*0.1,
                                                         num_training_steps=self.epochs*len(train_loader))
+
+        ckpt_filename = os.path.join(save_dir, ckpt_name+'_best-val-acc-model.pt')
         if load_checkpoint:
             logging.info('loading checkpoint....')
-            checkpoint = torch.load(os.path.join(
-                save_dir, ckpt_name+'_best-val-acc-model.pt'))
 
-            scheduler.load_state_dict(checkpoint['scheduler'])
-            self.load_state_dict(checkpoint['state_dict'])
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
-            start_epoch = checkpoint['epoch']+1
+            if not(os.path.exists(ckpt_filename)):
+                logging.info(f'Checkpoint did not exist at {ckpt_filename}. Will start training a new model.')
+            else:
+                checkpoint = torch.load(ckpt_filename)
+
+                scheduler.load_state_dict(checkpoint['scheduler'])
+                self.load_state_dict(checkpoint['state_dict'])
+                self.optimizer.load_state_dict(checkpoint['optimizer'])
+                start_epoch = checkpoint['epoch']+1
 
         save_epoch = -1
         for epoch in trange(start_epoch, self.epochs):
