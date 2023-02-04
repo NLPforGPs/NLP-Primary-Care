@@ -246,6 +246,7 @@ if __name__ == '__main__':
             'BERT MLM',
             'BERT conventional',
         ]
+        f1 = np.zeros((len(methods_for_description_test), ncols))
 
         key = 'transcript__conversation_gp'
         for d, mode in enumerate(selected_modes):
