@@ -1,0 +1,4 @@
+,CKS only,CKS only without A,CKS only GP speech only
+binary NB,0.0,0.0,0.21894473417991978
+BERT MLM,0.0,0.0,0.5166466018738625
+BERT conventional,0.0,0.0,0.4801296530909849
