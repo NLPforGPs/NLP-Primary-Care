@@ -145,147 +145,163 @@ def compute_confidence_intervals(exptname, runnames, methodname):
 # compute_confidence_intervals(exptname, runnames, methodname)
 # runnames = ['test']
 # compute_confidence_intervals(exptname, runnames, methodname)
+#
+# # ICPC without A
+# exptname = 'distantsupervision_icpc_only_withouta'
+# runnames = ['dev']
+# methodname = 'binary NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_icpc_only_withouta'
+# runnames = ['dev']
+# methodname = 'multiclass NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_icpc_only_withouta'
+# runnames = ['dev']
+# methodname = 'nearest centroid'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# # ICPC without patient's speech
+# exptname = 'distantsupervision_icpc_only_gponly'
+# runnames = ['dev']
+# methodname = 'binary NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_icpc_only_gponly'
+# runnames = ['dev']
+# methodname = 'multiclass NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_icpc_only_gponly'
+# runnames = ['dev']
+# methodname = 'nearest centroid'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# #CKS
+# exptname = 'distantsupervision_cks_only'
+# runnames = ['dev']
+# methodname = 'binary NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_cks_only'
+# runnames = ['dev']
+# methodname = 'multiclass NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_cks_only'
+# runnames = ['dev']
+# methodname = 'nearest centroid'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# # CKS without A
+# exptname = 'distantsupervision_cks_only_withouta'
+# runnames = ['dev']
+# methodname = 'binary NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_cks_only_withouta'
+# runnames = ['dev']
+# methodname = 'multiclass NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_cks_only_withouta'
+# runnames = ['dev']
+# methodname = 'nearest centroid'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# # CKS without patient speech
+# exptname = 'distantsupervision_cks_only_gponly'
+# runnames = ['dev']
+# methodname = 'binary NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_cks_only_gponly'
+# runnames = ['dev']
+# methodname = 'multiclass NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_cks_only_gponly'
+# runnames = ['dev']
+# methodname = 'nearest centroid'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# # Both
+# exptname = 'distantsupervision_both'
+# runnames = ['dev']
+# methodname = 'binary NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_both'
+# runnames = ['dev']
+# methodname = 'multiclass NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_both'
+# runnames = ['dev']
+# methodname = 'nearest centroid'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# # Both without A
+# exptname = 'distantsupervision_both_withouta'
+# runnames = ['dev']
+# methodname = 'binary NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_both_withouta'
+# runnames = ['dev']
+# methodname = 'multiclass NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_both_withouta'
+# runnames = ['dev']
+# methodname = 'nearest centroid'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# # Both without patient
+# exptname = 'distantsupervision_both_gponly'
+# runnames = ['dev']
+# methodname = 'binary NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_both_gponly'
+# runnames = ['dev']
+# methodname = 'multiclass NB'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+#
+# exptname = 'distantsupervision_both_gponly'
+# runnames = ['dev']
+# methodname = 'nearest centroid'
+# compute_confidence_intervals(exptname, runnames, methodname)
 
-# ICPC without A
-exptname = 'distantsupervision_icpc_only_withouta'
-runnames = ['dev']
-methodname = 'binary NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-exptname = 'distantsupervision_icpc_only_withouta'
-runnames = ['dev']
-methodname = 'multiclass NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-exptname = 'distantsupervision_icpc_only_withouta'
-runnames = ['dev']
-methodname = 'nearest centroid'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-# ICPC without patient's speech
-exptname = 'distantsupervision_icpc_only_gponly'
-runnames = ['dev']
-methodname = 'binary NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-exptname = 'distantsupervision_icpc_only_gponly'
-runnames = ['dev']
-methodname = 'multiclass NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-exptname = 'distantsupervision_icpc_only_gponly'
-runnames = ['dev']
-methodname = 'nearest centroid'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-#CKS
-exptname = 'distantsupervision_cks_only'
-runnames = ['dev']
-methodname = 'binary NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-exptname = 'distantsupervision_cks_only'
-runnames = ['dev']
-methodname = 'multiclass NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-exptname = 'distantsupervision_cks_only'
-runnames = ['dev']
-methodname = 'nearest centroid'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-# CKS without A
-exptname = 'distantsupervision_cks_only_withouta'
-runnames = ['dev']
-methodname = 'binary NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-exptname = 'distantsupervision_cks_only_withouta'
-runnames = ['dev']
-methodname = 'multiclass NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-exptname = 'distantsupervision_cks_only_withouta'
-runnames = ['dev']
-methodname = 'nearest centroid'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-# CKS without patient speech
+# CKS without patient for BERT
 exptname = 'distantsupervision_cks_only_gponly'
 runnames = ['dev']
-methodname = 'binary NB'
+methodname = 'BERT conventional'
 compute_confidence_intervals(exptname, runnames, methodname)
-
 
 exptname = 'distantsupervision_cks_only_gponly'
 runnames = ['dev']
-methodname = 'multiclass NB'
+methodname = 'BERT MLM'
 compute_confidence_intervals(exptname, runnames, methodname)
-
 
 exptname = 'distantsupervision_cks_only_gponly'
 runnames = ['dev']
-methodname = 'nearest centroid'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-# Both
-exptname = 'distantsupervision_both'
-runnames = ['dev']
-methodname = 'binary NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-exptname = 'distantsupervision_both'
-runnames = ['dev']
-methodname = 'multiclass NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-exptname = 'distantsupervision_both'
-runnames = ['dev']
-methodname = 'nearest centroid'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-# Both without A
-exptname = 'distantsupervision_both_withouta'
-runnames = ['dev']
-methodname = 'binary NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-exptname = 'distantsupervision_both_withouta'
-runnames = ['dev']
-methodname = 'multiclass NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-exptname = 'distantsupervision_both_withouta'
-runnames = ['dev']
-methodname = 'nearest centroid'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-# Both without patient
-exptname = 'distantsupervision_both_gponly'
-runnames = ['dev']
-methodname = 'binary NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-exptname = 'distantsupervision_both_gponly'
-runnames = ['dev']
-methodname = 'multiclass NB'
-compute_confidence_intervals(exptname, runnames, methodname)
-
-
-exptname = 'distantsupervision_both_gponly'
-runnames = ['dev']
-methodname = 'nearest centroid'
+methodname = 'BERT NSP'
 compute_confidence_intervals(exptname, runnames, methodname)

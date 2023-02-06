@@ -129,6 +129,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--experiment_to_run', type=str, default='1234')
     parser.add_argument('--methods', type=str, default=None)
+    parser.add_argument('--mode', type=str, default=None)
     args = parser.parse_args()
 
     # Load the data
@@ -164,7 +165,10 @@ if __name__ == '__main__':
     # key = 'transcript__conversation_patient'
 
     # Specify which descriptions we will test
-    selected_modes = ['both', 'CKS only', 'ICPC only']
+    if args.mode is None:
+        selected_modes = ['both', 'CKS only', 'ICPC only']
+    else:
+        selected_modes = [args.mode]
 
     stopword_settings = [
         [],
