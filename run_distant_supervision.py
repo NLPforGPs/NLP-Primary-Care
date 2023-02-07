@@ -222,9 +222,10 @@ if __name__ == '__main__':
             description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
             stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
             for m, method in enumerate(methods):
-                f1[m, d*3], _, _, preds_dev[mode][method], models[mode][method] = \
-                    run_distant_supervision(method, mode + '_rerun', description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
-                                            mult_lbl_enc.classes_)
+                #f1[m, d*3], _, _, preds_dev[mode][method], models[mode][method] = \
+                #    run_distant_supervision(method, mode + '_rerun', description_corpus, y_desc, stopword_setting, dev_data, y_hot_dev,
+                #                            mult_lbl_enc.classes_)
+                
                 descriptions_file = './results3/distant_descriptions.csv'
                 f1_df = pd.DataFrame(f1, index=methods, columns=csv_header)
                 f1_df.to_csv(descriptions_file, sep=',')
