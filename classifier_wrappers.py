@@ -250,7 +250,7 @@ def prepare_binary_test_set(pretrained_model, chunks, chunk_labels, split_nums, 
 
 
 def run_bert_conventional(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
-    model_dir = os.path.join('/Volumes/NLP_One_In_A_Million', all_models_dir + '/conventional')
+    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/conventional')
     model_name = 'full-text-conventional_' + run_name
 
     print('using traditional bert classifier...')
@@ -271,7 +271,7 @@ def run_bert_conventional(text_train, y_train, id2label, text_test, run_name, tr
 
 
 def run_nsp_classifier(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
-    model_dir = os.path.join('/Volumes/NLP_One_In_A_Million', all_models_dir + '/nsp')
+    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/nsp')
     model_name = 'nsp-abstract-5e-5_' + run_name
 
     print('using next sentence prediction bert classifier...')
@@ -290,7 +290,7 @@ def run_nsp_classifier(text_train, y_train, id2label, text_test, run_name, train
 
 
 def run_mlm_classifier(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
-    model_dir = os.path.join('/Volumes/NLP_One_In_A_Million', all_models_dir + '/mlm')
+    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/mlm')
     model_name = 'mlm-abstract-5e-5_' + run_name
 
     print('using masked language model bert classifier...')
