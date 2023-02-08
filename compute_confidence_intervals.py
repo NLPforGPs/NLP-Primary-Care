@@ -350,11 +350,90 @@ def compute_confidence_intervals(exptname, runnames, methodname):
 # runnames = ['dev']
 # methodname = 'BERT MLM'
 # compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_both_rerun'
+# runnames = ['dev']
+# methodname = 'BERT NSP'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_both_rerun'
+# runnames = ['dev']
+# methodname = 'BERT MLM'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_both_withouta'
+# runnames = ['dev']
+# methodname = 'BERT MLM'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_both_rerun'
+# runnames = ['dev']
+# methodname = 'BERT conventional'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_both_withouta'
+# runnames = ['dev']
+# methodname = 'BERT conventional'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_icpc_only_rerun'
+# runnames = ['dev']
+# methodname = 'BERT NSP'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_icpc_only_withouta'
+# runnames = ['dev']
+# methodname = 'BERT NSP'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_cks_only_rerun'
+# runnames = ['dev']
+# methodname = 'BERT NSP'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_cks_only_withouta'
+# runnames = ['dev']
+# methodname = 'BERT NSP'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_cks_only_rerun'
+# runnames = ['dev']
+# methodname = 'BERT MLM'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_cks_only_withouta'
+# runnames = ['dev']
+# methodname = 'BERT MLM'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_cks_only_rerun'
+# runnames = ['dev']
+# methodname = 'BERT conventional'
+# compute_confidence_intervals(exptname, runnames, methodname)
+#
+# exptname = 'distantsupervision_cks_only_withouta'
+# runnames = ['dev']
+# methodname = 'BERT conventional'
+# compute_confidence_intervals(exptname, runnames, methodname)
 
-exptname = 'distantsupervision_both_rerun'
-runnames = ['dev']
-methodname = 'BERT NSP'
-compute_confidence_intervals(exptname, runnames, methodname)
+# exptname = 'distantsupervision_cks_only'
+# runnames = ['test']
+# methodname = 'BERT conventional'
+# compute_confidence_intervals(exptname, runnames, methodname)
+
+# exptname = 'transcriptsupervision'
+# runnames = [f'cross_val_{i}' for i in range(5)]
+# methodname = 'BERT conventional'
+# compute_confidence_intervals(exptname, runnames, methodname)
+# runnames = ['test']
+# compute_confidence_intervals(exptname, runnames, methodname)
+
+
+# exptname = 'distantsupervision_cks_only'
+# runnames = ['test']
+# methodname = 'BERT conventional'
+# compute_confidence_intervals(exptname, runnames, methodname)
+
 
 exptname = 'distantsupervision_both_withouta'
 runnames = ['dev']

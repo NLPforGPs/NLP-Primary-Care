@@ -185,8 +185,8 @@ if __name__ == '__main__':
             'multiclass NB',
             'nearest centroid',
             'BERT NSP',
-            'BERT MLM',
             'BERT conventional',
+            'BERT MLM',
         ]
     else:
         methods = args.methods.split(',')
@@ -318,3 +318,22 @@ if __name__ == '__main__':
     # }, index=mult_lbl_enc.classes_)
     #
     # table.to_csv(perclass_file, sep=',')
+
+    # Using a model that was trained already, make predictions on the training set (the descriptions) to check for
+    # overfitting
+    f1 = np.zeros((len(methods), len(selected_modes)))
+
+    if '6' in args.experiment_to_run:
+        for d, mode in enumerate(selected_modes):
+            description_corpus = load_descriptions(mode, mult_lbl_enc.classes_)
+            stopword_setting = 'ce' if mode == 'ICPC only' else 'mce'
+            for m, method in enumerate(methods):
+                f1[m, d], _, _, _, _ = \
+                   run_distant_supervision(method, mode + '_rerun', description_corpus, y_desc, stopword_setting,
+                                           {'transcript__conversation_both':description_corpus}, y_desc, mult_lbl_enc.classes_)
+                                           # existing_model=models[mode][method])
+
+                descriptions_file = './results3/distant_descriptions_train.csv'
+                f1_df = pd.DataFrame(f1, index=methods, columns=selected_modes)
+                f1_df.to_csv(descriptions_file, sep=',')
+

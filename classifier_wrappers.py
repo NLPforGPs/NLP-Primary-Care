@@ -25,7 +25,7 @@ from utils.utils import merge_predictions, stratified_multi_label_split
 
 debug = False  # choose debug settings for quicker running of the script at lower performance
 all_models_dir = 'models_3'
-do_training = True
+do_training = False
 
 
 class NSPDataset(Dataset):
@@ -250,7 +250,7 @@ def prepare_binary_test_set(pretrained_model, chunks, chunk_labels, split_nums, 
 
 
 def run_bert_conventional(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
-    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/conventional')
+    model_dir = os.path.join('/Volumes/NLP_One_In_A_Million', all_models_dir + '/conventional')
     model_name = 'full-text-conventional_' + run_name
 
     print('using traditional bert classifier...')
@@ -271,7 +271,7 @@ def run_bert_conventional(text_train, y_train, id2label, text_test, run_name, tr
 
 
 def run_nsp_classifier(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
-    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/nsp')
+    model_dir = os.path.join('/Volumes/NLP_One_In_A_Million', all_models_dir + '/nsp')
     model_name = 'nsp-abstract-5e-5_' + run_name
 
     print('using next sentence prediction bert classifier...')
@@ -290,7 +290,7 @@ def run_nsp_classifier(text_train, y_train, id2label, text_test, run_name, train
 
 
 def run_mlm_classifier(text_train, y_train, id2label, text_test, run_name, training_mode, trained_classifier=None):
-    model_dir = os.path.join(PCC_BASE_DIR, all_models_dir + '/mlm')
+    model_dir = os.path.join('/Volumes/NLP_One_In_A_Million', all_models_dir + '/mlm')
     model_name = 'mlm-abstract-5e-5_' + run_name
 
     print('using masked language model bert classifier...')
@@ -374,17 +374,20 @@ def run_bert_classifier(pretrained_model, text_train, y_train, id2label, text_te
                                                  use_nsp=use_nsp,
                                                  class_names=id2name)
     # convert to one-hot encodings
-    predictions = np.array(predictions).flatten()
     y_hot = np.zeros((len(chunks), nclasses))
     if not np.isscalar(predictions[0]):
+        predictions = np.array(predictions).flatten()
+
         # labels are actually lists of labels, where multiple labels can be assigned to a single transcript.
         predictions = np.array([[i, np.argwhere(id2name == p)[0][0]] for i, plist in enumerate(predictions) for p in plist])
-        y_hot[predictions[:, 0], predictions[:, 1]] = 1
-    elif not np.issubdtype(predictions.dtype, np.number):
-        predictions = [np.argwhere(id2name == p)[0][0] for p in predictions]
-        y_hot[range(len(chunks)), predictions] = 1
+        if predictions.ndim == 2:
+            y_hot[predictions[:, 0], predictions[:, 1]] = 1  # else we have no predictions!
     else:
-        y_hot[range(len(chunks)), predictions] = 1
+        if not np.issubdtype(predictions.dtype, np.number):
+            predictions = [np.argwhere(id2name == p)[0][0] for p in predictions]
+            y_hot[range(len(chunks)), predictions] = 1
+        else:
+            y_hot[range(len(chunks)), predictions] = 1
 
     # merge labels for each transcript
     final_predictions = merge_predictions(dataset_test.split_nums, np.array(y_hot))
