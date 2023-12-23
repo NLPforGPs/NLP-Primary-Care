@@ -3,6 +3,60 @@ import pandas as pd
 from sklearn.metrics import precision_score, recall_score, f1_score
 
 
+def compute_bootstrap_pvals(exptname, expt2name, methodname, runname='dev'):
+    print(f'Boostrap significance test for {exptname}, {methodname} compared to {expt2name}')
+
+    filename = f'./output_predictions/{exptname}_{runname}_{methodname}'
+    filename2 = f'./output_predictions/{expt2name}_{runname}_{methodname}'
+
+    data = pd.read_csv(filename, index_col=0)
+    # print(data.columns)
+    # print(data.shape)
+    nclasses = 16 if 'withouta' not in exptname else 15
+    y_gold = data.to_numpy()[:, :nclasses].astype(int)
+    y_pred = data.to_numpy()[:, nclasses:].astype(int)
+
+    data = pd.read_csv(filename2, index_col=0)
+    y_pred2 = data.to_numpy()[:, nclasses:].astype(int)
+
+    print(y_gold.shape)
+    print(y_pred.shape)
+    print(y_pred2.shape)
+
+    f1 = f1_score(y_gold, y_pred, average='macro', zero_division=0)
+    f2 = f1_score(y_gold, y_pred2, average='macro', zero_division=0)
+    diff = f1 - f2
+
+    print(f'The F1 scores are {f1} for {exptname} and {f2} for {expt2name}.')
+
+    diff_count = 0
+    print(diff)
+    n_samples = 1000
+    idxs = np.arange(y_gold.shape[0])  # list of all indexes to sample from
+    for n in range(n_samples):
+        # bootstrap sampling
+        boostrap_idxs = np.random.choice(idxs, size=y_gold.shape[0])
+
+        targets = y_gold[boostrap_idxs]
+        predictions = y_pred[boostrap_idxs]
+        predictions2 = y_pred2[boostrap_idxs]
+
+        keepclasses = np.any(targets, axis=0).astype(bool)
+        targets = targets[:, keepclasses]
+        predictions = predictions[:, keepclasses]
+        predictions2 = predictions2[:, keepclasses]
+
+        f_n1 = f1_score(targets, predictions, average='macro', zero_division=0)
+        f_n2 = f1_score(targets, predictions2, average='macro', zero_division=0)
+        diff_n = f_n1 - f_n2
+        # print(diff_n)
+        count_n = 1 if diff_n > (2 * diff) else 0
+        diff_count += count_n
+
+    p = diff_count / n_samples
+    print(f'p = {p}')
+
+
 def compute_confidence_intervals(exptname, runnames, methodname):
     p_sample_list = []
     r_sample_list = []
@@ -435,7 +489,38 @@ def compute_confidence_intervals(exptname, runnames, methodname):
 # compute_confidence_intervals(exptname, runnames, methodname)
 
 
-exptname = 'distantsupervision_both_withouta'
-runnames = ['dev']
+# exptname = 'distantsupervision_both_withouta_rerun'
+# runnames = ['dev']
+# methodname = 'BERT NSP'
+# compute_confidence_intervals(exptname, runnames, methodname)
+
+#
+# exptname = 'distantsupervision_icpc_only'
+# expt2name = 'distantsupervision_icpc_only_gponly'
+# methodname = 'binary NB'
+# compute_bootstrap_pvals(exptname, expt2name, methodname)
+#
+# exptname = 'distantsupervision_icpc_only'
+# expt2name = 'distantsupervision_icpc_only_gponly'
+# methodname = 'multiclass NB'
+# compute_bootstrap_pvals(exptname, expt2name, methodname)
+#
+# exptname = 'distantsupervision_icpc_only'
+# expt2name = 'distantsupervision_icpc_only_gponly'
+# methodname = 'nearest centroid'
+# compute_bootstrap_pvals(exptname, expt2name, methodname)
+#
+# exptname = 'distantsupervision_cks_only'
+# expt2name = 'distantsupervision_cks_only_gponly'
+# methodname = 'BERT conventional'
+# compute_bootstrap_pvals(exptname, expt2name, methodname)
+
+exptname = 'distantsupervision_cks_only_rerun'
+expt2name = 'distantsupervision_cks_only_gponly'
 methodname = 'BERT NSP'
-compute_confidence_intervals(exptname, runnames, methodname)
+compute_bootstrap_pvals(exptname, expt2name, methodname)
+
+exptname = 'distantsupervision_both_rerun'
+expt2name = 'distantsupervision_cks_only_gponly'
+methodname = 'BERT MLM'
+compute_bootstrap_pvals(exptname, expt2name, methodname)
